@@ -3,7 +3,7 @@ import { AbsoluteFill, Easing, Html5Audio, Img, Sequence, interpolate, spring, s
 import { BIG, ARCHIVO, FRAUNCES, YELLOWTAIL } from "../fonts";
 import { Grain, Nota, Vignette, clamp } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
-import { Noite, SUBESTILO } from "../data";
+import { Noite, SUBESTILO, feriadoSeguinte } from "../data";
 
 // AGENDA DA SEMANA — 3 versões (V1 lineup, V2 cartaz, V3 repetição), feed 4:5 e story 9:16.
 // parado = versão estática: tudo no estado final e sem destaque; no vídeo cada artista toca ~3s e a noite dele acende.
@@ -14,11 +14,12 @@ const OSSO = "#F2F0E6";
 const COR: Record<Noite["key"], string> = { sexta: LIMA, sabado: "#FF2E93", domingo: "#F29A2E" };
 
 export const AGENDA_DUR = 300;
-const SEG = 100; // quadros de cada artista no vídeo
+const segDe = (qtd: number) => Math.floor(AGENDA_DUR / qtd); // quadros de cada artista no vídeo
 
 type P = { noites: Noite[]; fmt: "feed" | "story"; periodo: string; parado?: boolean };
 
-const useAnim = (parado: boolean) => {
+const useAnim = (parado: boolean, qtd = 3) => {
+  const SEG = segDe(qtd);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const spr = (delay: number, cfg: Partial<{ damping: number; stiffness: number; mass: number }> = {}) =>
@@ -28,14 +29,16 @@ const useAnim = (parado: boolean) => {
   const vez = (i: number) => {
     if (parado) return 0;
     const ini = i === 0 ? 62 : i * SEG;
-    const fim = i === 2 ? 99999 : (i + 1) * SEG;
+    const fim = i === qtd - 1 ? 99999 : (i + 1) * SEG;
     return interpolate(frame, [ini - 6, ini + 8, fim - 6, fim + 8], [0, 1, 1, 0], clamp);
   };
   return { spr, fade, vez, t: parado ? 0 : frame };
 };
 
 // trilha: um trecho de cada artista, em sequência
-export const TrilhaAgenda: React.FC<{ noites: Noite[] }> = ({ noites }) => (
+export const TrilhaAgenda: React.FC<{ noites: Noite[] }> = ({ noites }) => {
+  const SEG = segDe(noites.length);
+  return (
   <>
     {noites.map((n, i) => (
       <Sequence key={n.data} from={i * SEG} durationInFrames={i === noites.length - 1 ? AGENDA_DUR - i * SEG : SEG + 8}>
@@ -43,7 +46,8 @@ export const TrilhaAgenda: React.FC<{ noites: Noite[] }> = ({ noites }) => (
       </Sequence>
     ))}
   </>
-);
+  );
+};
 
 const Foto: React.FC<{ n: Noite; h: number; cx: number; top: number; fade?: number; filter?: string; style?: React.CSSProperties }> = ({ n, h, cx, top, fade = 0.78, filter, style }) => {
   const w = h * n.foto.ratio;
@@ -60,7 +64,23 @@ const Estilo: React.FC<{ n: Noite; size: number; cor?: string; fundo?: string }>
 );
 
 const dataCurta = (n: Noite) => `${n.dia}.${n.mes}`;
+const diaMes = (n: Noite) => `${n.dia}.${n.data.slice(5, 7)}`;
 const nome = (n: Noite) => n.artista;
+// "SEXTA, SÁBADO E DOMINGO" / "SEXTA E SÁBADO"
+const diasTexto = (ns: Noite[]) => {
+  const d = ns.map((n) => n.diaSemana);
+  return d.length > 1 ? `${d.slice(0, -1).join(", ")} E ${d[d.length - 1]}` : d[0];
+};
+// posições dos recortes (ordem de desenho: pontas primeiro, o do meio por último, na frente)
+const posicoes = (qtd: number, larg: number) =>
+  qtd === 3
+    ? [{ i: 0, cx: 540 - larg, dy: 30, k: 1 }, { i: 2, cx: 540 + larg, dy: 30, k: 1 }, { i: 1, cx: 540, dy: 0, k: 1.04 }]
+    : [{ i: 0, cx: 540 - larg * 0.52, dy: 0, k: 1 }, { i: 1, cx: 540 + larg * 0.52, dy: 0, k: 1 }];
+const Vespera: React.FC<{ n: Noite; size: number; cor: string }> = ({ n, size, cor }) => {
+  const f = feriadoSeguinte(n.data);
+  if (!f) return null;
+  return <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: size, letterSpacing: "0.12em", color: cor, marginTop: 6 }}>★ VÉSPERA DE FERIADO</div>;
+};
 
 // letras entrando uma a uma (de baixo ou de cima)
 const Letras: React.FC<{ text: string; delay: number; a: ReturnType<typeof useAnim>; de: number; style: React.CSSProperties; passo?: number }> = ({ text, delay, a, de, style, passo = 3 }) => (
@@ -85,10 +105,10 @@ const destaqueFoto = (peso: number, algum: number) => ({
 
 // ───────────────────────── V1 · LINEUP (ref. Camarote 26) ─────────────────────────
 export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) => {
-  const a = useAnim(parado);
+  const a = useAnim(parado, noites.length);
   const feed = fmt === "feed";
   const T = feed ? 0 : 200; // desloca pra dentro da área segura do story
-  const rowH = feed ? 196 : 250;
+  const rowH = noites.length === 3 ? (feed ? 196 : 250) : feed ? 270 : 330;
   const agY = feed ? 770 : 1210;
   const fotoH = feed ? 600 : 720;
   const fotoTop = feed ? 800 : 1230;
@@ -112,10 +132,7 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
           <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 20, letterSpacing: "0.3em", color: OSSO, opacity: 0.8, marginTop: 6 }}>OUTUBRO</div>
         </div>
         <div style={{ position: "absolute", left: 64, top: T + 400, width: 300, fontFamily: ARCHIVO, fontWeight: 900, fontSize: 38, lineHeight: 1.02, color: OSSO, textAlign: "center", opacity: a.fade(12, 26) }}>
-          SEXTA,
-          <br />
-          SÁBADO
-          <br />E DOMINGO
+          {diasTexto(noites)}
           <div style={{ fontFamily: ARCHIVO, fontWeight: 600, fontSize: 19, letterSpacing: "0.2em", color: LIMA, marginTop: 14 }}>TE VEJO NA ESQUINA</div>
         </div>
         {/* linhas das noites: entram da direita, e a de quem está tocando acende */}
@@ -132,6 +149,7 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
                 <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: nome(n).length > 12 ? 56 : 66, color: OSSO, lineHeight: 0.95, marginTop: 8 }}>{nome(n)}</div>
                 <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 17, letterSpacing: "0.14em", color: COR[n.key], margin: "4px 0 8px" }}>{n.noite.toUpperCase()} ● {n.hora}</div>
                 <Estilo n={n} size={20} />
+                <Vespera n={n} size={16} cor={COR[n.key]} />
               </div>
               <div style={{ position: "relative", width: rowH * 0.95, height: rowH - 30, borderRadius: 22, overflow: "hidden", background: `linear-gradient(160deg, ${COR[n.key]} 0%, #1c1c18 75%)`, flex: "0 0 auto", boxShadow: `0 0 ${pv * 30}px ${COR[n.key]}` }}>
                 <Img src={staticFile(n.foto.src)} style={{ position: "absolute", width: "105%", left: "-2.5%", top: 6 }} />
@@ -143,16 +161,13 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         <Letras text="AGENDA" delay={26} a={a} de={320} style={{ position: "absolute", left: 0, right: 0, top: agY, display: "flex", justifyContent: "center", fontFamily: BIG, fontWeight: 900, fontSize: 360, lineHeight: 0.8, color: LIMA, letterSpacing: "-0.01em" }} />
         <div style={{ position: "absolute", left: 0, right: 0, top: agY - 34, textAlign: "center", fontFamily: BIG, fontWeight: 900, fontSize: 210, lineHeight: 0.8, color: "transparent", WebkitTextStroke: "3px rgba(242,240,230,.8)", letterSpacing: "0.02em", opacity: semana, transform: `translateX(${(1 - semana) * -120}px)` }}>SEMANA</div>
         {/* artistas levemente sobrepostos, sobem um a um */}
-        {(() => {
-          const s0 = art(0, 34), s2 = art(2, 40), s1 = art(1, 46);
-          return (
-            <>
-              <Foto n={noites[0]} h={fotoH} cx={250} top={fotoTop + 30 + s0.top} filter={`drop-shadow(0 20px 30px rgba(0,0,0,.6)) ${s0.filter}`} style={{ opacity: s0.opacity, transform: s0.transform, transformOrigin: s0.transformOrigin }} />
-              <Foto n={noites[2]} h={fotoH} cx={830} top={fotoTop + 30 + s2.top} filter={`drop-shadow(0 20px 30px rgba(0,0,0,.6)) ${s2.filter}`} style={{ opacity: s2.opacity, transform: s2.transform, transformOrigin: s2.transformOrigin }} />
-              <Foto n={noites[1]} h={fotoH * 1.04} cx={540} top={fotoTop + s1.top} filter={`drop-shadow(0 20px 40px rgba(0,0,0,.75)) ${s1.filter}`} style={{ opacity: s1.opacity, transform: s1.transform, transformOrigin: s1.transformOrigin }} />
-            </>
-          );
-        })()}
+        {posicoes(noites.length, 290).map((p, ordem) => {
+          const n = noites[p.i];
+          const alvo = fotoH * p.k;
+          const h = Math.min(alvo, 560 / n.foto.ratio);
+          const sx = art(p.i, 34 + ordem * 6);
+          return <Foto key={n.data} n={n} h={h} cx={p.cx} top={fotoTop + p.dy + (alvo - h) + sx.top} filter={`drop-shadow(0 20px 36px rgba(0,0,0,.7)) ${sx.filter}`} style={{ opacity: sx.opacity, transform: sx.transform, transformOrigin: sx.transformOrigin }} />;
+        })}
       </AbsoluteFill>
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(11,11,9,0) 88%, rgba(11,11,9,.9) 100%)" }} />
       {!feed && (
@@ -169,7 +184,7 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
 // ───────────────────────── V2 · CARTAZ (ref. agendas A6) ─────────────────────────
 // "Semana" fica sobre a parte de baixo do AGENDA, ACIMA das cabeças (antes caía no rosto do artista do meio)
 export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) => {
-  const a = useAnim(parado);
+  const a = useAnim(parado, noites.length);
   const feed = fmt === "feed";
   const { w, h } = feed ? { w: 1080, h: 1350 } : { w: 1080, h: 1920 };
   const T = feed ? 0 : 190;
@@ -185,7 +200,6 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
     const pv = a.vez(i);
     return { dy: (1 - s) * 260, op: Math.min(1, s * 2), ...destaqueFoto(pv, algum) };
   };
-  const s0 = art(0, 18), s2 = art(2, 24), s1 = art(1, 30);
   return (
     <AbsoluteFill style={{ background: "#0A1004", overflow: "hidden" }}>
       <AbsoluteFill style={{ background: `radial-gradient(ellipse at 50% ${feed ? 30 : 32}%, rgba(200,210,0,.55) 0%, rgba(120,140,0,.25) 30%, rgba(10,16,4,0) 62%)`, opacity: a.fade(0, 16) }} />
@@ -197,9 +211,14 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         <span style={{ display: "inline-block", fontFamily: YELLOWTAIL, fontSize: feed ? 150 : 170, color: LIMA, filter: "drop-shadow(0 4px 0 rgba(0,0,0,.55))", clipPath: `inset(-30% ${(1 - semana) * 100}% -30% -5%)`, paddingRight: 12 }}>Semana</span>
       </div>
       {/* grupo sobreposto: pontas atrás, centro na frente */}
-      <Foto n={noites[0]} h={fotoH * 0.92} cx={270} top={topoPontas + s0.dy} fade={0.72} filter={`drop-shadow(0 20px 30px rgba(0,0,0,.55)) ${s0.filter}`} style={{ opacity: s0.op, transform: s0.transform, transformOrigin: s0.transformOrigin }} />
-      <Foto n={noites[2]} h={fotoH * 0.92} cx={810} top={topoPontas + s2.dy} fade={0.72} filter={`drop-shadow(0 20px 30px rgba(0,0,0,.55)) ${s2.filter}`} style={{ opacity: s2.op, transform: s2.transform, transformOrigin: s2.transformOrigin }} />
-      <Foto n={noites[1]} h={fotoH} cx={540} top={topoCentro + s1.dy} fade={0.72} filter={`drop-shadow(0 24px 40px rgba(0,0,0,.7)) ${s1.filter}`} style={{ opacity: s1.op, transform: s1.transform, transformOrigin: s1.transformOrigin }} />
+      {posicoes(noites.length, 270).map((p, ordem) => {
+        const n = noites[p.i];
+        const lateral = noites.length === 3 && p.i !== 1;
+        const alvo = lateral ? fotoH * 0.92 : fotoH;
+        const h = Math.min(alvo, 600 / n.foto.ratio);
+        const sx = art(p.i, 18 + ordem * 6);
+        return <Foto key={n.data} n={n} h={h} cx={p.cx} top={(lateral ? topoPontas : topoCentro) + sx.dy} fade={0.72} filter={`drop-shadow(0 22px 36px rgba(0,0,0,.65)) ${sx.filter}`} style={{ opacity: sx.op, transform: sx.transform, transformOrigin: sx.transformOrigin }} />;
+      })}
       <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(10,16,4,0) ${feed ? 58 : 58}%, rgba(10,16,4,.96) ${feed ? 68 : 69}%)` }} />
       <div style={{ position: "absolute", left: 0, right: 0, top: colY - 70, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.34em", color: OSSO, opacity: a.fade(48, 62) }}>{periodo} ● OUTUBRO</div>
       <div style={{ position: "absolute", left: 50, right: 50, top: colY, display: "flex", gap: 24 }}>
@@ -208,7 +227,7 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
           const pv = a.vez(i);
           return (
             <div key={n.data} style={{ flex: 1, borderTop: `6px solid ${COR[n.key]}`, paddingTop: 16, transform: `translateY(${(1 - s) * 90 - pv * 8}px)`, opacity: Math.min(1, s * 1.6), boxShadow: `0 -${pv * 16}px ${pv * 22}px -${pv * 8}px ${COR[n.key]}` }}>
-              <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 86, lineHeight: 0.85, color: OSSO }}>{n.dia}.10</div>
+              <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 86, lineHeight: 0.85, color: OSSO }}>{diaMes(n)}</div>
               <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 20, letterSpacing: "0.2em", color: COR[n.key], marginTop: 6 }}>
                 {n.diaSemana} ● {n.hora}
               </div>
@@ -216,6 +235,7 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
               <div style={{ marginTop: 10 }}>
                 <Estilo n={n} size={17} />
               </div>
+              <Vespera n={n} size={15} cor={COR[n.key]} />
             </div>
           );
         })}
@@ -231,7 +251,7 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
 
 // ───────────────────────── V3 · REPETIÇÃO (ref. Buteko), fundo claro ─────────────────────────
 export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) => {
-  const a = useAnim(parado);
+  const a = useAnim(parado, noites.length);
   const feed = fmt === "feed";
   const T = feed ? 0 : 200;
   const linhas = 4;
@@ -247,7 +267,6 @@ export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
     const pv = a.vez(i);
     return { transform: `scale(${interpolate(s, [0, 1], [1.35, 1]) * (1 + pv * 0.035)}) rotate(${(1 - s) * 12 * lado}deg)`, transformOrigin: "50% 100%", opacity: Math.min(1, s * 3), bright: `brightness(${1 + pv * 0.06 - (algum - pv) * 0.12})` };
   };
-  const c0 = cola(0, 30, -1), c2 = cola(2, 36, 1), c1 = cola(1, 42, 1);
   return (
     <AbsoluteFill style={{ background: "#EEE9DC", overflow: "hidden" }}>
       <AbsoluteFill style={{ backgroundImage: "radial-gradient(circle, rgba(11,11,9,.12) 1.2px, transparent 1.8px)", backgroundSize: "14px 14px", opacity: 0.6 }} />
@@ -269,9 +288,13 @@ export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         <span style={{ fontFamily: FRAUNCES, fontStyle: "italic", fontWeight: 900, fontSize: feed ? 150 : 170, color: LIMA, WebkitTextStroke: `3px ${PRETO}`, paintOrder: "stroke fill", textShadow: `6px 6px 0 ${PRETO}` }}>Semana</span>
       </div>
       {/* artistas como adesivos, colados um a um */}
-      <Foto n={noites[0]} h={fotoH} cx={255} top={fotoTop + 40} fade={0.8} filter={`${sticker(COR.sexta)} ${c0.bright}`} style={{ transform: c0.transform, transformOrigin: c0.transformOrigin, opacity: c0.opacity }} />
-      <Foto n={noites[2]} h={fotoH} cx={825} top={fotoTop + 40} fade={0.8} filter={`${sticker(COR.domingo)} ${c2.bright}`} style={{ transform: c2.transform, transformOrigin: c2.transformOrigin, opacity: c2.opacity }} />
-      <Foto n={noites[1]} h={fotoH * 1.05} cx={540} top={fotoTop} fade={0.8} filter={`${sticker(COR.sabado)} ${c1.bright}`} style={{ transform: c1.transform, transformOrigin: c1.transformOrigin, opacity: c1.opacity }} />
+      {posicoes(noites.length, 285).map((p, ordem) => {
+        const n = noites[p.i];
+        const alvo = fotoH * (p.k > 1 ? 1.05 : 1);
+        const h = Math.min(alvo, 540 / n.foto.ratio);
+        const c = cola(p.i, 30 + ordem * 6, ordem % 2 ? 1 : -1);
+        return <Foto key={n.data} n={n} h={h} cx={p.cx} top={fotoTop + (p.dy ? 40 : 0) + (alvo - h)} fade={0.8} filter={`${sticker(COR[n.key])} ${c.bright}`} style={{ transform: c.transform, transformOrigin: c.transformOrigin, opacity: c.opacity }} />;
+      })}
       {/* cartões das noites: viram pra cima; o de quem está tocando levanta */}
       <div style={{ position: "absolute", left: 40, right: 40, top: cardY, display: "flex", gap: 16, perspective: 1200 }}>
         {noites.map((n, i) => {
@@ -280,7 +303,7 @@ export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
           return (
             <div key={n.data} style={{ flex: 1, background: PRETO, color: OSSO, borderRadius: 18, padding: "18px 18px 20px", boxShadow: `${6 + pv * 4}px ${8 + pv * 6}px 0 ${COR[n.key]}`, transform: `rotateX(${(1 - s) * 90}deg) translateY(${-pv * 12}px)`, transformOrigin: "50% 100%", opacity: Math.min(1, s * 2) }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: 70, lineHeight: 0.85 }}>{n.dia}.10</span>
+                <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: 70, lineHeight: 0.85 }}>{diaMes(n)}</span>
                 <span style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 18, color: COR[n.key], letterSpacing: "0.1em" }}>{n.hora}</span>
               </div>
               <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 17, letterSpacing: "0.22em", color: COR[n.key], marginTop: 6 }}>{n.diaSemana}</div>
@@ -288,6 +311,7 @@ export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
               <div style={{ marginTop: 10 }}>
                 <Estilo n={n} size={14} />
               </div>
+              <Vespera n={n} size={13} cor={COR[n.key]} />
             </div>
           );
         })}

@@ -57,6 +57,32 @@ export const RemotionRoot: React.FC = () => (
         ];
       }),
     )}
+    {/* agendas de outubro em rodízio V1 → V2 → V3 (feed na segunda com a agenda da esteira; stories na terça) */}
+    {(
+      [
+        ["s1", AgendaV1, "02 A 04", [NOITES.sexta, NOITES.sabado, NOITES.domingo]],
+        ["s2", AgendaV2, "09 A 11", [NOITES.sexta2, NOITES.sabado2, NOITES.domingo2]],
+        ["s3", AgendaV3, "16 E 17", [NOITES.sexta3, NOITES.sabado3]],
+        ["s4", AgendaV1, "23 E 24", [NOITES.sexta4, NOITES.sabado4]],
+        ["s5", AgendaV2, "30 E 31", [NOITES.sexta5, NOITES.sabado5]],
+      ] as const
+    ).flatMap(([s, C, periodo, ns]) =>
+      (["feed", "story"] as const).flatMap((fmt) => {
+        const noites = [...ns];
+        const h = fmt === "feed" ? 1350 : 1920;
+        const Parado: React.FC = () => <C noites={noites} fmt={fmt} periodo={periodo} parado />;
+        const Video: React.FC = () => (
+          <AbsoluteFill>
+            <C noites={noites} fmt={fmt} periodo={periodo} />
+            <TrilhaAgenda noites={noites} />
+          </AbsoluteFill>
+        );
+        return [
+          <Still key={`agenda-${s}-${fmt}`} id={`agenda-${s}-${fmt}`} component={Parado} width={1080} height={h} />,
+          <Composition key={`agenda-${s}-${fmt}-video`} id={`agenda-${s}-${fmt}-video`} component={Video} durationInFrames={AGENDA_DUR} fps={30} width={1080} height={h} />,
+        ];
+      }),
+    )}
     {(Object.keys(IDS) as NoiteKey[]).flatMap((k) =>
       (["feed", "story", "broll"] as Formato[]).map((fmt) => {
         const C = IDS[k]!;
