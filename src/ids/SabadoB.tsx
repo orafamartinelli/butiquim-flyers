@@ -260,7 +260,7 @@ const SabadoBBroll: React.FC<{ n: Noite }> = ({ n }) => {
       <Vinil n={n} cx={SX + SW - 60} cy={SY + SH / 2} d={740} delay={6} tilt={8} />
       <div style={{ position: "absolute", left: SX, top: SY, width: SW, height: SH, background: CREME, padding: 14, boxShadow: `12px 14px 0 ${ROXO}`, transform: "rotate(-2deg)", opacity: vid }}>
         <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
-          <OffthreadVideo src={staticFile(n.clip)} style={{ width: SW - 28, height: (SW - 28) * (1920 / 1080), objectFit: "cover", marginTop: -300, filter: "contrast(1.08) saturate(1.2)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+          <OffthreadVideo src={staticFile(n.clip)} style={{ width: SW - 28, height: (SW - 28) * (1920 / 1080), objectFit: "cover", marginTop: n.clipTop ?? -300, filter: "contrast(1.08) saturate(1.2)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
           <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(42,8,56,.5) 0%, rgba(42,8,56,0) 25%)" }} />
         </div>
       </div>

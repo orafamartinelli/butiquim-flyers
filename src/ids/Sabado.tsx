@@ -184,7 +184,7 @@ const SabadoFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) 
       <AbsoluteFill style={{ transform: `scale(${push})` }}>
         {anel.back}
         <Cromo text="SABADÁ" size={L.titleSize} top={L.titleTop} delay={4} />
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 220} fadeFrom={0.6} filter="drop-shadow(0 0 1px rgba(255,255,255,.4)) drop-shadow(-14px 0 30px rgba(255,46,147,.35)) drop-shadow(14px 0 30px rgba(200,210,0,.25)) contrast(1.05)" style={{ opacity: art }} />
+        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(L.artH, 1000 / n.foto.ratio)} cx={540} top={L.artTop + (1 - art) * 220} fadeFrom={0.6} filter="drop-shadow(0 0 1px rgba(255,255,255,.4)) drop-shadow(-14px 0 30px rgba(255,46,147,.35)) drop-shadow(14px 0 30px rgba(200,210,0,.25)) contrast(1.05)" style={{ opacity: art }} />
         {anel.front}
       </AbsoluteFill>
       <Pill y={L.pillY} delay={22} center />
@@ -218,7 +218,7 @@ const SabadoBroll: React.FC<{ n: Noite }> = ({ n }) => {
       <Palco h={h} intro={intro} />
       <div style={{ position: "absolute", left: FX - 3, top: FY - 3, width: FW + 6, height: FH + 6, borderRadius: 44, background: `linear-gradient(135deg, ${MAGENTA}, ${LILAS} 45%, ${LIMA})`, boxShadow: `0 0 40px rgba(255,46,147,.55), 0 0 90px rgba(165,139,255,.35)`, opacity: intro }} />
       <div style={{ position: "absolute", left: FX, top: FY, width: FW, height: FH, borderRadius: 41, overflow: "hidden", opacity: intro }}>
-        <OffthreadVideo src={staticFile(n.clip)} style={{ width: FW, height: FW * (1920 / 1080), objectFit: "cover", marginTop: -520, filter: "contrast(1.05) saturate(1.1)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+        <OffthreadVideo src={staticFile(n.clip)} style={{ width: FW, height: FW * (1920 / 1080), objectFit: "cover", marginTop: n.clipTop ?? -520, filter: "contrast(1.05) saturate(1.1)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(13,6,36,.6) 0%, rgba(13,6,36,0) 22%, rgba(13,6,36,0) 75%, rgba(13,6,36,.7) 100%)" }} />
       </div>
       <Logo width={240} top={214} />
@@ -226,7 +226,7 @@ const SabadoBroll: React.FC<{ n: Noite }> = ({ n }) => {
       {anel.back}
       <Cromo text="SABADÁ" size={100} top={1092} delay={6} left={50} align="left" />
       <Pill x={54} y={1214} delay={16} size={24} />
-      <Cutout src={n.foto.src} ratio={n.foto.ratio} height={950} cx={868} top={935 + (1 - art) * 200} fadeFrom={0.62} filter="drop-shadow(-14px 0 30px rgba(255,46,147,.35)) drop-shadow(14px 0 30px rgba(200,210,0,.25)) contrast(1.05)" style={{ opacity: art }} />
+      <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(950, 600 / n.foto.ratio)} cx={868} top={935 + (1 - art) * 200} fadeFrom={0.62} filter="drop-shadow(-14px 0 30px rgba(255,46,147,.35)) drop-shadow(14px 0 30px rgba(200,210,0,.25)) contrast(1.05)" style={{ opacity: art }} />
       {anel.front}
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(10,5,32,0) 84%, rgba(10,5,32,.95) 92%)" }} />
       <LogoArtista n={n} w={450} top={1286} delay={22} cx={290} />

@@ -192,7 +192,7 @@ const SextaFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) =
       <AbsoluteFill style={{ transform: `scale(${push})` }}>
         <RingPx width={w} height={h} look="lima" flat cx={L.ringCx} cy={L.ringCy} ringH={L.ringH * r.grow} rotY={r.rotY} rotX={r.rotX} envIntensity={0.9} />
         <Titulo size={L.titleSize} top={L.titleTop} delay={6} />
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={L.artCx} top={L.artTop + (1 - art) * 220} fadeFrom={0.62} filter="drop-shadow(0 30px 50px rgba(0,0,0,.55)) contrast(1.04)" style={{ opacity: art }} />
+        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(L.artH, 1040 / n.foto.ratio)} cx={L.artCx} top={L.artTop + (1 - art) * 220} fadeFrom={0.62} filter="drop-shadow(0 30px 50px rgba(0,0,0,.55)) contrast(1.04)" style={{ opacity: art }} />
       </AbsoluteFill>
       <Tag x={L.tagX} y={L.tagY} size={L.tagSize} delay={26} />
       <Logo width={L.logoW} top={L.logoTop} />
@@ -220,14 +220,14 @@ const SextaBroll: React.FC<{ n: Noite }> = ({ n }) => {
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Fundo cx={830} cy={1330} />
       <div style={{ position: "absolute", left: 0, top: 0, width: w, height: VH, overflow: "hidden", opacity: vid }}>
-        <OffthreadVideo src={staticFile(n.clip)} style={{ width: w, height: 1920, objectFit: "cover", marginTop: -110, filter: "contrast(1.06) saturate(1.05)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+        <OffthreadVideo src={staticFile(n.clip)} style={{ width: w, height: 1920, objectFit: "cover", marginTop: n.clipTop ?? -110, filter: "contrast(1.06) saturate(1.05)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 80%, rgba(11,11,9,.85) 100%)" }} />
       </div>
       <Logo width={240} top={214} />
       <Estilo n={n} x={40} y={204} delay={14} size={33} />
       <RingPx width={w} height={h} look="lima" flat cx={830} cy={1330} ringH={580 * r.grow} rotY={r.rotY} rotX={r.rotX} envIntensity={0.9} />
       <Ticker text={`  ${n.noite.toUpperCase()}  ●  ${n.artista}  ●  ${n.dia}.${n.mes}  ●  ${n.hora}  ●  TE VEJO NA ESQUINA  ●`} top={VH - 34} height={68} bg={LIMA} color={PRETO} font={BIG} size={46} speed={3.2} rotate={-2} />
-      <Cutout src={n.foto.src} ratio={n.foto.ratio} height={1060} cx={840} top={905 + (1 - art) * 200} fadeFrom={0.7} filter="drop-shadow(0 30px 50px rgba(0,0,0,.6)) contrast(1.04)" style={{ opacity: art }} />
+      <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(1060, 640 / n.foto.ratio)} cx={840} top={905 + (1 - art) * 200} fadeFrom={0.7} filter="drop-shadow(0 30px 50px rgba(0,0,0,.6)) contrast(1.04)" style={{ opacity: art }} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(11,11,9,0) 76%, rgba(11,11,9,.96) 83%)" }} />
       <div style={{ position: "absolute", left: 50, top: 1086, fontFamily: BIG, fontWeight: 900, fontSize: 182, lineHeight: 0.8, color: OSSO, opacity: tit, textShadow: "0 10px 30px rgba(0,0,0,.6)" }}>SEXTA</div>
       <Tag x={54} y={1248} size={32} delay={20} />

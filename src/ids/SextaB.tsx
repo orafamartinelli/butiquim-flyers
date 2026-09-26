@@ -198,10 +198,17 @@ const useO = () => {
 };
 
 // foto do grupo (corte reto embaixo): entra subindo, com o "O" lima atrás
-const Banda: React.FC<{ n: Noite; w: number; h: number; cx: number; bottom: number; fotoW: number; oH: number; oCy: number; canvasW: number; canvasH: number }> = ({ n, cx, bottom, fotoW, oH, oCy, canvasW, canvasH }) => {
+const Banda: React.FC<{ n: Noite; w: number; h: number; cx: number; bottom: number; fotoW: number; oH: number; oCy: number; canvasW: number; canvasH: number; topMin: number; hMax: number }> = ({ n, cx, bottom, fotoW: wMax, oH, oCy, canvasW, canvasH, topMin, hMax }) => {
   const art = useSpr(10, { damping: 15 });
   const o = useO();
-  const fotoH = fotoW / n.foto.ratio;
+  // foto larga: encosta no painel; foto alta (grupo em pé): fixa o topo e o resto some atrás do painel
+  let fotoW = wMax;
+  let fotoH = fotoW / n.foto.ratio;
+  if (bottom - fotoH < topMin) {
+    fotoH = Math.min(fotoH, hMax);
+    fotoW = fotoH * n.foto.ratio;
+    bottom = topMin + fotoH;
+  }
   return (
     <>
       <RingPx width={canvasW} height={canvasH} look="lima" flat cx={cx} cy={oCy} ringH={oH * o.grow} rotY={o.rotY} envIntensity={0.9} />
@@ -220,7 +227,7 @@ export const SextaB: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Terminal />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "50% 30%" }}>
-        <Banda n={n} w={w} h={h} cx={540} bottom={feed ? 700 : 1010} fotoW={feed ? 900 : 1000} oH={feed ? 560 : 660} oCy={feed ? 390 : 640} canvasW={w} canvasH={h} />
+        <Banda n={n} w={w} h={h} cx={540} bottom={feed ? 700 : 1010} fotoW={feed ? 900 : 1000} oH={feed ? 560 : 660} oCy={feed ? 390 : 640} canvasW={w} canvasH={h} topMin={feed ? 100 : 290} hMax={feed ? 1100 : 1300} />
       </AbsoluteFill>
       <Logo width={feed ? 210 : 240} top={feed ? 34 : 214} />
       <Estilo n={n} x={feed ? 28 : 46} y={feed ? 22 : 200} delay={20} size={feed ? 25 : 29} />

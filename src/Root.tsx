@@ -9,6 +9,7 @@ import { SextaB } from "./ids/SextaB";
 import { SabadoB } from "./ids/SabadoB";
 import { DomingoB } from "./ids/DomingoB";
 import { TesteO } from "./Teste";
+import { AgendaV1, AgendaV2, AgendaV3 } from "./agenda/AgendaSemana";
 
 type Id = React.FC<{ n: Noite; fmt: Formato }>;
 
@@ -20,6 +21,12 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta2: SextaB,
   sabado2: SabadoB,
   domingo2: DomingoB,
+  sexta3: Sexta,
+  sabado3: Sabado,
+  sexta4: SextaB,
+  sabado4: SabadoB,
+  sexta5: Sexta,
+  sabado5: Sabado,
 };
 
 const DUR: Record<Formato, number> = { feed: 240, story: 240, broll: 300 };
@@ -32,6 +39,13 @@ const Trilha: React.FC<{ src: string; dur: number }> = ({ src, dur }) => (
 export const RemotionRoot: React.FC = () => (
   <>
     <Still id="teste-o" component={TesteO} width={1620} height={600} />
+    {/* agenda da semana 29/09–04/10: 3 versões × feed/story */}
+    {([["v1", AgendaV1], ["v2", AgendaV2], ["v3", AgendaV3]] as const).flatMap(([v, C]) =>
+      (["feed", "story"] as const).map((fmt) => {
+        const Comp: React.FC = () => <C noites={[NOITES.sexta, NOITES.sabado, NOITES.domingo]} fmt={fmt} periodo="02 A 04" />;
+        return <Still key={`agenda-${v}-${fmt}`} id={`agenda-${v}-${fmt}`} component={Comp} width={1080} height={fmt === "feed" ? 1350 : 1920} />;
+      }),
+    )}
     {(Object.keys(IDS) as NoiteKey[]).flatMap((k) =>
       (["feed", "story", "broll"] as Formato[]).map((fmt) => {
         const C = IDS[k]!;

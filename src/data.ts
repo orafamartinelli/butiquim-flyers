@@ -15,6 +15,7 @@ export type Noite = {
   artistaLogo?: { src: string; ratio: number };
   foto: { src: string; ratio: number };
   clip: string;
+  clipTop?: number;
   diaSemana: string;
   dia: string;
   mes: string;
@@ -37,13 +38,21 @@ const DIAS: Record<number, Pick<Noite, "key" | "noite" | "diaSemana" | "hora" | 
 };
 
 // material de cada artista (foto oficial dos PSDs do designer + trecho de vídeo)
-const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string; logo?: Noite["artistaLogo"] }> = {
+const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string; clipTop?: number; logo?: Noite["artistaLogo"] }> = {
   "gui-silva": { nome: "GUI SILVA", foto: { src: "fotos/gui-silva.png", ratio: 0.606 }, clip: "broll/gui.mp4" },
   "sou-vibe": { nome: "SOU VIBE", foto: { src: "fotos/sou-vibe.png", ratio: 0.5742 }, clip: "broll/souvibe.mp4", logo: { src: "logos/sou-vibe-branco.png", ratio: 3.3289 } },
   "ricardo-ribeiro": { nome: "RICARDO RIBEIRO", foto: { src: "fotos/ricardo-ribeiro.png", ratio: 0.6257 }, clip: "broll/ricardo.mp4", logo: { src: "logos/ricardo-ribeiro-branco.png", ratio: 4.3433 } },
   "grupo-rilex": { nome: "GRUPO RILEX", foto: { src: "fotos/grupo-rilex.png", ratio: 1.5339 }, clip: "broll/rilex.mp4" },
   cqsamba: { nome: "CQ SAMBA", foto: { src: "fotos/cqsamba.png", ratio: 0.6699 }, clip: "broll/cqsamba.mp4", logo: { src: "logos/cqsamba-branco.png", ratio: 1.363 } },
   "biannchi-e-cristiano": { nome: "BIANNCHI & CRISTIANO", foto: { src: "fotos/biannchi-e-cristiano.png", ratio: 1.0823 }, clip: "broll/biannchi.mp4" },
+  // clipTop: deslocamento do vídeo no B-roll (Hilana está no alto do quadro, desce pra não ficar sob o logo)
+  hilana: { nome: "HILANA", foto: { src: "fotos/hilana.png", ratio: 0.5868 }, clip: "broll/hilana.mp4", clipTop: 200 },
+  "pagode-44": { nome: "PAGODE 44", foto: { src: "fotos/pagode-44.png", ratio: 1.1382 }, clip: "broll/pagode44.mp4", logo: { src: "logos/pagode-44.png", ratio: 2.1576 } },
+  "juntou-deu-samba": { nome: "JUNTOU DEU SAMBA", foto: { src: "fotos/juntou-deu-samba.png", ratio: 0.6287 }, clip: "broll/juntou.mp4" },
+  "juninho-cari": { nome: "JUNINHO CARI", foto: { src: "fotos/juninho-cari.png", ratio: 0.4173 }, clip: "broll/juninho.mp4", logo: { src: "logos/juninho-cari.png", ratio: 2.8366 } },
+  // vídeo do Papo 10 tem legenda de música no meio do quadro: enquadra a parte de cima e a legenda cai sob a faixa corrida
+  "papo-10": { nome: "PAPO 10", foto: { src: "fotos/papo-10.png", ratio: 0.835 }, clip: "broll/papo10.mp4", clipTop: 40 },
+  "deixa-clarear": { nome: "DEIXA CLAREAR", foto: { src: "fotos/deixa-clarear.png", ratio: 0.7136 }, clip: "broll/deixaclarear.mp4", logo: { src: "logos/deixa-clarear.png", ratio: 8.0493 } },
 };
 
 const MESES = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
@@ -67,6 +76,7 @@ export const noiteDe = (data: string): Noite => {
     artistaLogo: art.logo,
     foto: art.foto,
     clip: art.clip,
+    clipTop: art.clipTop,
     dia: String(d.getUTCDate()).padStart(2, "0"),
     mes: MESES[d.getUTCMonth()],
     mesExtenso: MESES_EXT[d.getUTCMonth()],
@@ -82,6 +92,13 @@ export const NOITES = {
   sexta2: noiteDe("2026-10-09"),
   sabado2: noiteDe("2026-10-10"),
   domingo2: noiteDe("2026-10-11"),
+  // 3ª semana (A), 4ª (B), 5ª (A) — domingos 18 e 25 sem atração: pulados
+  sexta3: noiteDe("2026-10-16"),
+  sabado3: noiteDe("2026-10-17"),
+  sexta4: noiteDe("2026-10-23"),
+  sabado4: noiteDe("2026-10-24"),
+  sexta5: noiteDe("2026-10-30"),
+  sabado5: noiteDe("2026-10-31"),
 };
 export type NoiteKey = keyof typeof NOITES;
 

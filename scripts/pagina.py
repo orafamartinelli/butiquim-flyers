@@ -5,7 +5,13 @@ noites = [
     ("fds1", "domingo", "DOMINGO 04/10 · RICARDO RIBEIRO", "SERTANEJO", "A · “RÓTULO DA ÚLTIMA RODADA”", "Rótulo de bebida: selo com a data, faixa com o nome, canhoto com a lista, “O” de cobre.", True),
     ("fds2", "sexta2", "SEXTA 09/10 · GRUPO RILEX", "PAGODE", "B · “PAINEL DE EMBARQUE”", "A Sexta como destino num painel de partidas: letras giram até formar atração, data e horário; status “CONFIRMADO” piscando; serviço de bordo com as bebidas trocando; relógio vira 23:00.", True),
     ("fds2", "sabado2", "SÁBADO 10/10 · CQ SAMBA", "PAGODE", "B · “LADO A”", "Capa de disco de pagode ao vivo: vinil girando solta notas musicais, “SABADÁ” pulsa no ritmo, selo de preço com a data, a lista vira tracklist digitada faixa a faixa, bebidas boiando no fundo.", True),
-    ("fds2", "domingo2", "DOMINGO 11/10 · BIANNCHI & CRISTIANO", "SERTANEJO", "B · “LETREIRO NEON”", "Parede de tijolo com néons acendendo: o “O” do logo desenhado em néon, “Saideira” se escrevendo, chapéu, violão, chope e notas piscando, data numa placa de néon.", True),
+    ("fds2", "domingo2", "DOMINGO 11/10 · BIANNCHI & CRISTIANO", "SERTANEJO", "B · “LETREIRO NEON”", "Parede de tijolo com néons acendendo: o “O” do logo desenhado em néon, “Saideira” se escrevendo em verde-lima, chapéu, violão, chope e notas piscando, data numa placa de néon.", True),
+    ("fds3", "sexta3", "SEXTA 16/10 · HILANA", "SERTANEJO", "A · “PLACA DE ESQUINA”", "", True),
+    ("fds3", "sabado3", "SÁBADO 17/10 · PAGODE 44", "PAGODE", "A · “ESQUINA DE VIDRO”", "", True),
+    ("fds4", "sexta4", "SEXTA 23/10 · JUNTOU DEU SAMBA", "PAGODE", "B · “PAINEL DE EMBARQUE”", "", True),
+    ("fds4", "sabado4", "SÁBADO 24/10 · JUNINHO CARI", "PAGODE", "B · “LADO A”", "", True),
+    ("fds5", "sexta5", "SEXTA 30/10 · PAPO 10", "PAGODE", "A · “PLACA DE ESQUINA”", "", True),
+    ("fds5", "sabado5", "SÁBADO 31/10 · DEIXA CLAREAR", "PAGODE", "A · “ESQUINA DE VIDRO”", "", True),
 ]
 
 
@@ -31,6 +37,26 @@ def secao(n):
 
 s1 = "\n".join(secao(n) for n in noites if n[0] == "fds1")
 s2 = "\n".join(secao(n) for n in noites if n[0] == "fds2")
+s3 = "\n".join(secao(n) for n in noites if n[0] == "fds3")
+s4 = "\n".join(secao(n) for n in noites if n[0] == "fds4")
+s5 = "\n".join(secao(n) for n in noites if n[0] == "fds5")
+
+VERSOES = [
+    ("v1", "V1 · LINEUP", "Referência do Camarote: coluna com logo e período, lista das noites com data, artista e estilo, e “AGENDA” gigante em lima com “SEMANA” sobrescrito em contorno; artistas lado a lado se sobrepondo na frente."),
+    ("v2", "V2 · CARTAZ", "No estilo das agendas da A6: os 3 artistas agrupados na frente do “AGENDA”, o “O” lima atrás e “Semana” manuscrito em lima; as noites em 3 colunas."),
+    ("v3", "V3 · REPETIÇÃO", "Tipo o Buteko, em fundo claro: “AGENDA” repetido em linhas vazadas, “Semana” em lima por cima, artistas como adesivos sobrepostos e cartões com as datas."),
+]
+sa = "\n".join(
+    f"""<section id="agenda-{v}">
+  <div class="head"><h2>{t}</h2></div>
+  <div class="ideia">{d}</div>
+  <div class="grid ag">
+    <div class="peca"><div class="rot"><b>FEED</b><span>1080×1350</span></div><img src="agenda-{v}-FEED.png" alt=""></div>
+    <div class="peca"><div class="rot"><b>STORY</b><span>1080×1920</span></div><img src="agenda-{v}-STORY.png" alt=""></div>
+  </div>
+</section>"""
+    for v, t, d in VERSOES
+)
 
 CSS = """
   :root { --bg:#0f0f0e; --card:#191917; --line:#2a2a27; --txt:#f2f0e6; --mut:#a3a197; --lima:#C8D200; }
@@ -55,6 +81,7 @@ CSS = """
   .est small { font-weight:600; letter-spacing:0; opacity:.7; }
   .ideia { color:var(--mut); font-size:15px; line-height:1.5; max-width:1050px; margin:4px 0 18px; }
   .grid { display:grid; grid-template-columns:1.25fr 1.25fr 1fr 1fr; gap:16px; align-items:start; }
+  .grid.ag { grid-template-columns:1.25fr 1fr; max-width:900px; }
   .peca { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px; }
   .rot { font-size:12px; font-weight:800; letter-spacing:.12em; color:var(--mut); margin:2px 2px 8px; display:flex; justify-content:space-between; }
   .rot b { color:var(--txt); }
@@ -85,8 +112,16 @@ html = f"""<!doctype html>
   <div class="sub"><b>1º fim de semana (02–04/10):</b> identidades A, com o “O” do logo em 3D agora <b>vazado</b> e o selo de estilo com <b>+ SpotiFunk</b>.<br>
   <b>2º fim de semana (09–11/10):</b> identidades B, mais ousadas e 100% animadas (painel de embarque, disco de vinil, letreiro neon), para o time avaliar o caminho.<br>
   O estilo agora vem do <b>cadastro do artista</b>: se ele mudar de dia, o selo acompanha.</div>
-  <nav><a href="#fds1">1º fds · identidades A</a><a href="#fds2">2º fds · identidades B</a><a href="#estilos">Estilos dos artistas</a></nav>
+  <nav><a href="#agenda">Agenda da semana (3 versões)</a><a href="#fds3">16–17 · A</a><a href="#fds4">23–24 · B</a><a href="#fds5">30–31 · A</a><a href="#fds1">02–04 · A</a><a href="#fds2">09–11 · B</a><a href="#estilos">Estilos</a></nav>
 </header>
+<div class="bloco" id="agenda"><h3>AGENDA DA SEMANA · 3 VERSÕES</h3><p>Semana de 02 a 04/10 (a próxima a ser postada). Qual vai ser a vencedora?</p></div>
+{sa}
+<div class="bloco" id="fds3"><h3>16–17/10 · IDENTIDADES A</h3><p>Domingo 18 sem atração na planilha: pulado.</p></div>
+{s3}
+<div class="bloco" id="fds4"><h3>23–24/10 · IDENTIDADES B</h3><p>Domingo 25 sem atração na planilha: pulado.</p></div>
+{s4}
+<div class="bloco" id="fds5"><h3>30–31/10 · IDENTIDADES A</h3><p>Última semana do mês.</p></div>
+{s5}
 <div class="bloco" id="fds1"><h3>1º FIM DE SEMANA · IDENTIDADES A</h3><p>Versão 3: “O” vazado igual ao logo + selo “ESTILO / + SpotiFunk”.</p></div>
 {s1}
 <div class="bloco" id="fds2"><h3>2º FIM DE SEMANA · IDENTIDADES B (NOVAS)</h3><p>Uma identidade nova por dia da semana. Tudo que se mexe é animação em código: letras, data, nome, bebidas e notas.</p></div>
