@@ -99,7 +99,7 @@ export const Placa: React.FC<{ x: number; y: number; w: number; nameSize: number
 const Data: React.FC<{ x: number; y: number; n: Noite; delay: number; scale?: number }> = ({ x, y, n, delay, scale = 1 }) => {
   const s = useSpr(delay, { damping: 11 });
   return (
-    <div style={{ position: "absolute", left: x, top: y, transform: `translateX(${(1 - s) * 400}px) rotate(3deg) scale(${scale})`, transformOrigin: "left top", background: OSSO, color: PRETO, borderRadius: 12, padding: "10px 22px 12px", textAlign: "center", boxShadow: "0 16px 30px rgba(0,0,0,.5)", border: `4px solid ${PRETO}` }}>
+    <div style={{ position: "absolute", left: x, top: y, opacity: Math.min(1, s * 3), transform: `translateX(${(1 - s) * 400}px) rotate(3deg) scale(${scale})`, transformOrigin: "left top", background: OSSO, color: PRETO, borderRadius: 12, padding: "10px 22px 12px", textAlign: "center", boxShadow: "0 16px 30px rgba(0,0,0,.5)", border: `4px solid ${PRETO}` }}>
       <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 78, lineHeight: 0.9 }}>
         {n.dia}.{n.mes}
       </div>
