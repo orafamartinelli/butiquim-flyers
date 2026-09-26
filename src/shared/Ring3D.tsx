@@ -12,7 +12,8 @@ const ALTURA = 2.17;
 // O "O" do Butiquim em 3D: o desenho oficial (pincelada com o traço interno) extrudado como letra-caixa,
 // com chanfro arredondado nas bordas — sem virar tubo.
 export const logoOGeometry = (profundidade = 0.13) => {
-  const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${O_PATH}"/></svg>`);
+  // evenodd: o 2º contorno é o furo do "O" (sem isso o miolo sai preenchido)
+  const data = new SVGLoader().parse(`<svg xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="${O_PATH}"/></svg>`);
   const shapes = data.paths.flatMap((p) => SVGLoader.createShapes(p));
   const probe = new THREE.ShapeGeometry(shapes);
   probe.computeBoundingBox();

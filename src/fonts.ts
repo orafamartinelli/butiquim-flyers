@@ -10,3 +10,14 @@ archivo("italic", { weights: ["800", "900"], subsets: latin });
 export const UNB = unbounded("normal", { weights: ["500", "700", "900"], subsets: latin }).fontFamily;
 export const FRAUNCES = fraunces("normal", { weights: ["400", "600", "900"], subsets: latin }).fontFamily;
 fraunces("italic", { weights: ["400", "600", "900"], subsets: latin });
+
+// identidades B
+import { loadFont as barlowCond } from "@remotion/google-fonts/BarlowCondensed";
+import { loadFont as anton } from "@remotion/google-fonts/Anton";
+import { loadFont as yellowtail } from "@remotion/google-fonts/Yellowtail";
+import { loadFont as monoton } from "@remotion/google-fonts/Monoton";
+export const BARLOW = barlowCond("normal", { weights: ["500", "700", "800", "900"], subsets: latin }).fontFamily;
+barlowCond("italic", { weights: ["800", "900"], subsets: latin });
+export const ANTON = anton("normal", { weights: ["400"], subsets: latin }).fontFamily;
+export const YELLOWTAIL = yellowtail("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+export const MONOTON = monoton("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;

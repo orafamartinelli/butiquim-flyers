@@ -1,15 +1,25 @@
 import React from "react";
-import { AbsoluteFill, Composition, Html5Audio, interpolate, staticFile } from "remotion";
+import { AbsoluteFill, Composition, Html5Audio, Still, interpolate, staticFile } from "remotion";
 import "./fonts";
-import { DIM, DiaKey, Formato, NOITES } from "./data";
+import { DIM, Formato, NOITES, Noite, NoiteKey } from "./data";
 import { Sexta } from "./ids/Sexta";
 import { Sabado } from "./ids/Sabado";
 import { Domingo } from "./ids/Domingo";
+import { SextaB } from "./ids/SextaB";
+import { SabadoB } from "./ids/SabadoB";
+import { DomingoB } from "./ids/DomingoB";
+import { TesteO } from "./Teste";
 
-const IDS: Record<DiaKey, React.FC<{ n: (typeof NOITES)[DiaKey]; fmt: Formato }>> = {
+type Id = React.FC<{ n: Noite; fmt: Formato }>;
+
+// cada noite com a identidade que vai usar (A = 1º fds, B = 2º fds)
+const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta: Sexta,
   sabado: Sabado,
   domingo: Domingo,
+  sexta2: SextaB,
+  sabado2: SabadoB,
+  domingo2: DomingoB,
 };
 
 const DUR: Record<Formato, number> = { feed: 240, story: 240, broll: 300 };
@@ -21,9 +31,10 @@ const Trilha: React.FC<{ src: string; dur: number }> = ({ src, dur }) => (
 
 export const RemotionRoot: React.FC = () => (
   <>
-    {(Object.keys(IDS) as DiaKey[]).flatMap((k) =>
+    <Still id="teste-o" component={TesteO} width={1620} height={600} />
+    {(Object.keys(IDS) as NoiteKey[]).flatMap((k) =>
       (["feed", "story", "broll"] as Formato[]).map((fmt) => {
-        const C = IDS[k];
+        const C = IDS[k]!;
         const n = NOITES[k];
         const Comp: React.FC = () => (
           <AbsoluteFill>

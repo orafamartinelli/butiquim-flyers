@@ -3,7 +3,7 @@ import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentF
 import { UNB, ARCHIVO } from "../fonts";
 import { Cutout, Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
-import { Formato, Noite, DIM } from "../data";
+import { Formato, Noite, DIM, SUBESTILO } from "../data";
 
 // SABADÁ — "Esquina de Vidro": noite violeta com as luzes do palco, cromo furta-cor e vidro fosco
 const MAGENTA = "#FF2E93";
@@ -84,9 +84,12 @@ const Pill: React.FC<{ x?: number; y: number; delay: number; size?: number; cent
 const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 22 }) => {
   const s = useSpr(delay, { damping: 12 });
   return (
-    <div style={{ position: "absolute", left: x, top: y, transform: `scale(${s})`, transformOrigin: "left center", display: "flex", alignItems: "center", gap: 10, padding: "9px 22px 9px 14px", borderRadius: 999, backdropFilter: "blur(14px) saturate(160%)", WebkitBackdropFilter: "blur(14px) saturate(160%)", background: "linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06))", border: "1.5px solid rgba(255,255,255,.45)", boxShadow: "0 0 26px rgba(255,46,147,.5), inset 0 1px 0 rgba(255,255,255,.5)" }}>
+    <div style={{ position: "absolute", left: x, top: y, transform: `scale(${s})`, transformOrigin: "left center", display: "flex", alignItems: "center", gap: 10, padding: "9px 22px 10px 14px", borderRadius: 22, backdropFilter: "blur(14px) saturate(160%)", WebkitBackdropFilter: "blur(14px) saturate(160%)", background: "linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06))", border: "1.5px solid rgba(255,255,255,.45)", boxShadow: "0 0 26px rgba(255,46,147,.5), inset 0 1px 0 rgba(255,255,255,.5)" }}>
       <Nota size={size * 1.15} color={LIMA} />
-      <span style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, color: "#fff", letterSpacing: "0.14em" }}>{n.estilo}</span>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, lineHeight: 1.05, color: "#fff", letterSpacing: "0.14em" }}>{n.estilo}</span>
+        <span style={{ fontFamily: ARCHIVO, fontWeight: 600, fontSize: size * 0.62, lineHeight: 1.2, color: "#fff", opacity: 0.7, letterSpacing: "0.04em", marginTop: 2 }}>{SUBESTILO}</span>
+      </div>
     </div>
   );
 };

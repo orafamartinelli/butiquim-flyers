@@ -3,7 +3,7 @@ import { AbsoluteFill, OffthreadVideo, interpolate, staticFile, useCurrentFrame 
 import { FRAUNCES, ARCHIVO } from "../fonts";
 import { Cutout, Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
-import { Formato, Noite, DIM } from "../data";
+import { Formato, Noite, DIM, SUBESTILO } from "../data";
 
 // SAIDEIRA — "Rótulo da Última Rodada": âmbar, creme e cobre; moldura de rótulo, faixa, selo e canhoto
 const ESPRESSO = "#140A05";
@@ -109,7 +109,10 @@ const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: n
   return (
     <div style={{ position: "absolute", left: x, top: y, transform: `rotate(-3deg) scale(${s})`, transformOrigin: "left center", display: "flex", alignItems: "center", gap: 8, background: CREME, color: QUEIMADO, border: `2px solid ${OURO}`, outline: `1.5px solid rgba(244,232,210,.7)`, outlineOffset: 3, padding: "6px 16px 6px 10px", boxShadow: "0 10px 20px rgba(0,0,0,.45)" }}>
       <Nota size={size * 1.15} color={QUEIMADO} />
-      <span style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: size, letterSpacing: "0.16em" }}>{n.estilo}</span>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: size, lineHeight: 1.05, letterSpacing: "0.16em" }}>{n.estilo}</span>
+        <span style={{ fontFamily: FRAUNCES, fontStyle: "italic", fontWeight: 600, fontSize: size * 0.7, lineHeight: 1.15, color: ESPRESSO, opacity: 0.75 }}>{SUBESTILO}</span>
+      </div>
     </div>
   );
 };

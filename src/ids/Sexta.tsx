@@ -3,7 +3,7 @@ import { AbsoluteFill, OffthreadVideo, interpolate, staticFile, useCurrentFrame 
 import { BIG, ARCHIVO } from "../fonts";
 import { Cutout, Grain, Logo, Nota, Ticker, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
-import { Formato, Noite, DIM } from "../data";
+import { Formato, Noite, DIM, SUBESTILO } from "../data";
 
 // SEXTA — "Placa de Esquina": preto + lima, tipografia de sinalização, placa de rua
 const LIMA = "#C8D200";
@@ -24,7 +24,7 @@ type L = {
 const LAYOUT: Record<"feed" | "story", L> = {
   feed: {
     logoTop: 34, logoW: 210,
-    titleTop: 96, titleSize: 345,
+    titleTop: 108, titleSize: 345,
     tagX: 640, tagY: 350, tagSize: 36,
     ringCx: 548, ringCy: 560, ringH: 800,
     artH: 1320, artTop: 300, artCx: 540,
@@ -135,7 +135,10 @@ const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: n
   return (
     <div style={{ position: "absolute", left: x, top: y, transform: `translateX(${(1 - s) * -320}px)`, opacity: Math.min(1, s * 3), display: "flex", alignItems: "center", gap: 10, background: PRETO, border: `3px solid ${LIMA}`, borderRadius: 10, padding: "7px 16px 7px 11px", boxShadow: "0 10px 24px rgba(0,0,0,.5)" }}>
       <Nota size={size * 1.05} color={LIMA} />
-      <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: size * 1.3, lineHeight: 1, color: LIMA, letterSpacing: "0.06em" }}>{n.estilo}</span>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: size * 1.3, lineHeight: 1, color: LIMA, letterSpacing: "0.06em" }}>{n.estilo}</span>
+        <span style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: size * 0.56, lineHeight: 1.1, color: OSSO, opacity: 0.72, letterSpacing: "0.03em", marginTop: 2 }}>{SUBESTILO}</span>
+      </div>
     </div>
   );
 };
@@ -193,7 +196,7 @@ const SextaFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) =
       </AbsoluteFill>
       <Tag x={L.tagX} y={L.tagY} size={L.tagSize} delay={26} />
       <Logo width={L.logoW} top={L.logoTop} />
-      <Estilo n={n} x={fmt === "feed" ? 30 : 46} y={fmt === "feed" ? 24 : 204} delay={34} size={fmt === "feed" ? 30 : 34} />
+      <Estilo n={n} x={fmt === "feed" ? 28 : 46} y={fmt === "feed" ? 20 : 200} delay={34} size={fmt === "feed" ? 27 : 32} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(11,11,9,0) 72%, rgba(11,11,9,.92) 88%)" }} />
       <Placa x={L.plateX} y={L.plateY} w={L.plateW} nameSize={L.nameSize} artista={n.artista} delay={30} />
       <Data x={L.dateX} y={L.dateY} n={n} delay={40} />
