@@ -2,7 +2,6 @@ import React from "react";
 import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { ANTON, ARCHIVO, UNB, YELLOWTAIL } from "../fonts";
 import { Grain, Logo, Nota, Vignette, clamp, useSpr } from "../shared/fx";
-import { RingPx } from "../shared/Ring3D";
 import { Ico, Icone, rnd } from "../shared/icones";
 import { DIM, regraDia } from "../data";
 
@@ -63,28 +62,16 @@ const AvatarO: React.FC<{ size: number; bg: string; ring?: string; escuro?: bool
 );
 
 // ═════════════════════════════════════════════════════════════════════════════════
-// ARTE A — "Esquina de Vidro" (estática): noite violeta com fachos de palco, LISTA cromada
-// atravessando o "O" cromado furta-cor em órbita, e cartões de vidro fosco.
+// ARTE A — "Esquina de Vidro" (estática): noite violeta com fachos de palco atrás de um grande
+// painel de vidro fosco; nele, o letreiro de acrílico LISTA (letras brancas sólidas com a luz
+// néon lima vazando pelas bordas) e COMENTE/RESPONDA gravado no vidro. Nada de texto cromado.
 // ═════════════════════════════════════════════════════════════════════════════════
 const MAG = "#FF2E93";
 const LIMA = "#C8D200";
+const NEON = "#DDF53C"; // lima aceso da luz que vaza do acrílico
 const LILAS = "#A58BFF";
-const BRANCO = "#F6F2FF";
-const TINTA = "#2A0F5E"; // violeta da extrusão
 
-const LUZES = [
-  { color: MAG, pos: [-3, 2.5, 3] as [number, number, number], intensity: 7 },
-  { color: LIMA, pos: [3, -2, 3] as [number, number, number], intensity: 5 },
-  { color: "#5b6bff", pos: [0, 3, -2] as [number, number, number], intensity: 6 },
-];
-// luzes do anel mais carregadas de cor (furta-cor mais evidente atrás da palavra branca)
-const LUZES_ANEL = [
-  { color: MAG, pos: [-3.5, 2, 3] as [number, number, number], intensity: 13 },
-  { color: LIMA, pos: [3.5, -2.5, 3] as [number, number, number], intensity: 8 },
-  { color: "#5b6bff", pos: [0.5, 3.5, 1] as [number, number, number], intensity: 9 },
-];
-
-const Facho: React.FC<{ x: number; a: number; color: string; w: number; h: number; op?: number }> = ({ x, a, color, w, h, op = 0.42 }) => (
+const Facho: React.FC<{ x: number; a: number; color: string; w: number; h: number; op?: number }> = ({ x, a, color, w, h, op = 0.45 }) => (
   <div
     style={{
       position: "absolute", left: x - w / 2, top: -60, width: w, height: h, transformOrigin: "50% 0%", transform: `rotate(${a}deg)`,
@@ -96,184 +83,204 @@ const Facho: React.FC<{ x: number; a: number; color: string; w: number; h: numbe
 
 const PalcoA: React.FC<{ h: number }> = ({ h }) => (
   <>
-    <AbsoluteFill style={{ background: "linear-gradient(180deg, #0D0624 0%, #1C0B45 52%, #0A0520 100%)" }} />
-    <div style={{ position: "absolute", left: -260, top: -120, width: 820, height: 820, borderRadius: "50%", background: MAG, filter: "blur(170px)", opacity: 0.45 }} />
-    <div style={{ position: "absolute", right: -300, top: h * 0.5, width: 760, height: 760, borderRadius: "50%", background: LIMA, filter: "blur(190px)", opacity: 0.2 }} />
-    <div style={{ position: "absolute", right: -200, top: -200, width: 700, height: 700, borderRadius: "50%", background: "#3b4bff", filter: "blur(180px)", opacity: 0.4 }} />
-    <div style={{ position: "absolute", left: 140, top: h * 0.3, width: 800, height: 520, borderRadius: "50%", background: "#7a3cff", filter: "blur(160px)", opacity: 0.35 }} />
-    <Facho x={170} a={-24} color={LILAS} w={380} h={h * 1.1} />
-    <Facho x={410} a={-8} color={LIMA} w={300} h={h * 1.05} op={0.34} />
-    <Facho x={690} a={12} color={MAG} w={340} h={h * 1.1} />
-    <Facho x={930} a={25} color={LILAS} w={380} h={h * 1.1} />
+    <AbsoluteFill style={{ background: "linear-gradient(180deg, #0D0624 0%, #1A0A42 50%, #09041C 100%)" }} />
+    <div style={{ position: "absolute", left: -260, top: -140, width: 820, height: 820, borderRadius: "50%", background: MAG, filter: "blur(170px)", opacity: 0.42 }} />
+    <div style={{ position: "absolute", right: -220, top: -220, width: 720, height: 720, borderRadius: "50%", background: "#3b4bff", filter: "blur(180px)", opacity: 0.42 }} />
+    <div style={{ position: "absolute", right: -300, top: h * 0.55, width: 760, height: 760, borderRadius: "50%", background: LIMA, filter: "blur(200px)", opacity: 0.16 }} />
+    <Facho x={150} a={-26} color={LILAS} w={380} h={h * 1.1} />
+    <Facho x={400} a={-9} color={LIMA} w={300} h={h * 1.05} op={0.36} />
+    <Facho x={700} a={11} color={MAG} w={340} h={h * 1.1} op={0.5} />
+    <Facho x={950} a={26} color={LILAS} w={380} h={h * 1.1} />
   </>
 );
-
-// cromo: extrusão violeta atrás + gradiente de cromo com reflexo magenta/lima + risco de brilho
-const CROMO = "linear-gradient(180deg, #ffffff 0%, #f6f1ff 22%, #d2c2ff 41%, #7556dc 48.5%, #2f166f 52%, #ff8fcb 58%, #ffe4f3 66%, #ffffff 76%, #ecff9e 100%)";
-const CromoTxt: React.FC<{ text: string; size: number; spacing?: string; depth?: number; glow?: number }> = ({ text, size, spacing = "-0.02em", depth = 8, glow = 0.55 }) => {
-  const base: React.CSSProperties = { fontFamily: UNB, fontWeight: 900, fontSize: size, lineHeight: 1, letterSpacing: spacing, whiteSpace: "nowrap" };
-  const ext = Array.from({ length: depth }, (_, i) => `0 ${i + 1}px 0 ${i === depth - 1 ? "#12062e" : TINTA}`).join(",");
-  return (
-    <div style={{ position: "relative" }}>
-      <div style={{ ...base, position: "absolute", inset: 0, color: TINTA, WebkitTextStroke: `${Math.max(2, size * 0.014)}px ${TINTA}`, textShadow: `${ext}, 0 0 ${size * 0.25}px rgba(255,46,147,${glow}), 0 ${depth + 12}px ${size * 0.18}px rgba(0,0,0,.55)` }}>{text}</div>
-      <div style={{ ...base, position: "relative", background: CROMO, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{text}</div>
-      <div style={{ ...base, position: "absolute", inset: 0, background: "linear-gradient(104deg, rgba(255,255,255,0) 26%, rgba(255,255,255,.95) 33%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.6) 74%, rgba(255,255,255,0) 78%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", mixBlendMode: "screen" }}>{text}</div>
-    </div>
-  );
-};
 
 const Centro: React.FC<{ top: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ top, children, style }) => (
   <div style={{ position: "absolute", top, left: 0, right: 0, display: "flex", justifyContent: "center", ...style }}>{children}</div>
 );
 
-// o "O" cromado furta-cor em pé atrás da palavra (como o anel atrás do artista na identidade)
-const AnelO: React.FC<{ fmt: FmtLista; cx: number; cy: number; ringH: number }> = ({ fmt, cx, cy, ringH }) => {
-  const { w, h } = DIM[fmt];
-  return <RingPx width={w} height={h} look="cromo" cx={cx} cy={cy} ringH={ringH} rotX={-0.22} rotY={0.5} rotZ={0} lights={LUZES_ANEL} envIntensity={0.85} />;
+// parafuso cromado que segura o vidro na parede (detalhe de letreiro de verdade)
+const Parafuso: React.FC<{ cx: number; cy: number; d: number }> = ({ cx, cy, d }) => (
+  <div style={{ position: "absolute", left: cx - d / 2, top: cy - d / 2, width: d, height: d, borderRadius: "50%", background: "radial-gradient(circle at 34% 30%, #ffffff 0%, #ebe6ff 20%, #9d93c4 52%, #3d3560 86%)", boxShadow: "0 4px 8px rgba(0,0,0,.55), 0 0 0 1.5px rgba(255,255,255,.3)" }} />
+);
+
+// o grande painel de vidro fosco: fachos borrados atrás, borda clara, bisel interno, reflexo diagonal e espessura
+const PainelVidro: React.FC<{ x: number; y: number; w: number; h: number; r?: number; children: React.ReactNode }> = ({ x, y, w, h, r = 46, children }) => (
+  <>
+    <div style={{ position: "absolute", left: x + 4, top: y + 14, width: w, height: h, borderRadius: r, background: "linear-gradient(180deg, rgba(255,255,255,.02), rgba(221,245,60,.10))", border: "1.5px solid rgba(255,255,255,.16)" }} />
+    <div
+      style={{
+        position: "absolute", left: x, top: y, width: w, height: h, borderRadius: r, overflow: "hidden",
+        backdropFilter: "blur(34px) saturate(180%)", WebkitBackdropFilter: "blur(34px) saturate(180%)",
+        background: "linear-gradient(150deg, rgba(255,255,255,.17) 0%, rgba(255,255,255,.06) 40%, rgba(255,255,255,.03) 64%, rgba(255,255,255,.10) 100%)",
+        border: "2px solid rgba(255,255,255,.5)",
+        boxShadow: "0 50px 90px rgba(4,1,18,.6), inset 0 2px 0 rgba(255,255,255,.7), inset 0 -2px 0 rgba(255,255,255,.16), inset 0 0 90px rgba(165,139,255,.14)",
+      }}
+    >
+      <div style={{ position: "absolute", left: -w * 0.3, top: -h * 0.25, width: w * 0.5, height: h * 1.6, transform: "rotate(30deg)", background: "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.11) 45%, rgba(255,255,255,.03) 70%, rgba(255,255,255,0))" }} />
+      <div style={{ position: "absolute", left: w * 0.34, top: -h * 0.3, width: 10, height: h * 1.7, transform: "rotate(30deg)", background: "rgba(255,255,255,.12)", filter: "blur(1px)" }} />
+      <div style={{ position: "absolute", inset: 16, borderRadius: r - 14, border: "1px solid rgba(255,255,255,.14)" }} />
+      {children}
+    </div>
+    {[
+      [x + 36, y + 36],
+      [x + w - 36, y + 36],
+      [x + 36, y + h - 36],
+      [x + w - 36, y + h - 36],
+    ].map(([cx, cy], i) => (
+      <Parafuso key={i} cx={cx} cy={cy} d={24} />
+    ))}
+  </>
+);
+
+// letreiro de acrílico: face branca sólida e nítida, borda de acrílico acesa e néon lima vazando,
+// afastado do vidro (sombra projetada no painel)
+const Letreiro: React.FC<{ text: string; size: number }> = ({ text, size }) => {
+  const base: React.CSSProperties = { fontFamily: UNB, fontWeight: 900, fontSize: size, lineHeight: 1, letterSpacing: "-0.035em", whiteSpace: "nowrap" };
+  const camada = (s: React.CSSProperties) => <div style={{ ...base, position: "absolute", inset: 0, ...s }}>{text}</div>;
+  return (
+    <div style={{ position: "relative" }}>
+      {camada({ color: "rgba(5,2,20,.6)", transform: `translate(${size * 0.035}px, ${size * 0.08}px)`, filter: `blur(${size * 0.045}px)` })}
+      {camada({ color: NEON, filter: `blur(${size * 0.1}px)`, opacity: 0.75 })}
+      {camada({ color: "transparent", WebkitTextStroke: `${size * 0.04}px ${NEON}`, filter: `blur(${size * 0.022}px)` })}
+      {camada({ color: "#F1FFB0", WebkitTextStroke: `${size * 0.008}px #F1FFB0`, transform: `translateY(${size * 0.022}px)` })}
+      <div style={{ ...base, position: "relative", color: "#FFFFFF" }}>{text}</div>
+    </div>
+  );
 };
 
-const vidro = (r: number): React.CSSProperties => ({
-  borderRadius: r,
-  backdropFilter: "blur(22px) saturate(170%)",
-  WebkitBackdropFilter: "blur(22px) saturate(170%)",
-  background: "linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.05) 60%, rgba(255,46,147,.08))",
-  border: "1.5px solid rgba(255,255,255,.4)",
-  boxShadow: "0 30px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 40px rgba(165,139,255,.15)",
-});
+// COMENTE/RESPONDA gravado no vidro, entre dois filetes de luz
+const Gravado: React.FC<{ text: string; size: number }> = ({ text, size }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: size * 0.45 }}>
+    <span style={{ width: size * 1.3, height: 3, borderRadius: 2, background: `linear-gradient(90deg, rgba(221,245,60,0), ${NEON})`, boxShadow: `0 0 10px ${NEON}` }} />
+    <span style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, lineHeight: 1, letterSpacing: "0.3em", marginRight: "-0.3em", color: "rgba(255,255,255,.94)", textShadow: "0 1px 0 rgba(255,255,255,.35), 0 -1px 0 rgba(8,3,26,.5), 0 0 22px rgba(255,255,255,.22)" }}>{text}</span>
+    <span style={{ width: size * 1.3, height: 3, borderRadius: 2, background: `linear-gradient(90deg, ${NEON}, rgba(221,245,60,0))`, boxShadow: `0 0 10px ${NEON}` }} />
+  </div>
+);
+
+const Direct: React.FC<{ size: number }> = ({ size }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: size * 0.45, fontFamily: ARCHIVO, fontWeight: 700, fontSize: size, color: "rgba(255,255,255,.92)", letterSpacing: "0.01em" }}>
+    <Traco d={AVIAO} size={size * 1.05} color={NEON} stroke={2.2} />
+    <span>
+      e receba o link da lista no seu <b style={{ color: NEON, fontWeight: 900 }}>direct</b>
+    </span>
+  </div>
+);
 
 const Coluna: React.FC<{ p: Parte; big: number }> = ({ p, big }) => (
   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: big * 0.27, letterSpacing: "0.26em", color: BRANCO, opacity: 0.8, marginRight: "-0.26em" }}>{p.quem}</div>
-    <div style={{ fontFamily: UNB, fontWeight: 900, fontSize: big, lineHeight: 1.1, color: "#fff", letterSpacing: "-0.03em", textShadow: "0 0 28px rgba(255,46,147,.7), 0 4px 0 rgba(42,15,94,.8)", marginTop: 2 }}>{p.valor}</div>
-    <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: big * 0.33, color: LIMA, letterSpacing: "0.12em", marginTop: 4, textShadow: "0 0 18px rgba(200,210,0,.45)" }}>{p.ate}</div>
+    <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: big * 0.25, letterSpacing: "0.3em", marginRight: "-0.3em", color: "rgba(255,255,255,.72)" }}>{p.quem}</div>
+    <div style={{ fontFamily: UNB, fontWeight: 900, fontSize: big, lineHeight: 1.12, color: "#fff", letterSpacing: "-0.03em", textShadow: "0 6px 22px rgba(4,1,18,.45)" }}>{p.valor}</div>
+    <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: big * 0.31, color: NEON, letterSpacing: "0.12em", textShadow: `0 0 16px rgba(221,245,60,.4)` }}>{p.ate}</div>
   </div>
 );
 
-const CartaoRegras: React.FC<{ y: number; h: number; big: number }> = ({ y, h, big }) => (
-  <div style={{ position: "absolute", left: 60, width: 960, top: y, height: h, overflow: "hidden", ...vidro(34), display: "flex", flexDirection: "column" }}>
-    <div style={{ position: "absolute", left: -40, top: -120, width: 560, height: 200, background: "linear-gradient(90deg, rgba(255,255,255,.26), rgba(255,255,255,0))", transform: "rotate(-12deg)" }} />
-    <div style={{ display: "flex", justifyContent: "center", paddingTop: big * 0.3, paddingBottom: big * 0.16 }}>
-      <div style={{ fontFamily: UNB, fontWeight: 700, fontSize: big * 0.22, letterSpacing: "0.3em", color: "#fff", background: MAG, borderRadius: 999, padding: "8px 24px 9px 30px", boxShadow: "0 0 24px rgba(255,46,147,.7)" }}>QUEM ESTÁ NA LISTA</div>
-    </div>
+// cartão de vidro (mais escuro que o painel) com as regras da lista
+const CartaoRegras: React.FC<{ x: number; y: number; w: number; h: number; big: number }> = ({ x, y, w, h, big }) => (
+  <div
+    style={{
+      position: "absolute", left: x, top: y, width: w, height: h, borderRadius: 34, overflow: "hidden", display: "flex", flexDirection: "column",
+      backdropFilter: "blur(26px) saturate(160%)", WebkitBackdropFilter: "blur(26px) saturate(160%)",
+      background: "linear-gradient(160deg, rgba(20,8,52,.55), rgba(20,8,52,.35))",
+      border: "1.5px solid rgba(255,255,255,.3)",
+      boxShadow: "0 30px 60px rgba(4,1,18,.5), inset 0 1px 0 rgba(255,255,255,.4)",
+    }}
+  >
     <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
       <Coluna p={FEM} big={big} />
-      <div style={{ width: 2, alignSelf: "stretch", margin: "18px 0", background: "linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0))" }} />
+      <div style={{ width: 2, alignSelf: "stretch", margin: "34px 0 26px", background: "linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.4), rgba(255,255,255,0))" }} />
       <Coluna p={MASC} big={big} />
     </div>
-    <div style={{ borderTop: "1.5px solid rgba(255,255,255,.22)", padding: `${big * 0.16}px 40px ${big * 0.2}px`, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 600, fontSize: big * 0.24, color: BRANCO, opacity: 0.9 }}>{R.obs}</div>
+    <div style={{ borderTop: "1.5px solid rgba(255,255,255,.16)", padding: `${big * 0.17}px 40px ${big * 0.2}px`, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 600, fontSize: big * 0.245, color: "rgba(255,255,255,.86)" }}>{R.obs}</div>
   </div>
 );
 
-const LinhaHora: React.FC<{ y: number; size: number }> = ({ y, size }) => (
+// cabeçalho enxuto: SABADÁ DO BUTICA · A PARTIR DAS 23H
+const Cabecalho: React.FC<{ y: number; size: number }> = ({ y, size }) => (
   <Centro top={y}>
-    <div style={{ display: "flex", alignItems: "center", gap: size * 0.55, fontFamily: UNB, fontWeight: 700, fontSize: size, color: "#fff", letterSpacing: "0.12em" }}>
-      <span>{R.diaSemana}</span>
-      <span style={{ width: size * 0.36, height: size * 0.36, borderRadius: "50%", background: LIMA, boxShadow: `0 0 16px ${LIMA}` }} />
-      <span>{HORA}</span>
+    <div style={{ display: "flex", alignItems: "center", gap: size * 0.6, fontFamily: UNB, fontWeight: 700, fontSize: size, letterSpacing: "0.14em", color: "#fff", whiteSpace: "nowrap" }}>
+      <span>{NOITE}</span>
+      <span style={{ width: size * 0.3, height: size * 0.3, borderRadius: "50%", background: NEON, boxShadow: `0 0 12px ${NEON}` }} />
+      <span style={{ color: NEON }}>{HORA}</span>
     </div>
   </Centro>
 );
 
 const Slogan: React.FC<{ y: number; size: number }> = ({ y, size }) => (
   <Centro top={y}>
-    <div style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, letterSpacing: "0.5em", marginRight: "-0.5em", color: BRANCO, opacity: 0.72 }}>{SLOGAN}</div>
+    <div style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, letterSpacing: "0.5em", marginRight: "-0.5em", color: "rgba(255,255,255,.7)" }}>{SLOGAN}</div>
   </Centro>
 );
 
-// FEED: campo de comentário com LISTA digitado
-const CampoComentario: React.FC<{ y: number }> = ({ y }) => (
-  <div style={{ position: "absolute", left: 120, width: 840, top: y, height: 100, ...vidro(999), display: "flex", alignItems: "center", padding: "0 34px 0 14px", gap: 22 }}>
-    <div style={{ borderRadius: "50%", padding: 4, background: `conic-gradient(from 200deg, ${MAG}, #ff9a3c, ${LIMA}, ${LILAS}, ${MAG})` }}>
-      <div style={{ borderRadius: "50%", padding: 3, background: "#1a0b3d" }}>
-        <Pessoa size={62} bg="#3a2472" fg="#cbbcff" />
-      </div>
-    </div>
-    <div style={{ flex: 1, display: "flex", alignItems: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 48, color: "#fff", letterSpacing: "0.04em" }}>
-      LISTA
-      <span style={{ width: 4, height: 50, background: LIMA, marginLeft: 6, boxShadow: `0 0 10px ${LIMA}` }} />
-    </div>
-    <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 32, color: MAG, textShadow: "0 0 18px rgba(255,46,147,.6)" }}>Publicar</div>
-  </div>
-);
-
-// STORY: barra de resposta do story com LISTA digitado
+// STORY: campo de resposta com LISTA digitado (aponta para a barra de resposta de verdade)
 const BarraResposta: React.FC<{ y: number }> = ({ y }) => (
-  <div style={{ position: "absolute", left: 60, right: 60, top: y, height: 104, display: "flex", alignItems: "center", gap: 26 }}>
-    <div style={{ flex: 1, height: "100%", ...vidro(999), border: "2.5px solid rgba(255,255,255,.85)", display: "flex", alignItems: "center", padding: "0 36px", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 50, color: "#fff", letterSpacing: "0.04em" }}>
+  <div style={{ position: "absolute", left: 60, right: 60, top: y, height: 104, display: "flex", alignItems: "center", gap: 22 }}>
+    <div
+      style={{
+        flex: 1, height: "100%", borderRadius: 999, display: "flex", alignItems: "center", padding: "0 38px",
+        backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", background: "rgba(20,8,52,.45)", border: "2.5px solid rgba(255,255,255,.88)",
+        fontFamily: ARCHIVO, fontWeight: 800, fontSize: 50, color: "#fff", letterSpacing: "0.04em",
+      }}
+    >
       LISTA
-      <span style={{ width: 4, height: 52, background: LIMA, marginLeft: 6, boxShadow: `0 0 10px ${LIMA}` }} />
+      <span style={{ width: 4, height: 52, background: NEON, marginLeft: 6, boxShadow: `0 0 10px ${NEON}` }} />
     </div>
-    <Traco d={CORACAO} size={58} color="#fff" stroke={1.8} />
-    <div style={{ width: 96, height: 96, borderRadius: "50%", background: MAG, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 30px rgba(255,46,147,.8)" }}>
-      <Traco d={AVIAO} size={50} color="#fff" stroke={2} style={{ marginLeft: -4, marginTop: 2 }} />
+    <div style={{ width: 104, height: 104, borderRadius: "50%", background: MAG, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 30px rgba(255,46,147,.7)" }}>
+      <Traco d={AVIAO} size={52} color="#fff" stroke={2} style={{ marginLeft: -4, marginTop: 2 }} />
     </div>
   </div>
 );
 
 type LA = {
-  logoTop: number; logoW: number; noiteTop: number; noiteSize: number; pillY: number; pillSize: number;
-  ctaY: number; ctaSize: number; listaTop: number; listaSize: number; ringCx: number; ringCy: number; ringH: number;
-  subY: number; subSize: number; campoY: number; cardY: number; cardH: number; big: number; horaY: number; horaSize: number; sloganY: number; sloganSize: number;
+  logoTop: number; logoW: number; headY: number; headSize: number;
+  painel: { x: number; y: number; w: number; h: number }; ctaTop: number; ctaSize: number; listaTop: number; listaSize: number; subTop: number; subSize: number;
+  card: { y: number; h: number; big: number }; campoY?: number; sloganY: number; sloganSize: number;
 };
 const LAYOUT_A: Record<FmtLista, LA> = {
   feed: {
-    logoTop: 38, logoW: 210, noiteTop: 94, noiteSize: 104, pillY: 208, pillSize: 26,
-    ctaY: 292, ctaSize: 50, listaTop: 352, listaSize: 236, ringCx: 540, ringCy: 468, ringH: 560,
-    subY: 612, subSize: 28, campoY: 690, cardY: 826, cardH: 336, big: 96, horaY: 1192, horaSize: 30, sloganY: 1282, sloganSize: 20,
+    logoTop: 48, logoW: 210, headY: 116, headSize: 25,
+    painel: { x: 50, y: 180, w: 980, h: 580 }, ctaTop: 80, ctaSize: 56, listaTop: 180, listaSize: 244, subTop: 468, subSize: 31,
+    card: { y: 802, h: 346, big: 100 }, sloganY: 1222, sloganSize: 21,
   },
   story: {
-    logoTop: 214, logoW: 240, noiteTop: 282, noiteSize: 132, pillY: 426, pillSize: 30,
-    ctaY: 540, ctaSize: 62, listaTop: 620, listaSize: 250, ringCx: 540, ringCy: 748, ringH: 640,
-    subY: 900, subSize: 32, campoY: 1486, cardY: 996, cardH: 372, big: 104, horaY: 1404, horaSize: 34, sloganY: 1636, sloganSize: 22,
+    logoTop: 214, logoW: 240, headY: 284, headSize: 28,
+    painel: { x: 44, y: 356, w: 992, h: 600 }, ctaTop: 84, ctaSize: 64, listaTop: 188, listaSize: 246, subTop: 486, subSize: 33,
+    card: { y: 1000, h: 380, big: 108 }, campoY: 1428, sloganY: 1604, sloganSize: 22,
   },
 };
 
 export const ListaSabadoA: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
   const L = LAYOUT_A[fmt];
   const { h } = DIM[fmt];
+  const P = L.painel;
   return (
     <AbsoluteFill style={{ overflow: "hidden", background: "#0D0624" }}>
       <PalcoA h={h} />
-      {/* o "O" fica atrás de tudo (título, pílula e a palavra LISTA) */}
-      <AnelO fmt={fmt} cx={L.ringCx} cy={L.ringCy} ringH={L.ringH} />
       <Logo width={L.logoW} top={L.logoTop} />
-      <Centro top={L.noiteTop}>
-        <CromoTxt text={NOITE_1} size={L.noiteSize} depth={6} glow={0.4} />
-      </Centro>
-      <Centro top={L.pillY}>
-        <div style={{ background: MAG, color: "#fff", fontFamily: UNB, fontWeight: 700, fontSize: L.pillSize, padding: "8px 28px 10px", borderRadius: 999, letterSpacing: "0.08em", boxShadow: "0 0 30px rgba(255,46,147,.8), inset 0 1px 0 rgba(255,255,255,.5)" }}>{NOITE_2}</div>
-      </Centro>
-      {/* herói: COMENTE/RESPONDA "LISTA" na frente do O cromado */}
-      <Centro top={L.ctaY}>
-        <div style={{ fontFamily: UNB, fontWeight: 700, fontSize: L.ctaSize, color: LIMA, letterSpacing: "0.3em", marginRight: "-0.3em", textShadow: "0 0 24px rgba(200,210,0,.55), 0 3px 0 rgba(20,6,46,.9), 0 0 6px rgba(20,6,46,.9)" }}>{CTA[fmt]}</div>
-      </Centro>
-      <Centro top={L.listaTop}>
-        <div style={{ position: "relative" }}>
-          <span style={{ position: "absolute", left: -L.listaSize * 0.2, top: -L.listaSize * 0.1, fontFamily: UNB, fontWeight: 900, fontSize: L.listaSize * 0.45, lineHeight: 1, color: MAG, textShadow: "0 0 24px rgba(255,46,147,.8), 0 3px 0 #12062e" }}>“</span>
-          <CromoTxt text="LISTA" size={L.listaSize} spacing="-0.03em" depth={12} />
-          <span style={{ position: "absolute", right: -L.listaSize * 0.2, top: -L.listaSize * 0.1, fontFamily: UNB, fontWeight: 900, fontSize: L.listaSize * 0.45, lineHeight: 1, color: MAG, textShadow: "0 0 24px rgba(255,46,147,.8), 0 3px 0 #12062e" }}>”</span>
-        </div>
-      </Centro>
-      <Centro top={L.subY}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, fontFamily: ARCHIVO, fontWeight: 700, fontSize: L.subSize, color: "#fff", letterSpacing: "0.02em", background: "rgba(13,6,36,.62)", borderRadius: 999, padding: `${L.subSize * 0.28}px ${L.subSize * 0.9}px`, boxShadow: "0 8px 24px rgba(0,0,0,.35)" }}>
-          <Traco d={AVIAO} size={L.subSize * 1.05} color={LIMA} stroke={2.2} />
-          <span>e receba o link da lista no seu <b style={{ color: LIMA, fontWeight: 900 }}>direct</b></span>
-        </div>
-      </Centro>
-      {fmt === "feed" ? <CampoComentario y={L.campoY} /> : <BarraResposta y={L.campoY} />}
-      <CartaoRegras y={L.cardY} h={L.cardH} big={L.big} />
-      <LinhaHora y={L.horaY} size={L.horaSize} />
+      <Cabecalho y={L.headY} size={L.headSize} />
+      <PainelVidro x={P.x} y={P.y} w={P.w} h={P.h}>
+        <Centro top={L.ctaTop}>
+          <Gravado text={CTA[fmt]} size={L.ctaSize} />
+        </Centro>
+        <Centro top={L.listaTop}>
+          <Letreiro text="LISTA" size={L.listaSize} />
+        </Centro>
+        <Centro top={L.subTop}>
+          <Direct size={L.subSize} />
+        </Centro>
+      </PainelVidro>
+      <CartaoRegras x={P.x} y={L.card.y} w={P.w} h={L.card.h} big={L.card.big} />
+      {L.campoY !== undefined && <BarraResposta y={L.campoY} />}
       <Slogan y={L.sloganY} size={L.sloganSize} />
-      {/* story: setas apontando para a barra de resposta de verdade (abaixo da área segura, só decoração) */}
+      {/* story: setas para a barra de resposta de verdade (abaixo da área segura, só decoração) */}
       {fmt === "story" && (
         <Centro top={1714}>
-          <svg width={70} height={70} viewBox="0 0 24 24" style={{ overflow: "visible", filter: `drop-shadow(0 0 10px ${LIMA})` }}>
-            <path d="M5 5l7 6 7-6M5 12l7 6 7-6" fill="none" stroke={LIMA} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+          <svg width={70} height={70} viewBox="0 0 24 24" style={{ overflow: "visible", filter: `drop-shadow(0 0 10px ${NEON})` }}>
+            <path d="M5 5l7 6 7-6M5 12l7 6 7-6" fill="none" stroke={NEON} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Centro>
       )}
-      <Grain opacity={0.09} />
-      <Vignette strength={0.42} />
+      <Grain opacity={0.08} />
+      <Vignette strength={0.4} />
     </AbsoluteFill>
   );
 };

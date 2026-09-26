@@ -1,6 +1,7 @@
 // Agenda as AGENDAS SEMANAIS nossas na fila do publicador avulso (butiquim_social_avulso):
-//  - SEGUNDA 17h10: carrossel no feed [agenda em vídeo + feed em vídeo de cada noite] (a agenda da esteira sai às 17h e fica como está)
-//  - TERÇA 17h: sequência de stories [agenda em vídeo + story de cada noite], marcando o artista
+//  - TERÇA 17h: carrossel no feed [agenda em vídeo + feed em vídeo de cada noite]
+//  - TERÇA 17h20: sequência de stories [agenda em vídeo + story de cada noite], marcando o artista
+// A agenda da ESTEIRA (segunda 17h, artes do designer) continua igual — esta é uma postagem A MAIS (Rafa quer volume).
 // Sobe os arquivos para o bucket público butiquim-social/avulso/claude/. Idempotente por campanha.
 // Uso: node scripts/agenda-fila.mjs            (simula e mostra)
 //      node scripts/agenda-fila.mjs --gravar   (sobe arquivos e grava na fila)
@@ -48,7 +49,7 @@ const existentes = new Set((await rest("butiquim_social_avulso?select=campanha&c
 
 mkdirSync("out/fila", { recursive: true });
 for (const s of SEMANAS) {
-  const campFeed = `agenda-claude-feed-${s.seg}`;
+  const campFeed = `agenda-claude-feed-${s.ter}`;
   const campStory = `agenda-claude-story-${s.ter}`;
   const linhasLeg = s.noites.map(([, d]) => {
     const a = agenda.find((x) => x.data === d);
@@ -58,21 +59,21 @@ for (const s of SEMANAS) {
   });
   const legenda = `🗓️ A SEMANA NA ESQUINA! Quem sobe no palco do Butica:\n\n${linhasLeg.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`;
 
-  // SEGUNDA — carrossel no feed
+  // TERÇA 17h — carrossel no feed
   if (!existentes.has(campFeed)) {
     const itens = [await sobe(`out/agendas/agenda-${s.ag}-FEED.mp4`, `avulso/claude/ag-${s.ag}-feed.mp4`, "video/mp4")];
     for (const [k] of s.noites) itens.push(await sobe(`out/final/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`, "video/mp4"));
-    const linha = { campanha: campFeed, ordem: 1, publicar_em: quando(s.seg, "17:10"), formato: "CAROUSEL", video_url: itens[0], itens_urls: JSON.stringify(itens), legenda, perfil: "obutiquim" };
-    console.log(`${s.seg} 17:10 CARROSSEL (${itens.length} itens) ${campFeed}`);
+    const linha = { campanha: campFeed, ordem: 1, publicar_em: quando(s.ter, "17:00"), formato: "CAROUSEL", video_url: itens[0], itens_urls: JSON.stringify(itens), legenda, perfil: "obutiquim" };
+    console.log(`${s.ter} 17:00 CARROSSEL (${itens.length} itens) ${campFeed}`);
     if (GRAVAR) await rest("butiquim_social_avulso", { method: "POST", body: JSON.stringify(linha) });
   } else console.log(`pula ${campFeed} (já na fila)`);
 
-  // TERÇA — sequência de stories
+  // TERÇA 17h20 — sequência de stories
   if (!existentes.has(campStory)) {
     const linhas = [];
     const handles = s.noites.map(([, d]) => handle(agenda.find((x) => x.data === d).slug)).filter(Boolean);
-    linhas.push({ campanha: campStory, ordem: 1, publicar_em: quando(s.ter, "17:00"), formato: "STORIES", video_url: await sobe(`out/agendas/agenda-${s.ag}-STORY.mp4`, `avulso/claude/ag-${s.ag}-story.mp4`, "video/mp4"), legenda: "", marcados: handles.slice(0, 2).join(",") || null, perfil: "obutiquim" });
-    let min = 6;
+    linhas.push({ campanha: campStory, ordem: 1, publicar_em: quando(s.ter, "17:20"), formato: "STORIES", video_url: await sobe(`out/agendas/agenda-${s.ag}-STORY.mp4`, `avulso/claude/ag-${s.ag}-story.mp4`, "video/mp4"), legenda: "", marcados: handles.slice(0, 2).join(",") || null, perfil: "obutiquim" });
+    let min = 26;
     for (const [k, d] of s.noites) {
       const h = handle(agenda.find((x) => x.data === d).slug);
       const url = await sobe(jpg(`out/final/${k}-STORY.png`), `avulso/claude/${k}-story.jpg`, "image/jpeg");
