@@ -7,3 +7,4 @@ assets/broll-src/
 assets/*.pdf
 public/broll/
 *.log
+build-agenda/
