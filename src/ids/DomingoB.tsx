@@ -80,8 +80,8 @@ const SaideiraNeon: React.FC<{ cx: number; y: number; size: number; liga: number
   const on = useNeon(liga + 30, 7);
   const W = size * 4.2;
   return (
-    <svg width={W} height={size * 1.3} style={{ position: "absolute", left: cx - W / 2, top: y, overflow: "visible", filter: glow(ROSA, 1.3), opacity: Math.max(on, draw > 0 && draw < 1 ? 1 : 0.1) }}>
-      <text x={W / 2} y={size} textAnchor="middle" fontFamily={YELLOWTAIL} fontSize={size} fill="rgba(255,62,165,.18)" stroke="#FFE1F1" strokeWidth={size * 0.028} strokeDasharray={size * 6} strokeDashoffset={size * 6 * (1 - draw)} strokeLinejoin="round">
+    <svg width={W} height={size * 1.3} style={{ position: "absolute", left: cx - W / 2, top: y, overflow: "visible", filter: glow(LIMA, 1.3), opacity: Math.max(on, draw > 0 && draw < 1 ? 1 : 0.1) }}>
+      <text x={W / 2} y={size} textAnchor="middle" fontFamily={YELLOWTAIL} fontSize={size} fill="rgba(212,232,58,.16)" stroke="#F6FFC2" strokeWidth={size * 0.028} strokeDasharray={size * 6} strokeDashoffset={size * 6 * (1 - draw)} strokeLinejoin="round">
         Saideira
       </text>
     </svg>
@@ -91,7 +91,7 @@ const SaideiraNeon: React.FC<{ cx: number; y: number; size: number; liga: number
 const DaSemana: React.FC<{ cx: number; y: number; size: number; liga: number }> = ({ cx, y, size, liga }) => {
   const on = useNeon(liga, 11);
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: y, textAlign: "center", fontFamily: MONOTON, fontSize: size, color: "#D8F4FF", letterSpacing: "0.08em", filter: glow(AZUL, 1), opacity: on, transform: `translateX(${cx - 540}px)` }}>DA SEMANA</div>
+    <div style={{ position: "absolute", left: 0, right: 0, top: y, textAlign: "center", fontFamily: MONOTON, fontSize: size, color: "#F6FFC2", letterSpacing: "0.08em", filter: glow(LIMA, 1), opacity: on, transform: `translateX(${cx - 540}px)` }}>DA SEMANA</div>
   );
 };
 
@@ -166,7 +166,7 @@ export const DomingoB: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
   const Y = feed ? 0 : 250;
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Parede glows={[{ x: 540, y: Y + 330, c: LIMA, r: 420 }, { x: 540, y: Y + 960, c: ROSA, r: 520 }, { x: 150, y: Y + 300, c: AMBAR, r: 260 }, { x: 930, y: Y + 320, c: AZUL, r: 260 }]} />
+      <Parede glows={[{ x: 540, y: Y + 330, c: LIMA, r: 420 }, { x: 540, y: Y + 960, c: LIMA, r: 520 }, { x: 150, y: Y + 300, c: AMBAR, r: 260 }, { x: 930, y: Y + 320, c: AZUL, r: 260 }]} />
       <ONeon cx={540} cy={Y + 330} w={feed ? 520 : 600} liga={4} />
       <IconeNeon i="chapeu" x={150} y={Y + 260} size={feed ? 150 : 170} cor={AMBAR} liga={20} seed={1} rot={-10} />
       <IconeNeon i="violao" x={935} y={Y + 300} size={feed ? 160 : 180} cor={AZUL} liga={28} seed={2} rot={12} />
