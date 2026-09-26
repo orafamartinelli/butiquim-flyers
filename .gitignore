@@ -1,0 +1,9 @@
+node_modules/
+build/
+out/
+psd/
+assets/raw-*/
+assets/broll-src/
+assets/*.pdf
+public/broll/
+*.log
