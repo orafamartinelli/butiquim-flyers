@@ -8,3 +8,5 @@ assets/*.pdf
 public/broll/
 *.log
 build-agenda/
+build-vespera/
+build-*/

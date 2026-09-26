@@ -60,6 +60,45 @@ sa = "\n".join(
     for v, t, d in VERSOES
 )
 
+
+def grade4(itens):
+    """itens: lista de (rotulo, detalhe, arquivo) — png vira img, mp4 vira video"""
+    cel = []
+    for rot, det, arq in itens:
+        tag = f'<video src="{arq}" controls muted loop autoplay playsinline></video>' if arq.endswith(".mp4") else f'<img src="{arq}" alt="">'
+        cel.append(f'<div class="peca"><div class="rot"><b>{rot}</b><span>{det}</span></div>{tag}</div>')
+    return '<div class="grid">' + "".join(cel) + "</div>"
+
+
+sv = f"""<section id="vespera-sec">
+  <div class="head"><h2>DOMINGO 11/10 · BIANNCHI &amp; CRISTIANO</h2><span class="est">♪ SERTANEJO <small>+ SpotiFunk</small></span><span class="tag">ID NOVA · “FOLHINHA”</span></div>
+  <div class="ideia">Véspera de Nossa Senhora Aparecida. A folhinha de parede do Butiquim, pendurada no “O” 3D, tem a página do domingo arrancada e revela “SEGUNDA-FEIRA 12 · FERIADO” circulado com o “O” do logo; confete e o aviso “amanhã sem despertador”.</div>
+  {grade4([("FEED ESTÁTICO", "1080×1350", "vespera-FEED.png"), ("FEED VÍDEO", "8s · com som", "vespera-FEED.mp4"), ("STORY", "1080×1920", "vespera-STORY.png"), ("STORY + B-ROLL", "10s · com som", "vespera-STORY-BROLL.mp4")])}
+</section>"""
+
+LISTAS = [
+    ("sexta", "SEXTA", "A · Placa de Esquina: placa lima gigante “COMENTE / RESPONDA LISTA”. B · Painel de Embarque: “LISTA” se forma no painel, é digitada no check-in e o aviãozinho do direct entrega o link."),
+    ("sabado", "SÁBADO", "A · Esquina de Vidro: “LISTA” cromada no palco e o campo de comentário com LISTA digitado. B · Lado A: “LISTA” é a faixa 1 do disco, o comentário é enviado e o direct chega."),
+    ("domingo", "DOMINGO", "A · Rótulo: a bebida da vez se chama “LISTA”, e as regras vêm no canhoto. B · Letreiro Neon: “LISTA” se acende em néon lima e um celular em néon mostra o comentário e o direct chegando."),
+]
+sl = "\n".join(
+    f"""<section id="lista-{k}">
+  <div class="head"><h2>LISTA · {t}</h2><span class="tag">2 ARTES · FEED “COMENTE LISTA” · STORY “RESPONDA LISTA”</span></div>
+  <div class="ideia">{d}</div>
+  {grade4([("A · FEED", "estático", f"lista-{k}-A-FEED.png"), ("A · STORY", "estático", f"lista-{k}-A-STORY.png"), ("B · FEED", "vídeo 8s", f"lista-{k}-B-FEED.mp4"), ("B · STORY", "vídeo 8s", f"lista-{k}-B-STORY.mp4")])}
+</section>"""
+    for k, t, d in LISTAS
+)
+
+AGS = [("s1", "28/09 e 29/09", "V1", "02 a 04/10"), ("s2", "05/10 e 06/10", "V2", "09 a 11/10"), ("s3", "12/10 e 13/10", "V3", "16 e 17/10"), ("s4", "19/10 e 20/10", "V1", "23 e 24/10"), ("s5", "26/10 e 27/10", "V2", "30 e 31/10")]
+sg = "\n".join(
+    f"""<section id="ag-{s}">
+  <div class="head"><h2>SEMANA {sem}</h2><span class="tag">{v} · FEED SEG 17H10 + STORIES TER 17H · {quando}</span></div>
+  {grade4([("FEED ESTÁTICO", "", f"agenda-{s}-FEED.png"), ("FEED VÍDEO", "10s · com som", f"agenda-{s}-FEED.mp4"), ("STORY ESTÁTICO", "", f"agenda-{s}-STORY.png"), ("STORY VÍDEO", "10s · com som", f"agenda-{s}-STORY.mp4")])}
+</section>"""
+    for s, quando, v, sem in AGS
+)
+
 CSS = """
   :root { --bg:#0f0f0e; --card:#191917; --line:#2a2a27; --txt:#f2f0e6; --mut:#a3a197; --lima:#C8D200; }
   * { box-sizing:border-box; }
@@ -114,8 +153,14 @@ html = f"""<!doctype html>
   <div class="sub"><b>1º fim de semana (02–04/10):</b> identidades A, com o “O” do logo em 3D agora <b>vazado</b> e o selo de estilo com <b>+ SpotiFunk</b>.<br>
   <b>2º fim de semana (09–11/10):</b> identidades B, mais ousadas e 100% animadas (painel de embarque, disco de vinil, letreiro neon), para o time avaliar o caminho.<br>
   O estilo agora vem do <b>cadastro do artista</b>: se ele mudar de dia, o selo acompanha.</div>
-  <nav><a href="#agenda">Agenda da semana (3 versões)</a><a href="#fds3">16–17 · A</a><a href="#fds4">23–24 · B</a><a href="#fds5">30–31 · A</a><a href="#fds1">02–04 · A</a><a href="#fds2">09–11 · B</a><a href="#estilos">Estilos</a></nav>
+  <nav><a href="#novas">Véspera de feriado</a><a href="#listas">Artes de LISTA</a><a href="#agendas-out">Agendas programadas</a><a href="#agenda">Agenda (3 versões)</a><a href="#fds3">16–17 · A</a><a href="#fds4">23–24 · B</a><a href="#fds5">30–31 · A</a><a href="#fds1">02–04 · A</a><a href="#fds2">09–11 · B</a><a href="#estilos">Estilos</a></nav>
 </header>
+<div class="bloco" id="novas"><h3>VÉSPERA DE FERIADO · ID NOVA</h3><p>Primeira véspera com atração na planilha: domingo 11/10 (amanhã é Nossa Senhora Aparecida).</p></div>
+{sv}
+<div class="bloco" id="listas"><h3>ARTES DE LISTA · 2 NOVAS POR DIA</h3><p>Artes “de sempre” (sem artista e sem data): A estática no estilo da identidade A do dia, B em vídeo animado no estilo da identidade B. Feed pede “COMENTE LISTA”; story pede “RESPONDA LISTA”.</p></div>
+{sl}
+<div class="bloco" id="agendas-out"><h3>AGENDAS DE OUTUBRO · JÁ PROGRAMADAS</h3><p>Rodízio V1 → V2 → V3. Segunda 17h10: carrossel no feed (agenda + feed de cada noite), logo depois da agenda da esteira. Terça 17h: sequência de stories (agenda + story de cada noite, marcando o artista).</p></div>
+{sg}
 <div class="bloco" id="agenda"><h3>AGENDA DA SEMANA · 3 VERSÕES</h3><p>Semana de 02 a 04/10. Versão estática e em vídeo: no vídeo toca um trecho de cada artista (~3s) e a noite dele acende na hora.</p></div>
 {sa}
 <div class="bloco" id="fds3"><h3>16–17/10 · IDENTIDADES A</h3><p>Domingo 18 sem atração na planilha: pulado.</p></div>

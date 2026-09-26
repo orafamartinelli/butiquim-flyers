@@ -66,7 +66,7 @@ const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string
   "ricardo-ribeiro": { nome: "RICARDO RIBEIRO", foto: { src: "fotos/ricardo-ribeiro.png", ratio: 0.6257 }, clip: "broll/ricardo.mp4", logo: { src: "logos/ricardo-ribeiro-branco.png", ratio: 4.3433 } },
   "grupo-rilex": { nome: "GRUPO RILEX", foto: { src: "fotos/grupo-rilex.png", ratio: 1.5339 }, clip: "broll/rilex.mp4" },
   cqsamba: { nome: "CQ SAMBA", foto: { src: "fotos/cqsamba.png", ratio: 0.6699 }, clip: "broll/cqsamba.mp4", logo: { src: "logos/cqsamba-branco.png", ratio: 1.363 } },
-  "biannchi-e-cristiano": { nome: "BIANNCHI & CRISTIANO", foto: { src: "fotos/biannchi-e-cristiano.png", ratio: 1.0823 }, clip: "broll/biannchi.mp4" },
+  "biannchi-e-cristiano": { nome: "BIANNCHI & CRISTIANO", foto: { src: "fotos/biannchi-e-cristiano.png", ratio: 1.0823 }, clip: "broll/biannchi.mp4", clipTop: -140 },
   // clipTop: deslocamento do vídeo no B-roll (Hilana está no alto do quadro, desce pra não ficar sob o logo)
   hilana: { nome: "HILANA", foto: { src: "fotos/hilana.png", ratio: 0.5868 }, clip: "broll/hilana.mp4", clipTop: 200 },
   "pagode-44": { nome: "PAGODE 44", foto: { src: "fotos/pagode-44.png", ratio: 1.1382 }, clip: "broll/pagode44.mp4", logo: { src: "logos/pagode-44.png", ratio: 2.1576 } },
