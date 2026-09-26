@@ -9,7 +9,7 @@ import { SextaB } from "./ids/SextaB";
 import { SabadoB } from "./ids/SabadoB";
 import { DomingoB } from "./ids/DomingoB";
 import { TesteO } from "./Teste";
-import { AgendaV1, AgendaV2, AgendaV3 } from "./agenda/AgendaSemana";
+import { AGENDA_DUR, AgendaV1, AgendaV2, AgendaV3, TrilhaAgenda } from "./agenda/AgendaSemana";
 
 type Id = React.FC<{ n: Noite; fmt: Formato }>;
 
@@ -39,11 +39,22 @@ const Trilha: React.FC<{ src: string; dur: number }> = ({ src, dur }) => (
 export const RemotionRoot: React.FC = () => (
   <>
     <Still id="teste-o" component={TesteO} width={1620} height={600} />
-    {/* agenda da semana 29/09–04/10: 3 versões × feed/story */}
+    {/* agenda da semana 02–04/10: 3 versões × feed/story, estática (parado) e vídeo com a trilha dos artistas */}
     {([["v1", AgendaV1], ["v2", AgendaV2], ["v3", AgendaV3]] as const).flatMap(([v, C]) =>
-      (["feed", "story"] as const).map((fmt) => {
-        const Comp: React.FC = () => <C noites={[NOITES.sexta, NOITES.sabado, NOITES.domingo]} fmt={fmt} periodo="02 A 04" />;
-        return <Still key={`agenda-${v}-${fmt}`} id={`agenda-${v}-${fmt}`} component={Comp} width={1080} height={fmt === "feed" ? 1350 : 1920} />;
+      (["feed", "story"] as const).flatMap((fmt) => {
+        const noites = [NOITES.sexta, NOITES.sabado, NOITES.domingo];
+        const h = fmt === "feed" ? 1350 : 1920;
+        const Parado: React.FC = () => <C noites={noites} fmt={fmt} periodo="02 A 04" parado />;
+        const Video: React.FC = () => (
+          <AbsoluteFill>
+            <C noites={noites} fmt={fmt} periodo="02 A 04" />
+            <TrilhaAgenda noites={noites} />
+          </AbsoluteFill>
+        );
+        return [
+          <Still key={`agenda-${v}-${fmt}`} id={`agenda-${v}-${fmt}`} component={Parado} width={1080} height={h} />,
+          <Composition key={`agenda-${v}-${fmt}-video`} id={`agenda-${v}-${fmt}-video`} component={Video} durationInFrames={AGENDA_DUR} fps={30} width={1080} height={h} />,
+        ];
       }),
     )}
     {(Object.keys(IDS) as NoiteKey[]).flatMap((k) =>

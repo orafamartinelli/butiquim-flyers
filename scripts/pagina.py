@@ -43,16 +43,18 @@ s5 = "\n".join(secao(n) for n in noites if n[0] == "fds5")
 
 VERSOES = [
     ("v1", "V1 · LINEUP", "Referência do Camarote: coluna com logo e período, lista das noites com data, artista e estilo, e “AGENDA” gigante em lima com “SEMANA” sobrescrito em contorno; artistas lado a lado se sobrepondo na frente."),
-    ("v2", "V2 · CARTAZ", "No estilo das agendas da A6: os 3 artistas agrupados na frente do “AGENDA”, o “O” lima atrás e “Semana” manuscrito em lima; as noites em 3 colunas."),
+    ("v2", "V2 · CARTAZ", "No estilo das agendas da A6: os 3 artistas agrupados na frente do “AGENDA”, o “O” lima atrás e “Semana” manuscrito em lima, agora acima das cabeças (antes caía no rosto do Sou Vibe); as noites em 3 colunas."),
     ("v3", "V3 · REPETIÇÃO", "Tipo o Buteko, em fundo claro: “AGENDA” repetido em linhas vazadas, “Semana” em lima por cima, artistas como adesivos sobrepostos e cartões com as datas."),
 ]
 sa = "\n".join(
     f"""<section id="agenda-{v}">
   <div class="head"><h2>{t}</h2></div>
   <div class="ideia">{d}</div>
-  <div class="grid ag">
-    <div class="peca"><div class="rot"><b>FEED</b><span>1080×1350</span></div><img src="agenda-{v}-FEED.png" alt=""></div>
-    <div class="peca"><div class="rot"><b>STORY</b><span>1080×1920</span></div><img src="agenda-{v}-STORY.png" alt=""></div>
+  <div class="grid">
+    <div class="peca"><div class="rot"><b>FEED ESTÁTICO</b><span>1080×1350</span></div><img src="agenda-{v}-FEED.png" alt=""></div>
+    <div class="peca"><div class="rot"><b>FEED VÍDEO</b><span>10s · com som</span></div><video src="agenda-{v}-FEED.mp4" controls muted loop autoplay playsinline></video></div>
+    <div class="peca"><div class="rot"><b>STORY ESTÁTICO</b><span>1080×1920</span></div><img src="agenda-{v}-STORY.png" alt=""></div>
+    <div class="peca"><div class="rot"><b>STORY VÍDEO</b><span>10s · com som</span></div><video src="agenda-{v}-STORY.mp4" controls muted loop autoplay playsinline></video></div>
   </div>
 </section>"""
     for v, t, d in VERSOES
@@ -114,7 +116,7 @@ html = f"""<!doctype html>
   O estilo agora vem do <b>cadastro do artista</b>: se ele mudar de dia, o selo acompanha.</div>
   <nav><a href="#agenda">Agenda da semana (3 versões)</a><a href="#fds3">16–17 · A</a><a href="#fds4">23–24 · B</a><a href="#fds5">30–31 · A</a><a href="#fds1">02–04 · A</a><a href="#fds2">09–11 · B</a><a href="#estilos">Estilos</a></nav>
 </header>
-<div class="bloco" id="agenda"><h3>AGENDA DA SEMANA · 3 VERSÕES</h3><p>Semana de 02 a 04/10 (a próxima a ser postada). Qual vai ser a vencedora?</p></div>
+<div class="bloco" id="agenda"><h3>AGENDA DA SEMANA · 3 VERSÕES</h3><p>Semana de 02 a 04/10. Versão estática e em vídeo: no vídeo toca um trecho de cada artista (~3s) e a noite dele acende na hora.</p></div>
 {sa}
 <div class="bloco" id="fds3"><h3>16–17/10 · IDENTIDADES A</h3><p>Domingo 18 sem atração na planilha: pulado.</p></div>
 {s3}
