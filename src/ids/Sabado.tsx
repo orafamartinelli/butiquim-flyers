@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { UNB, ARCHIVO } from "../fonts";
-import { Cutout, Grain, Logo, Vignette, clamp, useFade, useSpr } from "../shared/fx";
+import { Cutout, Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
 import { Formato, Noite, DIM } from "../data";
 
@@ -80,6 +80,17 @@ const Pill: React.FC<{ x?: number; y: number; delay: number; size?: number; cent
   );
 };
 
+// estilo musical no canto: pílula de vidro com brilho magenta
+const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 22 }) => {
+  const s = useSpr(delay, { damping: 12 });
+  return (
+    <div style={{ position: "absolute", left: x, top: y, transform: `scale(${s})`, transformOrigin: "left center", display: "flex", alignItems: "center", gap: 10, padding: "9px 22px 9px 14px", borderRadius: 999, backdropFilter: "blur(14px) saturate(160%)", WebkitBackdropFilter: "blur(14px) saturate(160%)", background: "linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06))", border: "1.5px solid rgba(255,255,255,.45)", boxShadow: "0 0 26px rgba(255,46,147,.5), inset 0 1px 0 rgba(255,255,255,.5)" }}>
+      <Nota size={size * 1.15} color={LIMA} />
+      <span style={{ fontFamily: UNB, fontWeight: 700, fontSize: size, color: "#fff", letterSpacing: "0.14em" }}>{n.estilo}</span>
+    </div>
+  );
+};
+
 const LogoArtista: React.FC<{ n: Noite; w: number; top: number; delay: number; cx: number }> = ({ n, w, top, delay, cx }) => {
   const frame = useCurrentFrame();
   const p = interpolate(frame - delay, [0, 22], [0, 100], clamp);
@@ -127,7 +138,7 @@ const Vidro: React.FC<{ n: Noite; x: number; y: number; w: number; h: number; de
 const useRing = (frame: number) => {
   const inn = useSpr(0, { damping: 16, stiffness: 70 });
   return {
-    rotY: interpolate(inn, [0, 1], [1.55, 0.5]) + Math.sin(frame / 40) * 0.12,
+    rotY: interpolate(inn, [0, 1], [1.55, 0.36]) + Math.sin(frame / 40) * 0.12,
     rotX: -0.32 + Math.sin(frame / 60) * 0.04,
     grow: interpolate(inn, [0, 1], [0.5, 1]),
   };
@@ -147,8 +158,8 @@ const useAnel = (w: number, h: number, cx: number, cy: number, ringH: number, fr
 type L = { titleTop: number; titleSize: number; pillY: number; ringCy: number; ringH: number; frontFrom: number; artH: number; artTop: number; logoY: number; logoW: number; cardY: number; cardH: number; big: number; cta?: number; logoTop: number };
 
 const LAYOUT: Record<"feed" | "story", L> = {
-  feed: { logoTop: 34, titleTop: 92, titleSize: 178, pillY: 268, ringCy: 640, ringH: 900, frontFrom: 890, artH: 1180, artTop: 330, logoY: 858, logoW: 560, cardY: 1052, cardH: 250, big: 100 },
-  story: { logoTop: 214, titleTop: 286, titleSize: 180, pillY: 466, ringCy: 930, ringH: 1060, frontFrom: 1200, artH: 1480, artTop: 540, logoY: 1180, logoW: 620, cardY: 1390, cardH: 260, big: 104, cta: 1690 },
+  feed: { logoTop: 34, titleTop: 92, titleSize: 178, pillY: 268, ringCy: 650, ringH: 690, frontFrom: 900, artH: 1180, artTop: 330, logoY: 858, logoW: 560, cardY: 1052, cardH: 250, big: 100 },
+  story: { logoTop: 214, titleTop: 286, titleSize: 180, pillY: 466, ringCy: 940, ringH: 800, frontFrom: 1230, artH: 1480, artTop: 540, logoY: 1180, logoW: 620, cardY: 1390, cardH: 260, big: 104, cta: 1690 },
 };
 
 export const Sabado: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
@@ -175,6 +186,7 @@ const SabadoFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) 
       </AbsoluteFill>
       <Pill y={L.pillY} delay={22} center />
       <Logo width={fmt === "feed" ? 210 : 240} top={L.logoTop} />
+      <Estilo n={n} x={fmt === "feed" ? 28 : 46} y={fmt === "feed" ? 22 : 202} delay={30} size={fmt === "feed" ? 25 : 28} />
       <LogoArtista n={n} w={L.logoW} top={L.logoY} delay={30} cx={540} />
       <Vidro n={n} x={60} y={L.cardY} w={960} h={L.cardH} delay={40} big={L.big} />
       {L.cta !== undefined && (
@@ -196,7 +208,7 @@ const SabadoBroll: React.FC<{ n: Noite }> = ({ n }) => {
   const { w, h } = DIM.broll;
   const intro = useFade(0, 18);
   const art = useSpr(10, { damping: 15 });
-  const anel = useAnel(w, h, 860, 1320, 740, 1470);
+  const anel = useAnel(w, h, 860, 1330, 540, 1500);
   const FX = 36, FY = 150, FW = w - 72, FH = 900;
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
@@ -207,6 +219,7 @@ const SabadoBroll: React.FC<{ n: Noite }> = ({ n }) => {
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(13,6,36,.6) 0%, rgba(13,6,36,0) 22%, rgba(13,6,36,0) 75%, rgba(13,6,36,.7) 100%)" }} />
       </div>
       <Logo width={240} top={214} />
+      <Estilo n={n} x={62} y={188} delay={12} size={26} />
       {anel.back}
       <Cromo text="SABADÁ" size={100} top={1092} delay={6} left={50} align="left" />
       <Pill x={54} y={1214} delay={16} size={24} />

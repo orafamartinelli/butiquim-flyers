@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BIG, ARCHIVO } from "../fonts";
-import { Cutout, Grain, Logo, Ticker, Vignette, clamp, useFade, useSpr } from "../shared/fx";
+import { Cutout, Grain, Logo, Nota, Ticker, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
 import { Formato, Noite, DIM } from "../data";
 
@@ -26,7 +26,7 @@ const LAYOUT: Record<"feed" | "story", L> = {
     logoTop: 34, logoW: 210,
     titleTop: 96, titleSize: 345,
     tagX: 640, tagY: 350, tagSize: 36,
-    ringCx: 560, ringCy: 620, ringH: 1000,
+    ringCx: 548, ringCy: 560, ringH: 800,
     artH: 1320, artTop: 300, artCx: 540,
     plateX: 110, plateY: 1022, plateW: 860, nameSize: 150,
     dateX: 752, dateY: 930,
@@ -36,7 +36,7 @@ const LAYOUT: Record<"feed" | "story", L> = {
     logoTop: 214, logoW: 240,
     titleTop: 290, titleSize: 350,
     tagX: 650, tagY: 548, tagSize: 40,
-    ringCx: 560, ringCy: 930, ringH: 1180,
+    ringCx: 548, ringCy: 860, ringH: 930,
     artH: 1640, artTop: 520, artCx: 540,
     plateX: 90, plateY: 1352, plateW: 900, nameSize: 160,
     dateX: 752, dateY: 1256,
@@ -129,6 +129,17 @@ export const Info: React.FC<{ n: Noite; y: number; cta?: number; delay: number; 
   );
 };
 
+// estilo musical no canto: plaquinha preta com borda lima
+const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 26 }) => {
+  const s = useSpr(delay, { damping: 12 });
+  return (
+    <div style={{ position: "absolute", left: x, top: y, transform: `translateX(${(1 - s) * -320}px)`, opacity: Math.min(1, s * 3), display: "flex", alignItems: "center", gap: 10, background: PRETO, border: `3px solid ${LIMA}`, borderRadius: 10, padding: "7px 16px 7px 11px", boxShadow: "0 10px 24px rgba(0,0,0,.5)" }}>
+      <Nota size={size * 1.05} color={LIMA} />
+      <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: size * 1.3, lineHeight: 1, color: LIMA, letterSpacing: "0.06em" }}>{n.estilo}</span>
+    </div>
+  );
+};
+
 const Fundo: React.FC<{ cx: number; cy: number }> = ({ cx, cy }) => (
   <>
     <AbsoluteFill style={{ background: PRETO }} />
@@ -154,7 +165,7 @@ const useRingMotion = () => {
   const frame = useCurrentFrame();
   const inn = useSpr(0, { damping: 16, stiffness: 70 });
   return {
-    rotY: interpolate(inn, [0, 1], [1.5, 0.42]) + Math.sin(frame / 38) * 0.1,
+    rotY: interpolate(inn, [0, 1], [1.5, 0.22]) + Math.sin(frame / 38) * 0.08,
     rotX: Math.sin(frame / 55) * 0.05,
     grow: interpolate(inn, [0, 1], [0.55, 1]),
   };
@@ -182,6 +193,7 @@ const SextaFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) =
       </AbsoluteFill>
       <Tag x={L.tagX} y={L.tagY} size={L.tagSize} delay={26} />
       <Logo width={L.logoW} top={L.logoTop} />
+      <Estilo n={n} x={fmt === "feed" ? 30 : 46} y={fmt === "feed" ? 24 : 204} delay={34} size={fmt === "feed" ? 30 : 34} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(11,11,9,0) 72%, rgba(11,11,9,.92) 88%)" }} />
       <Placa x={L.plateX} y={L.plateY} w={L.plateW} nameSize={L.nameSize} artista={n.artista} delay={30} />
       <Data x={L.dateX} y={L.dateY} n={n} delay={40} />
@@ -209,7 +221,8 @@ const SextaBroll: React.FC<{ n: Noite }> = ({ n }) => {
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 80%, rgba(11,11,9,.85) 100%)" }} />
       </div>
       <Logo width={240} top={214} />
-      <RingPx width={w} height={h} look="lima" flat cx={830} cy={1330} ringH={820 * r.grow} rotY={r.rotY} rotX={r.rotX} envIntensity={0.9} />
+      <Estilo n={n} x={40} y={204} delay={14} size={33} />
+      <RingPx width={w} height={h} look="lima" flat cx={830} cy={1330} ringH={580 * r.grow} rotY={r.rotY} rotX={r.rotX} envIntensity={0.9} />
       <Ticker text={`  ${n.noite.toUpperCase()}  ●  ${n.artista}  ●  ${n.dia}.${n.mes}  ●  ${n.hora}  ●  TE VEJO NA ESQUINA  ●`} top={VH - 34} height={68} bg={LIMA} color={PRETO} font={BIG} size={46} speed={3.2} rotate={-2} />
       <Cutout src={n.foto.src} ratio={n.foto.ratio} height={1060} cx={840} top={905 + (1 - art) * 200} fadeFrom={0.7} filter="drop-shadow(0 30px 50px rgba(0,0,0,.6)) contrast(1.04)" style={{ opacity: art }} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(11,11,9,0) 76%, rgba(11,11,9,.96) 83%)" }} />

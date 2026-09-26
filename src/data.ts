@@ -5,6 +5,7 @@ export type Noite = {
   key: DiaKey;
   noite: string;
   artista: string;
+  estilo: string;
   artistaLogo?: { src: string; ratio: number };
   foto: { src: string; ratio: number };
   clip: string;
@@ -24,6 +25,7 @@ export const NOITES: Record<DiaKey, Noite> = {
     key: "sexta",
     noite: "Sexta do Butica",
     artista: "GUI SILVA",
+    estilo: "SERTANEJO",
     foto: { src: "fotos/gui-silva.png", ratio: 0.606 },
     clip: "broll/gui.mp4",
     diaSemana: "SEXTA",
@@ -38,6 +40,7 @@ export const NOITES: Record<DiaKey, Noite> = {
     key: "sabado",
     noite: "Sabadá do Butica",
     artista: "SOU VIBE",
+    estilo: "PAGODE",
     artistaLogo: { src: "logos/sou-vibe-branco.png", ratio: 3.3289 },
     foto: { src: "fotos/sou-vibe.png", ratio: 0.5742 },
     clip: "broll/souvibe.mp4",
@@ -53,6 +56,7 @@ export const NOITES: Record<DiaKey, Noite> = {
     key: "domingo",
     noite: "Saideira da Semana",
     artista: "RICARDO RIBEIRO",
+    estilo: "SERTANEJO",
     artistaLogo: { src: "logos/ricardo-ribeiro-branco.png", ratio: 4.3433 },
     foto: { src: "fotos/ricardo-ribeiro.png", ratio: 0.6257 },
     clip: "broll/ricardo.mp4",

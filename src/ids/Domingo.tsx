@@ -1,7 +1,7 @@
 import React from "react";
 import { AbsoluteFill, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { FRAUNCES, ARCHIVO } from "../fonts";
-import { Cutout, Grain, Logo, Vignette, clamp, useFade, useSpr } from "../shared/fx";
+import { Cutout, Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
 import { Formato, Noite, DIM } from "../data";
 
@@ -103,6 +103,17 @@ const Faixa: React.FC<{ n: Noite; cx: number; top: number; w: number; delay: num
   );
 };
 
+// estilo musical no canto: etiqueta creme de rótulo
+const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 20 }) => {
+  const s = useSpr(delay, { damping: 12 });
+  return (
+    <div style={{ position: "absolute", left: x, top: y, transform: `rotate(-3deg) scale(${s})`, transformOrigin: "left center", display: "flex", alignItems: "center", gap: 8, background: CREME, color: QUEIMADO, border: `2px solid ${OURO}`, outline: `1.5px solid rgba(244,232,210,.7)`, outlineOffset: 3, padding: "6px 16px 6px 10px", boxShadow: "0 10px 20px rgba(0,0,0,.45)" }}>
+      <Nota size={size * 1.15} color={QUEIMADO} />
+      <span style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: size, letterSpacing: "0.16em" }}>{n.estilo}</span>
+    </div>
+  );
+};
+
 // selo redondo com a data
 const Selo: React.FC<{ n: Noite; x: number; y: number; d: number; delay: number }> = ({ n, x, y, d, delay }) => {
   const s = useSpr(delay, { damping: 12, stiffness: 140 });
@@ -157,7 +168,7 @@ const useAnel = () => {
   const frame = useCurrentFrame();
   const inn = useSpr(0, { damping: 17, stiffness: 60 });
   return {
-    rotY: interpolate(inn, [0, 1], [1.45, 0.34]) + Math.sin(frame / 45) * 0.09,
+    rotY: interpolate(inn, [0, 1], [1.45, 0.26]) + Math.sin(frame / 45) * 0.09,
     rotX: Math.sin(frame / 60) * 0.05,
     grow: interpolate(inn, [0, 1], [0.6, 1]),
   };
@@ -174,8 +185,8 @@ const useAcende = () => {
 type L = { frame: number; logoTop: number; logoW: number; lineY: number; ringCy: number; ringH: number; artH: number; artTop: number; faixaY: number; faixaW: number; titleY: number; titleSize: number; semanaY: number; semanaSize: number; seloX: number; seloY: number; seloD: number; tkY: number; tkH: number; cta?: boolean };
 
 const LAYOUT: Record<"feed" | "story", L> = {
-  feed: { frame: 26, logoTop: 52, logoW: 200, lineY: 108, ringCy: 560, ringH: 860, artH: 1090, artTop: 150, faixaY: 770, faixaW: 640, titleY: 842, titleSize: 228, semanaY: 1080, semanaSize: 54, seloX: 890, seloY: 300, seloD: 210, tkY: 1162, tkH: 128 },
-  story: { frame: 30, logoTop: 214, logoW: 230, lineY: 276, ringCy: 800, ringH: 980, artH: 1300, artTop: 330, faixaY: 1080, faixaW: 700, titleY: 1160, titleSize: 250, semanaY: 1420, semanaSize: 60, seloX: 880, seloY: 520, seloD: 230, tkY: 1508, tkH: 160, cta: true },
+  feed: { frame: 26, logoTop: 52, logoW: 200, lineY: 108, ringCy: 540, ringH: 660, artH: 1090, artTop: 150, faixaY: 770, faixaW: 640, titleY: 842, titleSize: 228, semanaY: 1080, semanaSize: 54, seloX: 890, seloY: 300, seloD: 210, tkY: 1162, tkH: 128 },
+  story: { frame: 30, logoTop: 214, logoW: 230, lineY: 276, ringCy: 790, ringH: 760, artH: 1300, artTop: 330, faixaY: 1080, faixaW: 700, titleY: 1160, titleSize: 250, semanaY: 1420, semanaSize: 60, seloX: 880, seloY: 520, seloD: 230, tkY: 1508, tkH: 160, cta: true },
 };
 
 export const Domingo: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
@@ -202,6 +213,7 @@ const DomingoFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt })
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(20,10,5,0) 52%, rgba(20,10,5,.75) 70%, rgba(20,10,5,.95) 84%)" }} />
       <Moldura w={w} h={h} inset={L.frame} o={o} />
       <Logo width={L.logoW} top={L.logoTop} />
+      <Estilo n={n} x={fmt === "feed" ? 56 : 66} y={fmt === "feed" ? 46 : 206} delay={36} size={fmt === "feed" ? 24 : 27} />
       <Linha text="A ÚLTIMA RODADA DA SEMANA" top={L.lineY} o={o} size={fmt === "feed" ? 17 : 19} w={70} />
       <Faixa n={n} cx={540} top={L.faixaY} w={L.faixaW} delay={30} />
       <Saideira size={L.titleSize} top={L.titleY} delay={18} />
@@ -233,7 +245,8 @@ const DomingoBroll: React.FC<{ n: Noite }> = ({ n }) => {
         </div>
       </div>
       <Logo width={230} top={214} />
-      <RingPx width={w} height={h} look="cobre" cx={820} cy={1330} ringH={760 * a.grow} rotY={a.rotY} rotX={a.rotX} envIntensity={1} lights={[{ color: "#ffb35c", pos: [-3, 2, 3], intensity: 4 }]} />
+      <Estilo n={n} x={80} y={190} delay={16} size={25} />
+      <RingPx width={w} height={h} look="cobre" cx={820} cy={1330} ringH={560 * a.grow} rotY={a.rotY} rotX={a.rotX} envIntensity={1} lights={[{ color: "#ffb35c", pos: [-3, 2, 3], intensity: 4 }]} />
       <Cutout src={n.foto.src} ratio={n.foto.ratio} height={960} cx={835} top={900 + (1 - art) * 200} fadeFrom={0.64} filter="sepia(.16) saturate(1.1) contrast(1.05) drop-shadow(0 0 30px rgba(242,154,46,.35)) drop-shadow(0 30px 40px rgba(0,0,0,.6))" style={{ opacity: art }} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(20,10,5,0) 70%, rgba(20,10,5,.9) 80%)" }} />
       <Saideira size={168} top={1080} delay={14} left={36} align="left" />

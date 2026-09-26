@@ -84,3 +84,10 @@ export const Ticker: React.FC<{ text: string; top: number; height: number; bg: s
     </div>
   );
 };
+
+// nota musical (ícone do selo de estilo)
+export const Nota: React.FC<{ size: number; color: string }> = ({ size, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{ display: "block", flex: "0 0 auto" }}>
+    <path d="M9 17.5a3 3 0 1 1-2-2.83V5.2l12-2.7v12a3 3 0 1 1-2-2.83V7.1l-8 1.8z" fill={color} />
+  </svg>
+);
