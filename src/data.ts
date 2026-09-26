@@ -37,6 +37,28 @@ const DIAS: Record<number, Pick<Noite, "key" | "noite" | "diaSemana" | "hora" | 
   0: { key: "domingo", noite: "Saideira da Semana", diaSemana: "DOMINGO", hora: "22H", lista: ["LISTA FEM. FREE ATÉ 23H", "LISTA MASC. R$ 20 ATÉ 23H"] },
 };
 
+// regras fixas de um dia da semana (para peças sem artista, ex.: artes de LISTA)
+export type RegraDia = Pick<Noite, "key" | "noite" | "diaSemana" | "hora" | "lista" | "obs">;
+export const regraDia = (key: Noite["key"]): RegraDia => {
+  const r = Object.values(DIAS).find((d) => d.key === key)!;
+  return { ...r, obs: OBS };
+};
+
+// feriados (butiquim_social_feriados): a noite anterior é véspera
+export const FERIADOS: Record<string, string> = {
+  "2026-10-12": "Nossa Senhora Aparecida",
+  "2026-11-02": "Finados",
+  "2026-11-15": "Proclamação da República",
+  "2026-11-20": "Consciência Negra",
+  "2026-12-25": "Natal",
+};
+export const feriadoSeguinte = (data: string) => {
+  const d = new Date(`${data}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  const iso = d.toISOString().slice(0, 10);
+  return FERIADOS[iso] ? { data: iso, nome: FERIADOS[iso], dia: String(d.getUTCDate()).padStart(2, "0"), mes: String(d.getUTCMonth() + 1).padStart(2, "0") } : null;
+};
+
 // material de cada artista (foto oficial dos PSDs do designer + trecho de vídeo)
 const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string; clipTop?: number; logo?: Noite["artistaLogo"] }> = {
   "gui-silva": { nome: "GUI SILVA", foto: { src: "fotos/gui-silva.png", ratio: 0.606 }, clip: "broll/gui.mp4" },
@@ -99,6 +121,8 @@ export const NOITES = {
   sabado4: noiteDe("2026-10-24"),
   sexta5: noiteDe("2026-10-30"),
   sabado5: noiteDe("2026-10-31"),
+  // véspera de feriado (identidade própria): domingo 11/10, véspera de Nossa Senhora Aparecida
+  vespera1: noiteDe("2026-10-11"),
 };
 export type NoiteKey = keyof typeof NOITES;
 
