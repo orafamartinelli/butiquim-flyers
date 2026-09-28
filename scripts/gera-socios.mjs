@@ -175,7 +175,7 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--linha);color:
   <ul class="fatos">
     <li><b>12</b>noites</li>
     <li><b>84</b>peças</li>
-    <li><b>52</b>posts a mais no mês</li>
+    <li><b>119</b>posts a mais no mês</li>
   </ul>
 </header>
 <nav aria-label="Seções"><a href="#identidades">As 6 identidades</a><a href="#programacao">Onde entra</a><a href="#s1">02–04</a><a href="#s2">09–11</a><a href="#s3">16–17</a><a href="#s4">23–24</a><a href="#s5">30–31</a><a href="#listas">Listas</a></nav>
@@ -191,18 +191,25 @@ footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--linha);color:
 
 <section class="bloco" id="programacao">
   <h2>Onde entra no Instagram</h2>
-  <p>A programação atual continua. As peças novas entram como posts a mais; só a arte de lista de sábado e domingo é trocada pela nova.</p>
+  <p>A programação atual continua. As peças novas entram como posts a mais. Duas trocas: o flyer novo vira a capa do carrossel da manhã, e a arte de lista de sábado e domingo passa a ser a nova. “Dia do show” vale para sexta, sábado e domingo com atração.</p>
   <div class="tab"><table>
     <thead><tr><th>Dia</th><th>Horário</th><th>O que sai</th><th>Formato</th><th></th></tr></thead>
     <tbody>
       <tr class="igual"><td class="d">Segunda</td><td class="h">17h</td><td>Agenda da semana (arte atual)</td><td>Carrossel + stories</td><td><span class="tag">como hoje</span></td></tr>
-      <tr><td class="d">Terça</td><td class="h">17h</td><td>Agenda nova + vídeo de cada noite</td><td>Carrossel no feed</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Terça</td><td class="h">12h</td><td>Vídeo da agenda nova</td><td>Reels</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Terça</td><td class="h">17h</td><td>Agenda nova + vídeo de cada noite</td><td>Carrossel</td><td><span class="tag novo">novo</span></td></tr>
       <tr><td class="d">Terça</td><td class="h">17h20</td><td>Agenda nova + story de cada noite, marcando o artista</td><td>Stories</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Quarta</td><td class="h">12h</td><td>Vídeo do artista de sexta + flyer</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
       <tr><td class="d">Quarta</td><td class="h">20h30</td><td>Lista da sexta aberta (arte fixa)</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Quinta</td><td class="h">17h</td><td>Flyer de sexta: “é amanhã”</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
       <tr><td class="d">Quinta</td><td class="h">20h30</td><td>Lista da sexta (arte animada)</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
-      <tr><td class="d">Sex e sáb</td><td class="h">manhã</td><td>Flyer novo como foto a mais no carrossel do dia</td><td>Carrossel</td><td><span class="tag novo">novo</span></td></tr>
-      <tr><td class="d">Sex e sáb</td><td class="h">12h</td><td>Flyer animado da noite, com som do artista</td><td>Reels</td><td><span class="tag novo">novo</span></td></tr>
-      <tr><td class="d">Sex e sáb</td><td class="h">16h30</td><td>Lista animada: “Comenta LISTA” e o link chega no direct</td><td>Reels</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">manhã</td><td>Flyer novo na capa do carrossel do dia (a arte atual vai para o fim)</td><td>Carrossel</td><td><span class="tag troca">troca</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">12h</td><td>Flyer animado da noite, com som do artista</td><td>Reels</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">13h30</td><td>Flyer novo, marcando o artista</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">16h</td><td>Vídeo do artista + flyer</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">16h30</td><td>Lista animada: “Comenta LISTA” e o link chega no direct</td><td>Reels</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">18h30</td><td>Lista nova: “Responda LISTA”</td><td>Story</td><td><span class="tag novo">novo</span></td></tr>
+      <tr><td class="d">Dia do show</td><td class="h">21h30</td><td>Última chamada da lista</td><td>Carrossel</td><td><span class="tag novo">novo</span></td></tr>
       <tr><td class="d">Sáb e dom</td><td class="h">tarde</td><td>Arte de lista nova no lugar da atual (A ou B, junto com a identidade da semana)</td><td>Carrossel + story</td><td><span class="tag troca">troca</span></td></tr>
     </tbody>
   </table></div>
