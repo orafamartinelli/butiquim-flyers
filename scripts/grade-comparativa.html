@@ -1,0 +1,251 @@
+<title>Grade do Butiquim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&family=Big+Shoulders:wght@800;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#11110e;--card:#1a1a16;--card2:#20201b;--linha:#2d2d27;--txt:#f2f0e6;--mut:#a6a497;--fraco:#77766c;
+  --lima:#C8D200;--ambar:#e8a33c;--reels:#3987e5;--carr:#d95926;--story:#199e70;
+  --disp:"Big Shoulders","Arial Narrow",Impact,sans-serif;--corpo:Archivo,"Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:var(--corpo);font-size:14px;line-height:1.45;padding-inline:clamp(16px,3vw,36px);padding-block:0 60px}
+.w{max-width:1500px;margin-inline:auto}
+h1,h2{font-family:var(--disp);font-weight:900;line-height:.92;margin:0;text-wrap:balance}
+.topo{padding-block:34px 18px;display:grid;gap:10px}
+.sobre{font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--lima)}
+h1{font-size:clamp(40px,6vw,76px);text-transform:uppercase}
+.lead{margin:0;color:var(--mut);max-width:72ch;font-size:15px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding-block:12px;border-block:1px solid var(--linha);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:6}
+.grupo{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.grupo>span{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--fraco);margin-right:4px}
+button.op{font:inherit;font-weight:700;font-size:13px;color:var(--txt);background:transparent;border:1px solid var(--linha);border-radius:999px;padding:7px 14px;cursor:pointer}
+button.op:hover{border-color:var(--mut)}
+button.op[aria-pressed="true"]{background:var(--lima);border-color:var(--lima);color:#141405}
+button.op:focus-visible{outline:2px solid var(--lima);outline-offset:2px}
+.kpis{display:flex;flex-wrap:wrap;gap:8px 30px;padding-block:18px 8px;margin:0;list-style:none}
+.kpis li{display:grid;gap:2px}
+.kpis small{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.kpis b{font-family:var(--disp);font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.kpis b i{font-style:normal;color:var(--fraco);font-size:24px}
+.kpis b em{font-style:normal;color:var(--lima);font-size:20px;margin-left:4px}
+.leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--mut);padding-block:6px 14px}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.sw.b-nova{border:1.5px solid var(--lima);background:transparent}.sw.b-troca{border:1.5px dashed var(--ambar);background:transparent}.sw.b-est{border:1px solid var(--linha);background:var(--card)}
+.rolo{overflow-x:auto;padding-bottom:8px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(158px,1fr));gap:10px;min-width:1150px}
+.dia{display:grid;gap:8px;align-content:start}
+.dia-topo{padding-block:6px 8px;border-bottom:1px solid var(--linha);display:grid;gap:5px}
+.dia-topo b{font-family:var(--disp);font-size:24px;line-height:1}
+.dia-topo .art{color:var(--mut);font-size:12px;font-weight:700;min-height:16px}
+.dia-topo .n{font-size:12.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.dia-topo .n strong{color:var(--txt)}
+.barra{display:flex;gap:2px;height:6px}
+.barra i{display:block;border-radius:2px}
+.vazio{color:var(--fraco);font-size:12.5px;padding:14px 4px}
+.c{background:var(--card);border:1px solid var(--linha);border-radius:10px;padding:7px;display:grid;gap:6px}
+.c.nova{border:1.5px solid var(--lima)}
+.c.troca{border:1.5px dashed var(--ambar)}
+.c.prev{border-style:dashed;background:transparent}
+.c-l1{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.c-l1 b{font-variant-numeric:tabular-nums;font-size:14px}
+.fmt{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.fmt i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.th{height:112px;border-radius:6px;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.th.st{height:140px}
+.th img{height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+.th .sp{color:var(--fraco);font-size:11px;text-align:center;padding:6px}
+.nome{font-weight:700;font-size:12.5px;line-height:1.25}
+.sub{color:var(--mut);font-size:11.5px;line-height:1.25}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--linha);color:var(--mut)}
+.tag.nova{background:var(--lima);border-color:var(--lima);color:#141405}
+.tag.troca{border-color:var(--ambar);color:var(--ambar)}
+.mini{display:flex;gap:3px;flex-wrap:wrap}
+.mini span{width:26px;height:32px;border-radius:3px;background:#000;overflow:hidden;display:block;border:1px solid transparent}
+.mini span.nova{border-color:var(--lima)}
+.mini img{width:100%;height:100%;object-fit:cover;display:block}
+/* repetição */
+.bloco{display:grid;gap:12px;padding-block:26px 6px}
+.bloco h2{font-size:clamp(28px,3.4vw,40px);text-transform:uppercase}
+.bloco>p{margin:0;color:var(--mut);max-width:78ch}
+.mix{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;max-width:980px}
+.mix .d{font-weight:800;font-size:13px;white-space:nowrap}
+.mix .par{display:grid;gap:3px}
+.lin{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center;font-size:11.5px;color:var(--mut)}
+.seg{display:flex;gap:2px;height:18px;align-items:stretch}
+.seg i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff;border-radius:3px;min-width:0}
+.seg i:first-child{border-radius:4px 3px 3px 4px}
+.seg .tot{color:var(--txt);font-size:12px;font-weight:800;padding-left:6px;font-variant-numeric:tabular-nums;background:none;justify-content:flex-start}
+.tab{overflow-x:auto;border:1px solid var(--linha);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--linha);text-align:left}
+thead th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);background:var(--card);position:sticky;top:0}
+td.cel{text-align:center;font-variant-numeric:tabular-nums;font-weight:800;min-width:74px}
+td.cel small{display:block;font-weight:600;font-size:10.5px;color:var(--mut)}
+td.cel.z{color:var(--fraco);font-weight:500}
+td.cel.alerta{outline:2px solid var(--ambar);outline-offset:-3px}
+td.cel.alerta small{color:rgba(20,20,5,.78)}
+tr.sep td{background:var(--card2);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.alertas{display:grid;gap:8px;max-width:980px;padding:0;margin:0;list-style:none}
+.alertas li{background:var(--card);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;display:grid;gap:3px}
+.alertas li b{font-size:13.5px}
+.alertas li span{color:var(--mut);font-size:12.5px}
+.alertas .novo{color:var(--ambar);font-weight:800}
+.alertas .velho{color:var(--mut);font-weight:800}
+.ok{color:var(--mut)}
+#tip{position:fixed;pointer-events:none;background:#000;color:var(--txt);border:1px solid var(--linha);border-radius:6px;padding:6px 9px;font-size:12px;z-index:20;max-width:260px}
+footer{margin-top:40px;color:var(--fraco);font-size:12.5px;max-width:80ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="w">
+<header class="topo">
+  <span class="sobre">O Butiquim · Instagram</span>
+  <h1>Grade da semana</h1>
+  <p class="lead">Como era a fila de posts só com as artes atuais, como ficou com as artes novas, só o que entrou, e o mapa de repetição para ver se está equilibrado.</p>
+</header>
+<div class="ctrl">
+  <div class="grupo" id="g-sem"><span>Semana</span></div>
+  <div class="grupo" id="g-vis"><span>Ver</span></div>
+</div>
+<ul class="kpis" id="kpis"></ul>
+<main id="palco"></main>
+<footer id="rodape"></footer>
+</div>
+<div id="tip" hidden></div>
+<script>
+const D = /*DADOS*/null;
+const FMT = { REELS: ["Reels", "var(--reels)"], CAROUSEL: ["Carrossel", "var(--carr)"], STORIES: ["Story", "var(--story)"] };
+const VIS = [["antes", "Antes"], ["agora", "Agora"], ["novas", "Só as novas"], ["rep", "Repetição"]];
+let sem = "w1", vis = "agora";
+try { const s = JSON.parse(localStorage.getItem("grade-bq") || "{}"); if (s.sem) sem = s.sem; if (s.vis) vis = s.vis; } catch (e) {}
+{ const h = location.hash.slice(1); if (VIS.some((v) => v[0] === h)) vis = h; if (D.semanas.some((s) => s.id === h)) sem = h; }
+const guarda = () => { try { localStorage.setItem("grade-bq", JSON.stringify({ sem, vis })); } catch (e) {} };
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const semana = () => D.semanas.find((s) => s.id === sem);
+const doDia = (lista, d) => lista.filter((c) => c.data === d);
+const conta = (lista) => lista.reduce((a, c) => a + (c.qtd || 1), 0);
+const porFmt = (lista) => { const o = { REELS: 0, CAROUSEL: 0, STORIES: 0 }; lista.forEach((c) => o[c.formato] += c.qtd || 1); return o; };
+const ehNova = (c) => c.origem === "nossa" || c.troca;
+
+function botoes() {
+  const gs = document.getElementById("g-sem"), gv = document.getElementById("g-vis");
+  gs.querySelectorAll("button").forEach((b) => b.remove()); gv.querySelectorAll("button").forEach((b) => b.remove());
+  D.semanas.forEach((s) => { const b = document.createElement("button"); b.className = "op"; b.textContent = s.nome; b.setAttribute("aria-pressed", s.id === sem); b.onclick = () => { sem = s.id; guarda(); tudo(); }; gs.appendChild(b); });
+  VIS.forEach(([k, n]) => { const b = document.createElement("button"); b.className = "op"; b.textContent = n; b.setAttribute("aria-pressed", k === vis); b.onclick = () => { vis = k; guarda(); tudo(); }; gv.appendChild(b); });
+}
+
+function kpis() {
+  const s = semana(), ds = s.dias.map((d) => d.data);
+  const a = D.antes.filter((c) => ds.includes(c.data)), g = D.agora.filter((c) => ds.includes(c.data));
+  const fa = porFmt(a), fg = porFmt(g);
+  const novas = g.filter((c) => c.origem === "nossa").reduce((x, c) => x + c.qtd, 0);
+  const comArte = g.filter(ehNova).reduce((x, c) => x + c.qtd, 0);
+  const item = (rot, x, y) => `<li><small>${rot}</small><b><i>${x} →</i> ${y}${y - x > 0 ? `<em>+${y - x}</em>` : ""}</b></li>`;
+  document.getElementById("kpis").innerHTML = item("Posts na semana", conta(a), conta(g)) + item("Reels", fa.REELS, fg.REELS) + item("Carrosséis", fa.CAROUSEL, fg.CAROUSEL) + item("Stories", fa.STORIES, fg.STORIES)
+    + `<li><small>Com arte nova</small><b>${Math.round(100 * comArte / conta(g))}%<i style="font-size:15px"> · ${novas} posts novos + ${comArte - novas} trocados</i></b></li>`;
+}
+
+function barra(lista) {
+  const f = porFmt(lista), t = conta(lista) || 1;
+  return `<div class="barra" role="img" aria-label="Reels ${f.REELS}, carrosséis ${f.CAROUSEL}, stories ${f.STORIES}">${["REELS", "CAROUSEL", "STORIES"].filter((k) => f[k]).map((k) => `<i style="flex:${f[k]};background:${FMT[k][1]}" data-tip="${FMT[k][0]}: ${f[k]}"></i>`).join("")}</div>`;
+}
+
+function cartao(c, modo) {
+  const [fn, fc] = FMT[c.formato];
+  const cls = c.prevista ? "prev" : modo === "antes" ? "" : c.origem === "nossa" ? "nova" : c.troca ? "troca" : "";
+  const tags = [];
+  if (modo !== "antes" && c.origem === "nossa") tags.push('<span class="tag nova">nova</span>');
+  if (modo !== "antes" && c.troca) tags.push(`<span class="tag troca">${c.nova ? "capa trocada" : "arte nova dentro"}</span>`);
+  if (c.prevista) tags.push('<span class="tag">prevista</span>');
+  if (c.fix) tags.push('<span class="tag">correção</span>');
+  const th = c.th ? `<img src="t/${esc(c.th)}" alt="" loading="lazy">` : `<div class="sp">${c.prevista ? "montada no dia" : "sem prévia"}</div>`;
+  const mini = c.mini && c.mini.length ? `<div class="mini" aria-label="Outras fotos do carrossel">${c.mini.map((m) => `<span class="${modo !== "antes" && m.nova ? "nova" : ""}" data-tip="${esc(m.nome)}">${m.th ? `<img src="t/${esc(m.th)}" alt="" loading="lazy">` : ""}</span>`).join("")}</div>` : "";
+  return `<article class="c ${cls}">
+    <div class="c-l1"><b>${c.hora}</b><span class="fmt"><i style="background:${fc}"></i>${fn}${c.qtd > 1 ? " ×" + c.qtd : ""}</span></div>
+    <div class="th ${c.formato === "STORIES" ? "st" : ""}">${th}</div>
+    <div><div class="nome">${esc(c.nome)}</div>${c.sub ? `<div class="sub">${esc(c.sub)}</div>` : ""}</div>
+    ${tags.length ? `<div class="tags">${tags.join("")}</div>` : ""}${mini}
+  </article>`;
+}
+
+function calendario(modo) {
+  const s = semana();
+  const leg = `<div class="leg"><span><i class="sw" style="background:var(--reels)"></i>Reels</span><span><i class="sw" style="background:var(--carr)"></i>Carrossel</span><span><i class="sw" style="background:var(--story)"></i>Story</span>
+    ${modo !== "antes" ? `<span><i class="sw b-est"></i>Arte atual</span><span><i class="sw b-nova"></i>Post novo</span><span><i class="sw b-troca"></i>Post atual com arte nova</span>` : `<span><i class="sw b-est"></i>Só artes atuais (designer e clipes)</span>`}</div>`;
+  const cols = s.dias.map((d) => {
+    const a = doDia(D.antes, d.data), g = doDia(D.agora, d.data);
+    const lista = modo === "antes" ? a : modo === "agora" ? g : g.filter(ehNova);
+    const n = modo === "antes" ? `<strong>${conta(a)}</strong> posts` : modo === "agora" ? `${conta(a)} → <strong>${conta(g)}</strong> posts` : `<strong>+${conta(g.filter((c) => c.origem === "nossa"))}</strong> novos · ${g.filter((c) => c.troca).length} trocados`;
+    return `<section class="dia"><div class="dia-topo"><b>${d.rot}</b><span class="art">${d.artista ? esc(d.artista) : ""}</span><span class="n">${n}</span>${barra(lista)}</div>
+      ${lista.length ? lista.map((c) => cartao(c, modo)).join("") : `<div class="vazio">${modo === "novas" ? "nada novo" : "sem posts"}</div>`}</section>`;
+  }).join("");
+  return leg + `<div class="rolo"><div class="cal">${cols}</div></div>`;
+}
+
+// ---------- repetição ----------
+function destaque(lista) { // por família: vezes como destaque (capa/Reels/story) e vezes dentro de carrossel
+  const m = {};
+  lista.forEach((c) => {
+    if (c.prevista) { (m[c.fam] ||= { nome: c.nome.replace(/ · 4 stories/, ""), nova: false, dest: 0, dentro: 0, quando: [] }).dest += c.qtd; return; }
+    const f = (m[c.fam] ||= { nome: c.nome, nova: c.origem === "nossa" || /^n-/.test(c.fam), dest: 0, dentro: 0, quando: [] });
+    f.dest += 1; f.quando.push(`${c.hora.replace(":", "h")} ${FMT[c.formato][0]}`);
+    (c.mini || []).forEach((mm) => { const k = mm.fam || mm.nome; (m[k] ||= { nome: mm.nome, nova: !!mm.nova, dest: 0, dentro: 0, quando: [] }).dentro += 1; });
+  });
+  return m;
+}
+function arquivosRepetidos(lista) {
+  const m = {};
+  lista.filter((c) => c.itens && c.itens[0]).forEach((c) => { (m[c.itens[0]] ||= []).push(`${c.hora.replace(":", "h")} ${FMT[c.formato][0]}`); });
+  return Object.entries(m).filter(([, v]) => v.length > 1);
+}
+function repeticao() {
+  const s = semana();
+  const maxT = Math.max(...s.dias.map((d) => conta(doDia(D.agora, d.data))), 1);
+  const seg = (lista) => { const f = porFmt(lista), t = conta(lista); return `<div class="seg">${["REELS", "CAROUSEL", "STORIES"].filter((k) => f[k]).map((k) => `<i style="width:${(90 * f[k] / maxT).toFixed(2)}%;flex:none;background:${FMT[k][1]}" data-tip="${FMT[k][0]}: ${f[k]}">${f[k] > 1 ? f[k] : ""}</i>`).join("")}<i class="tot">${t}</i></div>`; };
+  const mix = s.dias.map((d) => { const a = doDia(D.antes, d.data), g = doDia(D.agora, d.data);
+    return `<div class="d">${d.rot}</div><div class="par"><div class="lin"><span>antes</span>${seg(a)}</div><div class="lin"><span>agora</span>${seg(g)}</div></div>`; }).join("");
+
+  // mapa: família × dia (vezes como destaque no dia, agora; "antes" embaixo quando muda)
+  const porDia = s.dias.map((d) => ({ a: destaque(doDia(D.antes, d.data)), g: destaque(doDia(D.agora, d.data)) }));
+  const fams = {};
+  porDia.forEach((p) => { for (const [k, v] of Object.entries(p.g)) { (fams[k] ||= { nome: v.nome, nova: v.nova, tot: 0 }).tot += v.dest + v.dentro; } for (const [k, v] of Object.entries(p.a)) { (fams[k] ||= { nome: v.nome, nova: v.nova, tot: 0 }); } });
+  const ordem = (nova) => Object.entries(fams).filter(([, v]) => v.nova === nova).sort((x, y) => y[1].tot - x[1].tot);
+  const alfa = (n) => n <= 0 ? 0 : Math.min(0.14 + 0.16 * n, 0.9);
+  const linha = ([k, v]) => `<tr><th scope="row">${esc(v.nome)}</th>${porDia.map((p, i) => {
+    const g = p.g[k] || { dest: 0, dentro: 0, quando: [] }, a = p.a[k] || { dest: 0, dentro: 0 };
+    const tip = `${s.dias[i].rot} · ${v.nome}: ${g.dest}× em destaque${g.quando.length ? " (" + g.quando.join(", ") + ")" : ""}${g.dentro ? `, ${g.dentro}× dentro de carrossel` : ""}. Antes: ${a.dest}× em destaque${a.dentro ? `, ${a.dentro}× dentro` : ""}.`;
+    if (!g.dest && !g.dentro && !a.dest && !a.dentro) return `<td class="cel z">·</td>`;
+    const mud = a.dest !== g.dest ? `<small>antes ${a.dest}</small>` : "";
+    const dentro = g.dentro ? `<small>+${g.dentro} dentro</small>` : "";
+    return `<td class="cel ${g.dest >= 3 ? "alerta" : ""}" style="background:rgba(200,210,0,${alfa(g.dest)});${g.dest >= 3 ? "color:#141405" : ""}" data-tip="${esc(tip)}">${g.dest >= 3 ? "⚠ " : ""}${g.dest}${mud}${dentro}</td>`;
+  }).join("")}</tr>`;
+  const cab = `<thead><tr><th>Arte</th>${s.dias.map((d) => `<th>${d.rot}</th>`).join("")}</tr></thead>`;
+  const tabela = `<div class="tab"><table>${cab}<tbody><tr class="sep"><td colspan="8">Artes atuais (designer, clipes, promo)</td></tr>${ordem(false).map(linha).join("")}<tr class="sep"><td colspan="8">Artes novas</td></tr>${ordem(true).map(linha).join("")}</tbody></table></div>`;
+
+  // alertas: família 3+ vezes em destaque no dia, e o mesmo arquivo 2+ vezes no dia
+  const al = [];
+  s.dias.forEach((d, i) => {
+    const p = porDia[i];
+    for (const [k, v] of Object.entries(p.g)) if (v.dest >= 3) al.push({ d: d.rot, t: `${v.nome}: ${v.dest}× em destaque`, q: v.quando.join(" · "), velho: (p.a[k]?.dest || 0) >= 3, antes: p.a[k]?.dest || 0 });
+    const antesRep = new Set(arquivosRepetidos(doDia(D.antes, d.data)).map(([f]) => f));
+    arquivosRepetidos(doDia(D.agora, d.data)).forEach(([f, q]) => al.push({ d: d.rot, t: `O mesmo arquivo sai ${q.length}× (${f.split("/").pop()})`, q: q.join(" · "), velho: antesRep.has(f) }));
+  });
+  const lista = al.length ? `<ul class="alertas">${al.map((x) => `<li><b>${x.d} · ${esc(x.t)}</b><span>${esc(x.q)}</span><span class="${x.velho ? "velho" : "novo"}">${x.velho ? "Já acontecia antes das artes novas" : "Novo, veio com as artes novas" + (x.antes !== undefined ? ` (antes: ${x.antes}×)` : "")}</span></li>`).join("")}</ul>` : `<p class="ok">Nenhuma arte aparece 3 vezes ou mais em destaque no mesmo dia.</p>`;
+
+  return `<section class="bloco"><h2>Formatos por dia</h2><p>Quantos Reels, carrosséis e stories saem em cada dia, antes e agora. A barra usa a mesma escala em todos os dias.</p>
+      <div class="leg"><span><i class="sw" style="background:var(--reels)"></i>Reels</span><span><i class="sw" style="background:var(--carr)"></i>Carrossel</span><span><i class="sw" style="background:var(--story)"></i>Story</span></div>
+      <div class="mix">${mix}</div></section>
+    <section class="bloco"><h2>Onde repete</h2><p>Cada linha é uma arte (juntando as versões feed, story e vídeo da mesma arte). O número é quantas vezes ela aparece em destaque no dia: capa do carrossel, Reels ou story. “Dentro” são fotos do meio do carrossel. Mais escuro = mais vezes. ⚠ = 3 ou mais vezes no mesmo dia. Passe o mouse para ver os horários.</p>${tabela}</section>
+    <section class="bloco"><h2>Alertas de repetição</h2>${lista}</section>`;
+}
+
+function tudo() {
+  botoes(); kpis();
+  document.getElementById("palco").innerHTML = vis === "rep" ? repeticao() : calendario(vis);
+  document.getElementById("rodape").textContent = `Dados da fila de publicação lidos em ${new Date(D.geradoEm).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}. “Antes” = a mesma fila sem as artes novas e sem as trocas. Na semana de 05/10, a agenda do designer de segunda é montada no próprio dia e aparece como prevista.`;
+}
+tudo();
+// dica ao passar o mouse
+const tip = document.getElementById("tip");
+document.addEventListener("mousemove", (e) => { const t = e.target.closest("[data-tip]"); if (!t) { tip.hidden = true; return; } tip.textContent = t.dataset.tip; tip.hidden = false;
+  const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8); tip.style.left = x + "px"; tip.style.top = y + "px"; });
+</script>
