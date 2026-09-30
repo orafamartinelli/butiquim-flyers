@@ -1,0 +1,64 @@
+import React from "react";
+import { Composition, Still } from "remotion";
+import { Parado } from "../../campanha/kit";
+import {
+  ALERTA_DUR,
+  AcaoVideo,
+  Alerta,
+  AlertaVideo,
+  CASA_DUR,
+  CarimboSlide,
+  Cartaz,
+  CasaSlide,
+  CasaVideo,
+  DIMS,
+  Destaque,
+  LembreteStory,
+  PagaSlide,
+  PrimeiraSlide,
+  RegrasStory,
+  Story,
+  VIDEO_DUR,
+  Zap,
+} from "../../campanha/pecas";
+
+// Campanha "A CASA TE DEVE" (out/2026): tiro de alerta, o que é, 3 ações, disparo e apoio.
+// Estáticos = <Still> com tudo no estado final; vídeos = <Composition> 30 fps.
+const parado = (el: React.ReactElement): React.FC => {
+  const W: React.FC = () => <Parado.Provider value={true}>{el}</Parado.Provider>;
+  return W;
+};
+
+type Est = { id: string; el: React.ReactElement; dim: { w: number; h: number } };
+const ESTATICOS: Est[] = [
+  { id: "alerta-feed", el: <Alerta fmt="feed" />, dim: DIMS.feed },
+  { id: "alerta-story", el: <Alerta fmt="story" />, dim: DIMS.story },
+  { id: "alerta-zap", el: <Alerta fmt="zap" />, dim: DIMS.zap },
+  ...[1, 2, 3, 4, 5, 6, 7].map((n) => ({ id: `casa-c${n}`, el: <CasaSlide n={n} />, dim: DIMS.feed })),
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({ id: `primeira-c${n}`, el: <PrimeiraSlide n={n} />, dim: DIMS.feed })),
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({ id: `paga-c${n}`, el: <PagaSlide n={n} />, dim: DIMS.feed })),
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({ id: `carimbo-c${n}`, el: <CarimboSlide n={n} />, dim: DIMS.feed })),
+  ...(["casa", "primeira", "paga", "carimbo"] as const).flatMap((a) => [
+    { id: `${a}-story`, el: <Story acao={a} />, dim: DIMS.story },
+    { id: `${a}-zap`, el: <Zap acao={a} />, dim: DIMS.zap },
+  ]),
+  { id: "lembrete-zap", el: <Zap acao="lembrete" />, dim: DIMS.zap },
+  { id: "lembrete-story", el: <LembreteStory />, dim: DIMS.story },
+  { id: "regras-story", el: <RegrasStory />, dim: DIMS.story },
+  { id: "destaque-capa", el: <Destaque />, dim: DIMS.story },
+  { id: "cartaz-a4", el: <Cartaz />, dim: DIMS.a4 },
+];
+
+export const RemotionRoot: React.FC = () => (
+  <>
+    {ESTATICOS.map((e) => (
+      <Still key={e.id} id={e.id} component={parado(e.el)} width={e.dim.w} height={e.dim.h} />
+    ))}
+    <Composition id="alerta-video" component={AlertaVideo} durationInFrames={ALERTA_DUR} fps={30} width={1080} height={1920} />
+    <Composition id="casa-video" component={CasaVideo} durationInFrames={CASA_DUR} fps={30} width={1080} height={1920} />
+    {(["primeira", "paga", "carimbo"] as const).flatMap((a) => [
+      <Composition key={`${a}-video-story`} id={`${a}-video-story`} component={() => <AcaoVideo acao={a} fmt="story" />} durationInFrames={VIDEO_DUR.story} fps={30} width={1080} height={1920} />,
+      <Composition key={`${a}-video-feed`} id={`${a}-video-feed`} component={() => <AcaoVideo acao={a} fmt="feed" />} durationInFrames={VIDEO_DUR.feed} fps={30} width={1080} height={1350} />,
+    ])}
+  </>
+);

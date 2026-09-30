@@ -1,0 +1,337 @@
+<title>A Casa Te Deve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;500;600;700&family=Rock+Salt&family=Caveat:wght@600;700&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --noite:#0b0b0d; --carvao:#151518; --grafite:#1c1c21; --borda:#2a2a31;
+  --branco:#f5f5f0; --cinza:#a5a5ad; --apagado:#6e6e78;
+  --lima:#C8D200; --rosa:#E91E8C; --papel:#F2ECDB; --caneta:#1C3C8C;
+  --display:'Anton','Impact','Arial Narrow',sans-serif;
+  --texto:'Outfit','Segoe UI',system-ui,sans-serif;
+  --mao:'Rock Salt','Comic Sans MS',cursive;
+  --caderno:'Caveat','Comic Sans MS',cursive;
+}
+*{box-sizing:border-box}
+html{background:var(--noite)}
+body{background:var(--noite);color:var(--branco);font-family:var(--texto);font-size:16px;line-height:1.55;padding-inline:clamp(16px,4vw,48px);padding-block:0 72px}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--lima)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--lima);outline-offset:3px}
+.num{font-variant-numeric:tabular-nums}
+header.topo{padding-block:44px 30px;border-bottom:1px solid var(--borda);display:grid;gap:18px}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--cinza);font-weight:600}
+h1{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:.9;margin:0;font-size:clamp(60px,12vw,140px)}
+h1 em{font-style:normal;font-family:var(--mao);font-size:.46em;color:var(--lima)!important;color:var(--branco);display:inline-block;transform:rotate(-4deg);text-transform:none;vertical-align:.35em}
+h1 span{color:var(--lima)}
+.tese{font-size:clamp(18px,2.2vw,22px);max-width:64ch;margin:0;font-weight:300;text-wrap:balance}
+.tese b{font-weight:600}
+nav.indice{display:flex;flex-wrap:wrap;gap:8px}
+nav.indice a{font-size:13px;text-decoration:none;color:var(--branco);border:1px solid var(--borda);padding:6px 12px;border-radius:999px}
+nav.indice a:hover{border-color:var(--lima);color:var(--lima)}
+section{padding-block:52px 8px;display:grid;gap:22px}
+.sec-tit{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(32px,5vw,50px);line-height:1;margin:0}
+.sec-tit .eyebrow{color:var(--lima)}
+h3{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:26px;margin:0;line-height:1.05}
+h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);font-weight:700;margin:0}
+p{margin:0}
+.lead{max-width:70ch;color:var(--cinza)}
+.lead b{color:var(--branco)}
+
+.placar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--borda);border:1px solid var(--borda)}
+.placar div{background:var(--noite);padding:18px 16px;display:grid;gap:4px;align-content:start}
+.placar strong{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1}
+.placar span{font-size:13px;color:var(--cinza);line-height:1.35}
+.placar .rosa strong{color:var(--rosa)} .placar .lima strong{color:var(--lima)}
+
+.acoes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.acao{background:var(--carvao);border:1px solid var(--borda);border-radius:6px;padding:20px;display:grid;gap:12px;align-content:start}
+.acao .n{font-family:var(--mao);color:var(--rosa);font-size:34px;line-height:1}
+.acao dl{margin:0;display:grid;gap:8px}
+.acao dt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cinza);font-weight:700}
+.acao dd{margin:0 0 6px;font-size:14.5px}
+.acao dd b{color:var(--lima);font-weight:600}
+.acao dd .r{color:var(--rosa);font-weight:600}
+
+.linha-tempo{list-style:none;margin:0;padding:0;border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.linha-tempo li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 18px;border-bottom:1px solid var(--borda)}
+.linha-tempo li:last-child{border-bottom:0}
+.linha-tempo b{color:var(--lima);font-weight:600}
+.linha-tempo .fase{font-family:var(--display);font-size:18px;text-transform:uppercase;display:block;color:var(--branco);margin-bottom:2px}
+.linha-tempo span{font-size:14.5px}
+
+.grupo{display:grid;gap:12px}
+.grupo > header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.pastinha{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--apagado)}
+.galeria{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x proximity}
+.peca{flex:0 0 auto;scroll-snap-align:start;display:grid;gap:6px;width:200px}
+.peca.largo{width:340px}
+.peca.a4{width:190px}
+.peca img,.peca video{width:100%;border-radius:4px;border:1px solid var(--borda);background:#000;display:block}
+.peca figcaption{font-size:12px;color:var(--cinza);line-height:1.3}
+.peca figcaption b{color:var(--branco);font-weight:600;display:block;font-size:12.5px}
+.peca .alta{font-size:11.5px}
+figure{margin:0}
+
+.copia{background:var(--carvao);border:1px solid var(--borda);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.copia header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.copia pre{margin:0;white-space:pre-wrap;font-family:var(--texto);font-size:14.5px;line-height:1.5;color:var(--branco)}
+.copia .meta{font-size:12.5px;color:var(--cinza)}
+.copia .meta code{font-family:ui-monospace,Consolas,monospace;color:var(--lima);font-size:12px}
+button.copiar{font:600 12px var(--texto);letter-spacing:.08em;text-transform:uppercase;color:var(--noite);background:var(--lima);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+button.copiar.ok{background:var(--branco)}
+.copias{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+
+.tabela-box{overflow-x:auto;border:1px solid var(--borda);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--borda);vertical-align:top;line-height:1.4}
+th{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);font-weight:600;background:var(--carvao)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:90ch}
+.checks li{display:grid;grid-template-columns:28px 1fr;gap:10px;font-size:15px}
+.checks li::before{content:"";width:18px;height:18px;border:2px solid var(--lima);border-radius:4px;margin-top:3px}
+.checks li b{font-weight:600}
+.caderno{background:var(--papel);color:var(--caneta);border-radius:6px;padding:22px 26px 22px 70px;position:relative;font-family:var(--caderno);font-size:24px;line-height:1.45;background-image:repeating-linear-gradient(180deg,transparent 0 33px,rgba(88,128,184,.35) 33px 35px);max-width:760px}
+.caderno::before{content:"";position:absolute;left:48px;top:0;bottom:0;width:2px;background:#D8493B;opacity:.7}
+.caderno b{color:#b0125f;font-weight:700}
+.assina{font-family:var(--mao);color:var(--lima);font-size:clamp(18px,3vw,26px);margin:44px 0 0;transform:rotate(-2deg);transform-origin:left}
+@media (max-width:900px){.acoes{grid-template-columns:1fr}.copias{grid-template-columns:1fr}.placar{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:540px){.linha-tempo li{grid-template-columns:1fr;gap:4px}.caderno{padding-left:56px;font-size:21px}.caderno::before{left:38px}}
+</style>
+
+<div class="wrap">
+<header class="topo">
+  <div class="eyebrow">O Butiquim · campanha de outubro/2026 · kit completo para aprovação</div>
+  <h1>A casa <em>te deve</em></h1>
+  <p class="tese">No boteco, o fiado sempre foi do cliente. <b>No Butiquim, a casa passa a te dever</b>: um drink para quem nunca veio, R$ 50 para quem sumiu e um balde para quem volta. Sexta e domingo valem mais, porque são as noites que mais perderam gente.</p>
+  <nav class="indice" aria-label="Seções">
+    <a href="#acoes">As 3 ações</a><a href="#cronograma">Cronograma</a><a href="#pecas">Peças</a><a href="#textos">Textos prontos</a><a href="#equipe">Equipe</a><a href="#antes">Antes de lançar</a><a href="#medir">Como medir</a>
+  </nav>
+</header>
+
+<section>
+  <div class="sec-tit"><h2>Por que</h2><span class="eyebrow">o que a análise dos 90 dias mostrou</span></div>
+  <div class="placar">
+    <div class="rosa"><strong class="num">−56%</strong><span>clientes novos por trimestre em 2 anos (2.792 → 1.227)</span></div>
+    <div class="rosa"><strong class="num">86%</strong><span>dos novos não voltam em 90 dias</span></div>
+    <div class="rosa"><strong class="num">−30%</strong><span>público por noite no domingo; sexta −13%</span></div>
+    <div class="lima"><strong class="num">2.799</strong><span>clientes da casa que sumiram em jul–set (R$ 854 mil em 12 meses)</span></div>
+  </div>
+</section>
+
+<section id="acoes">
+  <div class="sec-tit"><h2>As 3 ações</h2><span class="eyebrow">uma para cada momento do cliente</span></div>
+  <div class="acoes">
+    <article class="acao">
+      <div class="n">1</div>
+      <h3>A primeira é nossa</h3>
+      <dl>
+        <dt>Para quem</dt><dd>Quem nunca veio (CPF sem histórico no PDV). Hoje ~1.230 por trimestre; meta é reabrir a porta.</dd>
+        <dt>O que ganha</dt><dd><b>Drink de boas-vindas</b> na 1ª visita + <b>passaporte de volta: R$ 20</b> de crédito no bar em até 21 dias.</dd>
+        <dt>Sexta e domingo</dt><dd><span class="r">Passaporte vale R$ 40</span> se a volta for sexta ou domingo.</dd>
+        <dt>Trava</dt><dd>Confere pelo CPF. 1 por pessoa. Crédito só em consumo, não vale entrada nem troco.</dd>
+        <dt>Custo por uso</dt><dd>Drink (CMV) + ~R$ 5,50 do passaporte (~R$ 11 sex/dom), com CMV de ~28%.</dd>
+      </dl>
+    </article>
+    <article class="acao">
+      <div class="n">2</div>
+      <h3>A gente paga pra você vir</h3>
+      <dl>
+        <dt>Para quem</dt><dd>Quem não vem há 45 dias ou mais (CPF). Primeiro lote: 1.299 clientes que vieram 3+ vezes no último ano.</dd>
+        <dt>O que ganha</dt><dd><b>R$ 50 de crédito no bar</b> na noite da volta, com código pessoal válido por 15 dias.</dd>
+        <dt>Sexta e domingo</dt><dd><span class="r">R$ 70</span> (o valor mais ousado do plano da caderneta de 02/09).</dd>
+        <dt>Trava</dt><dd>1 crédito por pessoa, código de 5 dígitos baixado no caixa do QG. Só consumo.</dd>
+        <dt>Custo por uso</dt><dd>~R$ 14 (R$ 50) ou ~R$ 20 (R$ 70) de bebida, só se a pessoa vier.</dd>
+      </dl>
+    </article>
+    <article class="acao">
+      <div class="n">3</div>
+      <h3>Carimbo no CPF</h3>
+      <dl>
+        <dt>Para quem</dt><dd>Todo mundo que já vem. Meta: voltar de 1,86 para 2,03 visitas por trimestre.</dd>
+        <dt>O que ganha</dt><dd><b>3 carimbos = balde de cerveja ou garrafa de vodka</b>. A 3ª visita já ganha.</dd>
+        <dt>Sexta e domingo</dt><dd><span class="r">Carimbo em dobro</span>: quem vem sexta e domingo ganha na 2ª visita.</dd>
+        <dt>Trava</dt><dd>Só carimba visita com <b>consumo a partir de R$ 30</b> na comanda (entrar e sair não vale). 1 por noite. Vale 60 dias.</dd>
+        <dt>Custo por uso</dt><dd>CMV do balde ou da garrafa a cada 3 carimbos (conferir com o André).</dd>
+      </dl>
+    </article>
+  </div>
+  <div class="caderno">
+    Regra de ouro das 3: <b>paga em bebida, não em dinheiro</b>.<br>
+    R$ 20 de crédito custam ~R$ 5,50 pra casa. Se 1 em cada 5 premiados<br>
+    for alguém que não viria, a ação já se pagou.
+  </div>
+</section>
+
+<section id="cronograma">
+  <div class="sec-tit"><h2>Cronograma</h2><span class="eyebrow">D = sexta de lançamento</span></div>
+  <p class="lead">Sugestão: <b>D = sexta 09/10</b> se o sistema ficar pronto até quarta 07/10 (ver "Antes de lançar"). Se não, <b>D = sexta 16/10</b>, com o mesmo roteiro. O domingo 11/10 é véspera de feriado e é a melhor noite para estrear o bônus de domingo.</p>
+  <ol class="linha-tempo">
+    <li><b>D−2 e D−1<br>qua e qui</b><span><span class="fase">Tiro de alerta</span>Feed + Reels + story "Nesta sexta, o Butiquim começa a te dever". Disparo de alerta só para a base ativa (até 90 dias). Nada de regra, só curiosidade: quem responde DEVE recebe primeiro.</span></li>
+    <li><b>D · sex</b><span><span class="fase">O que é</span>Carrossel geral (7 slides) + Reels geral + story. Disparos: <i>A primeira é nossa</i> para quem se cadastrou e nunca veio; <i>Volta paga</i> lote 1 (1.000 sumidos: 500 recebem, 500 ficam de controle); <i>Carimbo</i> para ativos até 45 dias. Anúncios no ar.</span></li>
+    <li><b>D+1 a D+6</b><span><span class="fase">Uma ação por dia</span>sáb: carrossel A primeira é nossa · dom: carrossel Carimbo + story "domingo vale em dobro" · ter: carrossel Volta paga · qua e qui: Reels de cada ação (um por dia). Stories diários com a peça da ação do dia.</span></li>
+    <li><b>D+6 · qui</b><span><span class="fase">Lembrete</span>Disparo "A casa ainda te deve" só para quem tem crédito ou passaporte vencendo no domingo.</span></li>
+    <li><b>D+10 e D+17</b><span><span class="fase">Leitura e lote 2</span>Conselho de Segunda compara quem recebeu × grupo de controle. Se a volta paga passar de 1 em 5 incremental, sai o lote 2 (os 1.500 restantes).</span></li>
+  </ol>
+</section>
+
+<section id="pecas">
+  <div class="sec-tit"><h2>Peças</h2><span class="eyebrow">41 estáticas · 8 vídeos</span></div>
+  <p class="lead" id="aviso-alta">Aqui estão as prévias. Os arquivos em alta estão no Drive, em <b>02 O Butiquim › Campanha A Casa Te Deve - Out 2026</b>, nas mesmas pastas.</p>
+  <div id="galeria"></div>
+</section>
+
+<section id="textos">
+  <div class="sec-tit"><h2>Textos prontos</h2><span class="eyebrow">legendas · anúncios · WhatsApp · Kim</span></div>
+  <h4>Legendas do Instagram</h4>
+  <div class="copias" id="legendas"></div>
+  <h4 style="margin-top:14px">Anúncios (Meta) · criar só depois do OK</h4>
+  <div class="tabela-box">
+    <table>
+      <thead><tr><th>Conjunto</th><th>Público</th><th>Criativos</th><th>Verba/mês</th><th>Destino</th></tr></thead>
+      <tbody>
+        <tr><td>A primeira é nossa</td><td>Maringá +25 km, 18–34 anos. <b>Excluir</b> a lista de clientes do QG (quem já veio)</td><td>Reels, feed em vídeo e carrossel da ação</td><td class="num">R$ 1.200</td><td>Lista (link da bio) com <code>utm_campaign=casadeve_primeira</code></td></tr>
+        <tr><td>A gente paga pra você vir</td><td>Público personalizado: telefones dos sumidos 45+ dias (lista do QG)</td><td>Reels e feed em vídeo da ação</td><td class="num">R$ 600</td><td>WhatsApp do Butiquim com a mensagem "VOLTEI"</td></tr>
+        <tr><td>Carimbo no CPF</td><td>Clientes ativos até 45 dias + engajados do Instagram em 90 dias</td><td>Reels, feed em vídeo e carrossel da ação</td><td class="num">R$ 600</td><td>Lista com <code>utm_campaign=casadeve_carimbo</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lead">A verba sai da metade do anúncio de cadastro (~R$ 2,4 mil/mês), como a reunião propôs; o total não aumenta.</p>
+  <div class="copias" id="anuncios"></div>
+  <h4 style="margin-top:14px">Modelos de WhatsApp (Meta) · imagem de cabeçalho = peça DISPARO</h4>
+  <div class="copias" id="modelos"></div>
+  <h4 style="margin-top:14px">Kim: respostas às palavras dos stories</h4>
+  <div class="copias" id="kim"></div>
+</section>
+
+<section id="equipe">
+  <div class="sec-tit"><h2>Equipe</h2><span class="eyebrow">portaria, caixa e bar</span></div>
+  <div class="tabela-box">
+    <table>
+      <thead><tr><th>A tela do check-in mostra</th><th>Quem faz</th><th>O que fazer</th></tr></thead>
+      <tbody>
+        <tr><td>1ª VISITA</td><td>Portaria</td><td>"Primeira vez aqui? O drink de boas-vindas é nosso, é só pedir no bar." O passaporte chega no WhatsApp no dia seguinte.</td></tr>
+        <tr><td>VOLTA PAGA · R$ 50 / R$ 70</td><td>Caixa</td><td>Dá baixa do código de 5 dígitos. Sexta e domingo o sistema já mostra R$ 70.</td></tr>
+        <tr><td>PASSAPORTE · R$ 20 / R$ 40</td><td>Caixa</td><td>Mesmo caminho da volta paga: baixa do código.</td></tr>
+        <tr><td>CARIMBO 2/3 · esta visita completa</td><td>Caixa</td><td>Prêmio liberado se a comanda da noite passar de R$ 30. Cliente escolhe <b>balde</b> ou <b>vodka</b>, e o caixa registra a escolha.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lead">Frase da equipe: <b>"Aqui a casa te deve. É só passar o CPF."</b> O cartaz A4 da pasta de apoio vai na portaria e no balcão.</p>
+</section>
+
+<section id="antes">
+  <div class="sec-tit"><h2>Antes de lançar</h2><span class="eyebrow">o que precisa existir antes do tiro de alerta</span></div>
+  <ul class="checks">
+    <li><span><b>OK dos sócios nos valores:</b> R$ 20/40 do passaporte, R$ 50/70 da volta paga, balde ou vodka no carimbo, consumo mínimo de R$ 30.</span></li>
+    <li><span><b>AllFood:</b> como o crédito entra na comanda (desconto com motivo "A CASA TE DEVE"), confirmar com o André.</span></li>
+    <li><span><b>QG, check-in:</b> selo de 1ª visita (CPF sem histórico), códigos de volta paga e passaporte (vouchers de 5 dígitos que já existem) e contador de carimbos por CPF, com sexta e domingo valendo 2.</span></li>
+    <li><span><b>Modelos de WhatsApp:</b> criar os 6 da lista abaixo por script em UTF-8 (acento quebra pelo terminal), com prefixo <code>butiquim_casadeve_</code>. Um monitor avisa quando a Meta aprovar e se desliga sozinho.</span></li>
+    <li><span><b>Kim:</b> regras na base de conhecimento, respostas às palavras DEVE, PRIMEIRA, VOLTEI e CARIMBO, e a ferramenta que confere o CPF e devolve o código.</span></li>
+    <li><span><b>Instagram:</b> conferir se "Responde DEVE" no story cai no direct da Kim (já funciona com LISTA).</span></li>
+    <li><span><b>Públicos da Meta:</b> lista de sumidos 45+ dias e lista de clientes para exclusão, as duas saídas do QG.</span></li>
+    <li><span><b>Grupo de controle:</b> todo lote de disparo sorteado 50/50, gravado no QG antes de sair.</span></li>
+    <li><span><b>Teste:</b> todo disparo novo vai primeiro para o seu número, com [TESTE].</span></li>
+  </ul>
+</section>
+
+<section id="medir">
+  <div class="sec-tit"><h2>Como medir</h2><span class="eyebrow">entra no Conselho de Segunda</span></div>
+  <div class="tabela-box">
+    <table>
+      <thead><tr><th>Ação</th><th>Número que decide</th><th>Hoje</th><th>Meta de 60 dias</th></tr></thead>
+      <tbody>
+        <tr><td>A primeira é nossa</td><td>Clientes novos por semana · % que voltam em 30 dias</td><td class="num">~94/semana · 8%</td><td class="num">120/semana · 16%</td></tr>
+        <tr><td>A gente paga pra você vir</td><td>Volta de quem recebeu − volta do grupo de controle</td><td class="num">—</td><td class="num">≥ 1 em 5 incremental</td></tr>
+        <tr><td>Carimbo no CPF</td><td>Visitas por cliente no trimestre</td><td class="num">1,86</td><td class="num">2,03</td></tr>
+        <tr><td>Sexta e domingo</td><td>Pessoas por noite</td><td class="num">sex 114 · dom 151</td><td class="num">sex 130 · dom 190</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="assina">Te vejo na esquina.</p>
+</section>
+</div>
+
+<script>
+const PASTAS = {
+  "00-tiro-de-alerta": { t: "Tiro de alerta", itens: [
+    ["alerta-FEED.png","Feed","post estático"],["alerta-STORY.png","Story","responde DEVE"],["alerta-REELS-e-STORY.mp4","Reels e story","10 s"],["alerta-DISPARO-whatsapp.png","Disparo","cabeçalho do WhatsApp"] ] },
+  "01-o-que-e": { t: "O que é (geral)", itens: [
+    ...[1,2,3,4,5,6,7].map(n=>[`carrossel-0${n}.png`,`Carrossel ${n}/7`,""]),["STORY.png","Story","responde DEVE"],["REELS.mp4","Reels","18 s"],["DISPARO-whatsapp.png","Disparo","cabeçalho do WhatsApp"] ] },
+  "02-a-primeira-e-nossa": { t: "A primeira é nossa", itens: [
+    ...[1,2,3,4,5,6].map(n=>[`carrossel-0${n}.png`,`Carrossel ${n}/6`,n===1?"também é o anúncio estático":""]),["STORY.png","Story","responde PRIMEIRA"],["REELS-e-STORY.mp4","Reels e story","15 s"],["FEED-video-anuncio.mp4","Feed em vídeo","anúncio 4:5, 10 s"],["DISPARO-whatsapp.png","Disparo","cabeçalho do WhatsApp"] ] },
+  "03-a-gente-paga-pra-voce-vir": { t: "A gente paga pra você vir", itens: [
+    ...[1,2,3,4,5,6].map(n=>[`carrossel-0${n}.png`,`Carrossel ${n}/6`,n===1?"também é o anúncio estático":""]),["STORY.png","Story","responde VOLTEI"],["REELS-e-STORY.mp4","Reels e story","15 s"],["FEED-video-anuncio.mp4","Feed em vídeo","anúncio 4:5, 10 s"],["DISPARO-whatsapp.png","Disparo","cabeçalho do WhatsApp"] ] },
+  "04-carimbo-no-cpf": { t: "Carimbo no CPF", itens: [
+    ...[1,2,3,4,5,6].map(n=>[`carrossel-0${n}.png`,`Carrossel ${n}/6`,n===1?"também é o anúncio estático":""]),["STORY.png","Story","responde CARIMBO"],["REELS-e-STORY.mp4","Reels e story","15 s"],["FEED-video-anuncio.mp4","Feed em vídeo","anúncio 4:5, 10 s"],["DISPARO-whatsapp.png","Disparo","cabeçalho do WhatsApp"] ] },
+  "05-apoio": { t: "Apoio", itens: [
+    ["lembrete-STORY.png","Lembrete · story","crédito vencendo"],["lembrete-DISPARO-whatsapp.png","Lembrete · disparo","cabeçalho do WhatsApp"],["regras-STORY.png","Regras","story fixo nos destaques"],["capa-destaque-instagram.png","Capa do destaque","A CASA TE DEVE"],["cartaz-A4-portaria-e-balcao.png","Cartaz A4","portaria e balcão"] ] },
+};
+const local = location.protocol === "file:";
+if (local) document.getElementById("aviso-alta").innerHTML = "Clique em <b>abrir em alta</b> para o arquivo final. As prévias ficam na pasta <code>previa</code>.";
+const gal = document.getElementById("galeria");
+for (const [pasta, g] of Object.entries(PASTAS)) {
+  const box = document.createElement("div"); box.className = "grupo";
+  box.innerHTML = `<header><h3>${g.t}</h3><span class="pastinha">${pasta}/</span></header>`;
+  const row = document.createElement("div"); row.className = "galeria";
+  for (const [arq, nome, nota] of g.itens) {
+    const video = arq.endsWith(".mp4");
+    const prev = `previa/${pasta}/${arq.replace(/\.png$/, ".jpg")}`;
+    const fig = document.createElement("figure");
+    fig.className = "peca" + (/DISPARO/.test(arq) ? " largo" : "") + (/A4/.test(arq) ? " a4" : "");
+    fig.innerHTML = (video ? `<video src="${prev}#t=4" controls muted playsinline preload="metadata"></video>` : `<img src="${prev}" alt="${g.t}: ${nome}" loading="lazy">`) +
+      `<figcaption><b>${nome}</b>${nota}${local ? ` · <a class="alta" href="${pasta}/${arq}">abrir em alta</a>` : ""}</figcaption>`;
+    row.appendChild(fig);
+  }
+  box.appendChild(row); gal.appendChild(box);
+}
+
+const ZAP = "(44) 3170-0906";
+const LEG = [
+  ["Tiro de alerta · feed e Reels", "Todo boteco tem uma caderneta de fiado. A nossa vai mudar de lado.\n\nNesta sexta o Butiquim começa a te dever. Não é erro de digitação.\n\nSalva esse post: sexta a gente conta tudo."],
+  ["O que é · carrossel geral", "Um bar que te deve? No boteco, o fiado sempre foi seu. No Butiquim, agora quem anota a dívida é a casa.\n\n3 jeitos de a gente te pagar pra vir:\n1. A primeira é nossa: nunca veio? Drink de boas-vindas + R$20 pra voltar.\n2. A gente paga pra você vir: sumiu faz 45 dias? R$50 no bar na sua volta.\n3. Carimbo no CPF: 3 visitas = balde de cerveja ou garrafa de vodka.\n\nE sexta e domingo valem mais: passaporte de R$40, volta de R$70 e carimbo em dobro.\n\nEntra na lista pelo link da bio. O CPF na portaria faz o resto. Regras no último slide.\n\nTe vejo na esquina."],
+  ["A primeira é nossa", "Nunca veio no Butiquim? A primeira é nossa.\n\nNa sua 1ª visita, o drink de boas-vindas é por conta da casa. E você ainda sai com o passaporte de volta: R$20 de crédito no bar pra voltar em até 21 dias. Voltou na sexta ou no domingo? Vale R$40.\n\nMarca aquele amigo que ainda não conhece a esquina. Lista no link da bio."],
+  ["A gente paga pra você vir", `Faz tempo que você não aparece. A gente sentiu.\n\nEntão a gente paga pra você vir: R$50 no bar na noite da sua volta. Se for sexta ou domingo, são R$70.\n\nManda VOLTEI no nosso WhatsApp, ${ZAP}, e pega seu código. Vale pra quem não vem há 45 dias ou mais.`],
+  ["Carimbo no CPF", "Seu CPF virou cartão fidelidade.\n\nCada visita com consumo é um carimbo. Juntou 3, você escolhe: balde de cerveja ou garrafa de vodka. Sexta e domingo valem carimbo em dobro, então dá pra ganhar já na 2ª visita.\n\nEntrar e sair não vale: só carimba com consumo a partir de R$30 na comanda.\n\nLista no link da bio."],
+];
+const ANU = [
+  ["Anúncio · A primeira é nossa", "Texto principal: Nunca veio no Butiquim? A primeira é nossa: drink de boas-vindas na sua 1ª visita e R$20 pra voltar (R$40 na sexta e no domingo).\nTítulo: A primeira é nossa\nDescrição: Entra na lista e passa o CPF na portaria.\nBotão: Saiba mais"],
+  ["Anúncio · A gente paga pra você vir", "Texto principal: Faz tempo que você não vem. A gente paga pra você vir: R$50 no bar na sua volta, R$70 na sexta e no domingo.\nTítulo: A gente paga pra você vir\nDescrição: Manda VOLTEI e pega seu código.\nBotão: Enviar mensagem (texto já preenchido: VOLTEI)"],
+  ["Anúncio · Carimbo no CPF", "Texto principal: Seu CPF virou cartão fidelidade. 3 visitas = balde de cerveja ou garrafa de vodka. Sexta e domingo valem carimbo em dobro.\nTítulo: A 3ª visita já ganha\nDescrição: Só vale visita com consumo.\nBotão: Saiba mais"],
+];
+const MOD = [
+  ["butiquim_casadeve_alerta", "MARKETING · cabeçalho: alerta-DISPARO · base ativa até 90 dias", "{{1}}, a partir desta sexta o Butiquim vai começar a te dever.\n\nNão é erro de digitação. Sexta a gente conta tudo por aqui.\n\nBotões: Quero saber · Não quero receber"],
+  ["butiquim_casadeve_primeira", "MARKETING · cabeçalho: primeira-DISPARO · cadastrou e nunca veio", "{{1}}, você ainda não conheceu o Butiquim, e a primeira é nossa.\n\nNa sua 1ª visita o drink de boas-vindas é por conta da casa, e você sai com R$20 pra voltar (R$40 se for sexta ou domingo).\n\nÉ só entrar na lista e passar o CPF na portaria: {{2}}\n\nBotão: Não quero receber"],
+  ["butiquim_casadeve_volta", "MARKETING · cabeçalho: paga-DISPARO · sumidos 45+ dias (lote com controle)", "{{1}}, faz tempo que você não aparece por aqui. Então a gente paga pra você vir.\n\nSeu código {{2}} vale R$50 no bar, ou R$70 se você vier numa sexta ou num domingo, até {{3}}. É só mostrar no caixa.\n\nLista: {{4}}\n\nBotões: Vou nessa · Não quero receber"],
+  ["butiquim_casadeve_carimbo", "MARKETING · cabeçalho: carimbo-DISPARO · ativos até 45 dias", "{{1}}, seu CPF virou cartão fidelidade no Butiquim.\n\nCada visita com consumo é um carimbo, e 3 carimbos valem um balde de cerveja ou uma garrafa de vodka. Sexta e domingo contam em dobro.\n\nSeu primeiro carimbo pode ser já nesta sexta.\n\nBotão: Não quero receber"],
+  ["butiquim_casadeve_passaporte", "MARKETING · sem imagem · dia seguinte à 1ª visita", "{{1}}, valeu pela primeira noite no Butiquim!\n\nSeu passaporte de volta: o código {{2}} vale R$20 no bar numa nova visita até {{3}}. Se voltar numa sexta ou num domingo, vale R$40."],
+  ["butiquim_casadeve_lembrete", "MARKETING · cabeçalho: lembrete-DISPARO · crédito vencendo", "{{1}}, a casa ainda te deve {{2}}.\n\nSeu crédito vence {{3}}, e sexta e domingo valem mais. Lista: {{4}}\n\nBotão: Não quero receber"],
+];
+const KIM = [
+  ["DEVE", "Agora é a casa que te deve! São 3 jeitos:\n1) Nunca veio? Drink de boas-vindas + R$20 pra voltar.\n2) Sumiu faz 45 dias? R$50 no bar na sua volta (manda VOLTEI).\n3) Carimbo no CPF: 3 visitas = balde de cerveja ou garrafa de vodka.\nSexta e domingo valem mais. Lista: [link da lista]"],
+  ["PRIMEIRA", "Se é sua primeira vez no Butiquim, é só entrar na lista [link] e passar o CPF na portaria: o sistema confirma e o drink de boas-vindas é seu. No dia seguinte chega aqui o seu passaporte de R$20 pra voltar (R$40 sexta ou domingo)."],
+  ["VOLTEI", "Que bom te ver de volta! Me passa seu CPF que eu confiro aqui: se faz 45 dias ou mais que você não vem, te mando o código de R$50 (R$70 na sexta ou no domingo), válido por 15 dias."],
+  ["CARIMBO", "Seu CPF já é seu cartão: cada visita com consumo a partir de R$30 vale um carimbo, sexta e domingo valem dois. Com 3 carimbos em até 60 dias, você escolhe um balde de cerveja ou uma garrafa de vodka. Depois de cada noite a gente te avisa quantos faltam."],
+];
+function cartao(alvo, titulo, meta, texto) {
+  const el = document.createElement("div"); el.className = "copia";
+  const id = "c" + Math.random().toString(36).slice(2, 8);
+  el.innerHTML = `<header><h3 style="font-size:20px">${titulo}</h3><button class="copiar" data-alvo="${id}">Copiar</button></header>` + (meta ? `<div class="meta">${meta}</div>` : "") + `<pre id="${id}"></pre>`;
+  el.querySelector("pre").textContent = texto;
+  document.getElementById(alvo).appendChild(el);
+}
+LEG.forEach(([t, x]) => cartao("legendas", t, "", x));
+ANU.forEach(([t, x]) => cartao("anuncios", t, "", x));
+MOD.forEach(([n, m, x]) => cartao("modelos", n, m.replace(/^(\w+)/, "<code>$1</code>"), x));
+KIM.forEach(([k, x]) => cartao("kim", `Responde ${k}`, "", x));
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("button.copiar"); if (!b) return;
+  const pre = document.getElementById(b.dataset.alvo);
+  try { await navigator.clipboard.writeText(pre.textContent); b.textContent = "Copiado"; b.classList.add("ok"); }
+  catch { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selecionado"; }
+  setTimeout(() => { b.textContent = "Copiar"; b.classList.remove("ok"); }, 1800);
+});
+</script>
