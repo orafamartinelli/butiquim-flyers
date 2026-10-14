@@ -13,3 +13,4 @@ build-vespera/
 build-*/
 build[0-9]*/
 assets/drive-out/
+public/estudio/

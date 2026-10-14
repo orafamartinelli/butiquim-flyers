@@ -1,0 +1,70 @@
+# ESTÚDIO — fase D: prova de um pedido do WhatsApp (butiquim_estudio_pedidos) renderizada na nuvem.
+# Disparo pelo Hermes (solicitar_producao):
+#   POST /repos/orafamartinelli/butiquim-flyers/dispatches  {"event_type":"estudio_render","client_payload":{"pedido_id":1}}
+# Manual: gh workflow run estudio-render.yml -f pedido_id=1
+# O Hermes já sobe `versao` e põe status=produzindo ANTES de disparar; este job renderiza a versão gravada no pedido.
+name: estudio-render
+run-name: "Estúdio · prova do pedido #${{ github.event.client_payload.pedido_id || inputs.pedido_id }}"
+
+on:
+  repository_dispatch:
+    types: [estudio_render]
+  workflow_dispatch:
+    inputs:
+      pedido_id:
+        description: "id em butiquim_estudio_pedidos"
+        required: true
+
+concurrency:
+  group: estudio-${{ github.event.client_payload.pedido_id || inputs.pedido_id }}
+  cancel-in-progress: false
+
+jobs:
+  prova:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PEDIDO_ID: ${{ github.event.client_payload.pedido_id || inputs.pedido_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # node_modules + Chrome do Remotion (fica em node_modules/.remotion) no cache: sem isso são ~1,5 min a mais
+      - name: cache node_modules
+        id: nm
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-v1
+
+      - name: npm ci
+        if: steps.nm.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: chrome do remotion
+        run: npx remotion browser ensure
+
+      - name: render + envio da prova
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+          ESTUDIO_AVISO_TEL: ${{ secrets.ESTUDIO_AVISO_TEL }}
+          GL: swangle
+        run: node scripts/estudio-render.mjs
+
+      - name: guarda a prova no run (7 dias)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prova-pedido-${{ env.PEDIDO_ID }}
+          path: out/estudio/pedido-*
+          retention-days: 7
+          if-no-files-found: ignore
