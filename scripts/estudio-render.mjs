@@ -14,6 +14,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
 const env = process.env;
@@ -150,7 +151,7 @@ const main = async () => {
   npx(["remotion", "still", "build-estudio", "aviso-feed", f.feed, "--frame=150", "--image-format=jpeg", "--jpeg-quality=92", ...comum]);
   npx(["remotion", "still", "build-estudio", "aviso-story", f.story, "--frame=150", "--image-format=jpeg", "--jpeg-quality=92", ...comum]);
   log("stills ok");
-  npx(["remotion", "render", "build-estudio", "aviso-story", f.mp4, "--codec=h264", "--crf=20", "--pixel-format=yuv420p", ...comum]);
+  npx(["remotion", "render", "build-estudio", "aviso-story", f.mp4, "--codec=h264", "--crf=20", "--pixel-format=yuv420p", `--concurrency=${Math.max(1, os.cpus().length)}`, ...comum]);
   log(`vídeo ok (${Math.round(fs.statSync(f.mp4).size / 1024)} KB)`);
 
   if (SEM_ENVIO) {
