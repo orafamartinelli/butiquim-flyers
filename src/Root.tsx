@@ -65,7 +65,7 @@ export const RemotionRoot: React.FC = () => (
       [
         ["s1", AgendaV1, "02 A 04", [NOITES.sexta, NOITES.sabado, NOITES.domingo]],
         ["s2", AgendaV2, "09 A 11", [NOITES.sexta2, NOITES.sabado2, NOITES.domingo2]],
-        ["s3", AgendaV3, "16 E 17", [NOITES.sexta3, NOITES.sabado3]],
+        ["s3", AgendaV3, "16 A 18", [NOITES.sexta3, NOITES.sabado3, NOITES.domingo3]],
         ["s4", AgendaV1, "23 A 25", [NOITES.sexta4, NOITES.sabado4, NOITES.domingo4]],
         ["s5", AgendaV2, "30/10 A 01/11", [NOITES.sexta5, NOITES.sabado5, NOITES.domingo5]],
       ] as const
