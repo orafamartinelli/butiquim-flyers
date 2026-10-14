@@ -36,7 +36,7 @@ const q = (d, hhmm) => `${d}T${hhmm}:00-03:00`;
 const somaDias = (d, n) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 const jpgDe = (png) => {
   const j = png.replace(/\.png$/i, ".jpg");
-  if (!existsSync(j)) execFileSync("ffmpeg", ["-v", "error", "-y", "-i", png, "-q:v", "2", j]);
+  if (!existsSync(j)) execFileSync("C:/Users/User/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/bin/ffmpeg.exe", ["-v", "error", "-y", "-i", png, "-q:v", "2", j]);
   return j;
 };
 
@@ -44,9 +44,9 @@ const jpgDe = (png) => {
 const NOITES = [
   ["2026-10-02", "sexta", "A"], ["2026-10-03", "sabado", "A"], ["2026-10-04", "domingo", "A"],
   ["2026-10-09", "sexta2", "B"], ["2026-10-10", "sabado2", "B"], ["2026-10-11", "domingo2", "B"],
-  ["2026-10-16", "sexta3", "A"], ["2026-10-17", "sabado3", "A"],
-  ["2026-10-23", "sexta4", "B"], ["2026-10-24", "sabado4", "B"],
-  ["2026-10-30", "sexta5", "A"], ["2026-10-31", "sabado5", "A"],
+  ["2026-10-16", "sexta3", "A"], ["2026-10-17", "sabado3", "A"], ["2026-10-18", "domingo3", "A"],
+  ["2026-10-23", "sexta4", "B"], ["2026-10-24", "sabado4", "B"], ["2026-10-25", "domingo4", "B"],
+  ["2026-10-30", "sexta5", "A"], ["2026-10-31", "sabado5", "A"], ["2026-11-01", "domingo5", "A"],
 ];
 const TERCAS = [["2026-09-29", "s1"], ["2026-10-06", "s2"], ["2026-10-13", "s3"], ["2026-10-20", "s4"], ["2026-10-27", "s5"]];
 const REGRA = {
@@ -65,6 +65,18 @@ for (const [, k] of NOITES) {
     feedMp4: await sobe(`out/final/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`),
     storyJpg: await sobe(jpgDe(`out/final/${k}-STORY.png`), `avulso/claude/${k}-story.jpg`),
     broll: await sobe(`out/final/${k}-STORY-BROLL.mp4`, `avulso/claude/${k}-broll.mp4`),
+  };
+}
+// véspera de feriado (Folhinha) mesclada com o flyer normal: Reels 12h + story 13h30 + B-roll 16h usam a Folhinha;
+// a capa do carrossel da manhã e o 2º slide da última chamada seguem com o flyer normal (Rafa 14/10)
+const VESPERA = { "2026-11-01": "vespera2" };
+for (const [d, v] of Object.entries(VESPERA)) {
+  const k = NOITES.find((x) => x[0] === d)[1];
+  F[k] = {
+    ...F[k],
+    vesperaMp4: await sobe(`out/vespera/${v}-FEED.mp4`, `avulso/claude/${v}-feed.mp4`),
+    vesperaStory: await sobe(jpgDe(`out/vespera/${v}-STORY.png`), `avulso/claude/${v}-story.jpg`),
+    vesperaBroll: await sobe(`out/vespera/${v}-STORY-BROLL.mp4`, `avulso/claude/${v}-broll.mp4`),
   };
 }
 const L = {};
@@ -120,9 +132,12 @@ for (const [d, k, v] of NOITES) {
     add(`extra-claude-mais-${somaDias(d, -2)}`, [{ publicar_em: q(somaDias(d, -2), "12:00"), formato: "STORIES", video_url: PUB + F[k].broll, marcados: ig }]);
     add(`extra-claude-mais-${somaDias(d, -1)}`, [{ publicar_em: q(somaDias(d, -1), "17:00"), formato: "STORIES", video_url: PUB + F[k].storyJpg, marcados: ig }]);
   }
+  const ves = F[k].vesperaMp4 ? F[k] : null;
   if (dow === 0) { // domingo ganha os 2 Reels que sex/sáb já têm
-    posts.push({ publicar_em: q(d, "12:00"), formato: "REELS", video_url: PUB + F[k].feedMp4, thumb_offset_seg: 3,
-      legenda: `🎤 HOJE tem ${nome} no palco d'O Butiquim!\n\n${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}` });
+    posts.push({ publicar_em: q(d, "12:00"), formato: "REELS", video_url: PUB + (ves ? ves.vesperaMp4 : F[k].feedMp4), thumb_offset_seg: 3,
+      legenda: ves
+        ? `🗓️ VÉSPERA DE FERIADO! Amanhã é segunda sem despertador ⏰❌\n\n🎤 HOJE tem ${nome} no palco d'O Butiquim. ${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}`
+        : `🎤 HOJE tem ${nome} no palco d'O Butiquim!\n\n${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}` });
     posts.push({ publicar_em: q(d, "16:30"), formato: "REELS", video_url: PUB + L.domingo.B.feed, thumb_offset_seg: 3,
       legenda: `💬 Comenta LISTA aqui embaixo que a gente te manda o link da lista no direct! 📲\n\n${regrasLista(r)}\n\n${rodape(r)}` });
   }
@@ -130,8 +145,8 @@ for (const [d, k, v] of NOITES) {
   const outra = dow === 5 ? null : (v === "A" ? "B" : "A");
   const vStory = dow === 5 ? "B" : outra;
   const vFeed = dow === 5 ? "A" : outra;
-  posts.push({ publicar_em: q(d, "13:30"), formato: "STORIES", video_url: PUB + F[k].storyJpg, marcados: ig });
-  posts.push({ publicar_em: q(d, "16:00"), formato: "STORIES", video_url: PUB + F[k].broll, marcados: ig });
+  posts.push({ publicar_em: q(d, "13:30"), formato: "STORIES", video_url: PUB + (ves ? ves.vesperaStory : F[k].storyJpg), marcados: ig });
+  posts.push({ publicar_em: q(d, "16:00"), formato: "STORIES", video_url: PUB + (ves ? ves.vesperaBroll : F[k].broll), marcados: ig });
   posts.push({ publicar_em: q(d, "18:30"), formato: "STORIES", video_url: PUB + L[r.dia][vStory].story });
   posts.push({ publicar_em: q(d, "21:30"), formato: "CAROUSEL", video_url: PUB + L[r.dia][vFeed].feed, itens_urls: JSON.stringify([PUB + L[r.dia][vFeed].feed, PUB + F[k].feedJpg]),
     legenda: `⏰ Última chamada pra lista de hoje!\n\n💬 Comenta LISTA aqui embaixo que a gente te manda o link no direct 📲\n\n${nome} no palco. ${regrasLista(r)}\n\n${rodape(r)}` });

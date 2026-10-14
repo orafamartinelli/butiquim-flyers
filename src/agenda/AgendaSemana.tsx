@@ -220,7 +220,7 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         return <Foto key={n.data} n={n} h={h} cx={p.cx} top={(lateral ? topoPontas : topoCentro) + sx.dy} fade={0.72} filter={`drop-shadow(0 22px 36px rgba(0,0,0,.65)) ${sx.filter}`} style={{ opacity: sx.op, transform: sx.transform, transformOrigin: sx.transformOrigin }} />;
       })}
       <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(10,16,4,0) ${feed ? 58 : 58}%, rgba(10,16,4,.96) ${feed ? 68 : 69}%)` }} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: colY - 70, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.34em", color: OSSO, opacity: a.fade(48, 62) }}>{periodo} ● OUTUBRO</div>
+      <div style={{ position: "absolute", left: 0, right: 0, top: colY - 70, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.34em", color: OSSO, opacity: a.fade(48, 62) }}>{periodo.includes("/") ? periodo : `${periodo} ● ${noites[0].mesExtenso}`}</div>
       <div style={{ position: "absolute", left: 50, right: 50, top: colY, display: "flex", gap: 24 }}>
         {noites.map((n, i) => {
           const s = a.spr(52 + i * 6, { damping: 15 });

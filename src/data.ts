@@ -74,6 +74,9 @@ const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string
   "juninho-cari": { nome: "JUNINHO CARI", foto: { src: "fotos/juninho-cari.png", ratio: 0.4173 }, clip: "broll/juninho.mp4", logo: { src: "logos/juninho-cari.png", ratio: 2.8366 } },
   // vídeo do Papo 10 tem legenda de música no meio do quadro: enquadra a parte de cima e a legenda cai sob a faixa corrida
   "papo-10": { nome: "PAPO 10", foto: { src: "fotos/papo-10.png", ratio: 0.835 }, clip: "broll/papo10.mp4", clipTop: 40 },
+  // domingos 18 e 25/10 (entraram na planilha depois do lote de 26/09): foto do PSD do Saideira de 30/09
+  "allister-ferraz": { nome: "ALISTER FERRAZ", foto: { src: "fotos/allister-ferraz.png", ratio: 0.475 }, clip: "broll/alister.mp4", clipTop: -180 },
+  "joao-mauricio": { nome: "JOÃO MAURÍCIO", foto: { src: "fotos/joao-mauricio.png", ratio: 0.7063 }, clip: "broll/joao.mp4" },
   "deixa-clarear": { nome: "DEIXA CLAREAR", foto: { src: "fotos/deixa-clarear.png", ratio: 0.7136 }, clip: "broll/deixaclarear.mp4", logo: { src: "logos/deixa-clarear.png", ratio: 8.0493 } },
 };
 
@@ -114,15 +117,22 @@ export const NOITES = {
   sexta2: noiteDe("2026-10-09"),
   sabado2: noiteDe("2026-10-10"),
   domingo2: noiteDe("2026-10-11"),
-  // 3ª semana (A), 4ª (B), 5ª (A) — domingos 18 e 25 sem atração: pulados
+  // 3ª semana (A), 4ª (B), 5ª (A) — domingos 18 e 25 entraram na planilha depois (feitos em 14/10)
   sexta3: noiteDe("2026-10-16"),
   sabado3: noiteDe("2026-10-17"),
+  domingo3: noiteDe("2026-10-18"),
   sexta4: noiteDe("2026-10-23"),
   sabado4: noiteDe("2026-10-24"),
+  domingo4: noiteDe("2026-10-25"),
+  // sexta5 = 30/10: a planilha trocou Papo 10 → Sou Vibe (14/10); segue a planilha via agenda.json
+  // domingo5 = 01/11: fecha o fim de semana que vira o mês (entra na agenda de 30/10, identidade A)
+  domingo5: noiteDe("2026-11-01"),
   sexta5: noiteDe("2026-10-30"),
   sabado5: noiteDe("2026-10-31"),
   // véspera de feriado (identidade própria): domingo 11/10, véspera de Nossa Senhora Aparecida
   vespera1: noiteDe("2026-10-11"),
+  // domingo 01/11, véspera de Finados (Rafa 14/10: temática de véspera no dia 1º, junto com o flyer normal)
+  vespera2: noiteDe("2026-11-01"),
 };
 export type NoiteKey = keyof typeof NOITES;
 

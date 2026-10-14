@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-09-26T21:28:44.589Z",
+  "gerado_em": "2026-10-14T19:42:33.731Z",
   "de": "2026-10-01",
-  "ate": "2026-10-31",
+  "ate": "2026-11-01",
   "noites": [
     {
       "data": "2026-10-02",
@@ -9,7 +9,7 @@
       "slug": "gui-silva",
       "nome": "Gui Silva",
       "estilo": "SERTANEJO",
-      "estilo_inferido": true
+      "estilo_inferido": false
     },
     {
       "data": "2026-10-03",
@@ -57,7 +57,7 @@
       "slug": "hilana",
       "nome": "Hilana",
       "estilo": "SERTANEJO",
-      "estilo_inferido": true
+      "estilo_inferido": false
     },
     {
       "data": "2026-10-17",
@@ -65,6 +65,14 @@
       "slug": "pagode-44",
       "nome": "Pagode 44",
       "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-10-18",
+      "atracao": "ALLISTER FERRAZ",
+      "slug": "allister-ferraz",
+      "nome": "Allister Ferraz",
+      "estilo": "SERTANEJO",
       "estilo_inferido": false
     },
     {
@@ -84,10 +92,18 @@
       "estilo_inferido": false
     },
     {
+      "data": "2026-10-25",
+      "atracao": "JOÃO MAURÍCIO",
+      "slug": "joao-mauricio",
+      "nome": "João Maurício",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
       "data": "2026-10-30",
-      "atracao": "PAPO 10",
-      "slug": "papo-10",
-      "nome": "Papo 10",
+      "atracao": "SOU VIBE",
+      "slug": "sou-vibe",
+      "nome": "Sou Vibe",
       "estilo": "PAGODE",
       "estilo_inferido": false
     },
@@ -97,6 +113,14 @@
       "slug": "deixa-clarear",
       "nome": "Deixa Clarear",
       "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-01",
+      "atracao": "RICARDO RIBEIRO",
+      "slug": "ricardo-ribeiro",
+      "nome": "Ricardo Ribeiro",
+      "estilo": "SERTANEJO",
       "estilo_inferido": false
     }
   ]

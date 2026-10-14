@@ -151,9 +151,11 @@ const Estilo: React.FC<{ n: Noite; x: number; y: number; liga: number; size?: nu
   );
 };
 
-const Dupla: React.FC<{ n: Noite; cx: number; bottom: number; w: number; delay: number }> = ({ n, cx, bottom, w, delay }) => {
+const Dupla: React.FC<{ n: Noite; cx: number; bottom: number; w: number; delay: number; maxH?: number }> = ({ n, cx, bottom, w: wMax, delay, maxH = Infinity }) => {
   const s = useSpr(delay, { damping: 16 });
-  const h = w / n.foto.ratio;
+  // foto vertical (ex.: João Maurício, meio corpo) estourava pra cima do logo: limita a altura e estreita junto
+  const h = Math.min(wMax / n.foto.ratio, maxH);
+  const w = h * n.foto.ratio;
   const mask = "linear-gradient(180deg, #000 70%, transparent 98%)";
   return (
     <Img src={staticFile(n.foto.src)} style={{ position: "absolute", width: w, height: h, left: cx - w / 2, top: bottom - h + (1 - s) * 120, opacity: s, WebkitMaskImage: mask, maskImage: mask, filter: `drop-shadow(-10px 0 18px rgba(255,62,165,.55)) drop-shadow(10px 0 18px rgba(54,201,255,.5)) contrast(1.06) brightness(.95)` }} />
@@ -172,7 +174,7 @@ export const DomingoB: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
       <IconeNeon i="violao" x={935} y={Y + 300} size={feed ? 160 : 180} cor={AZUL} liga={28} seed={2} rot={12} />
       <IconeNeon i="chope" x={120} y={Y + 640} size={feed ? 120 : 140} cor={AMBAR} liga={36} seed={3} rot={-6} />
       <IconeNeon i="notas" x={955} y={Y + 650} size={feed ? 120 : 140} cor={ROSA} liga={42} seed={4} rot={8} />
-      <Dupla n={n} cx={540} bottom={Y + (feed ? 960 : 1130)} w={feed ? 820 : 960} delay={10} />
+      <Dupla n={n} cx={540} bottom={Y + (feed ? 960 : 1130)} w={feed ? 820 : 960} maxH={feed ? 820 : 1060} delay={10} />
       <SaideiraNeon cx={540} y={Y + (feed ? 760 : 900)} size={feed ? 220 : 250} liga={30} />
       <DaSemana cx={540} y={Y + (feed ? 1030 : 1210)} size={feed ? 40 : 46} liga={62} />
       <Nomes n={n} cx={540} y={Y + (feed ? 1090 : 1280)} size={feed ? 50 : 58} liga={56} />

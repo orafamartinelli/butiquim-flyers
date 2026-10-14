@@ -242,7 +242,7 @@ const DomingoBroll: React.FC<{ n: Noite }> = ({ n }) => {
       <Fundo cx={800} cy={1350} />
       <div style={{ position: "absolute", left: PX, top: PY, width: PW, height: PH, background: CREME, padding: 16, transform: "rotate(-1.5deg)", boxShadow: "0 30px 60px rgba(0,0,0,.6)", opacity: o }}>
         <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
-          <OffthreadVideo src={staticFile(n.clip)} style={{ width: PW - 32, height: (PW - 32) * (1920 / 1080), objectFit: "cover", marginTop: -380, filter: "sepia(.38) saturate(1.25) contrast(1.08) brightness(1.02)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+          <OffthreadVideo src={staticFile(n.clip)} style={{ width: PW - 32, height: (PW - 32) * (1920 / 1080), objectFit: "cover", marginTop: n.clipTop ?? -380, filter: "sepia(.38) saturate(1.25) contrast(1.08) brightness(1.02)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
           <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(40,15,5,.55) 100%)" }} />
           <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(20,10,5,.55) 0%, rgba(20,10,5,0) 25%)" }} />
         </div>

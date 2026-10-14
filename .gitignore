@@ -4,9 +4,12 @@ out/
 psd/
 assets/raw-*/
 assets/broll-src/
+assets/gui-silva-novo/
 assets/*.pdf
 public/broll/
 *.log
 build-agenda/
 build-vespera/
 build-*/
+build[0-9]*/
+assets/drive-out/
