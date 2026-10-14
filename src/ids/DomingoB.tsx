@@ -119,7 +119,7 @@ const Data: React.FC<{ n: Noite; x: number; y: number; w: number; h: number; lig
   return (
     <div style={{ position: "absolute", left: x, top: y, width: w, height: h, borderRadius: 18, border: `4px solid #D8F4FF`, filter: glow(AZUL, 1), opacity: on, display: "flex", alignItems: "center", justifyContent: "center", gap: 14, color: "#D8F4FF" }}>
       <div style={{ fontFamily: BARLOW, fontWeight: 700, fontSize: h * 0.22, letterSpacing: "0.18em", writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{n.diaSemana.slice(0, 3)}</div>
-      <div style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: h * 0.62, lineHeight: 1 }}>{n.dia}.10</div>
+      <div style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: h * 0.62, lineHeight: 1 }}>{n.dia}.{n.data.slice(5, 7)}</div>
       <div style={{ width: 3, alignSelf: "stretch", margin: `${h * 0.2}px 0`, background: "#D8F4FF" }} />
       <div style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: h * 0.4, lineHeight: 1 }}>{n.hora}</div>
     </div>

@@ -133,6 +133,16 @@ export const NOITES = {
   vespera1: noiteDe("2026-10-11"),
   // domingo 01/11, véspera de Finados (Rafa 14/10: temática de véspera no dia 1º, junto com o flyer normal)
   vespera2: noiteDe("2026-11-01"),
+  // NOVEMBRO (produzido 14/10) — rodízio continua: sem 6 B, 7 A, 8 B, 9 A. Noites vazias na planilha: 13, 15, 20, 29
+  sexta6: noiteDe("2026-11-06"),
+  sabado6: noiteDe("2026-11-07"),
+  domingo6: noiteDe("2026-11-08"),
+  sabado7: noiteDe("2026-11-14"),
+  vespera3: noiteDe("2026-11-14"), // sábado 14, véspera da Proclamação da República (dom 15)
+  sabado8: noiteDe("2026-11-21"),
+  domingo8: noiteDe("2026-11-22"),
+  sexta9: noiteDe("2026-11-27"),
+  sabado9: noiteDe("2026-11-28"),
 };
 export type NoiteKey = keyof typeof NOITES;
 

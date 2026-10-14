@@ -30,6 +30,15 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta5: Sexta,
   sabado5: Sabado,
   domingo5: Domingo,
+  // novembro: sem 6 B · 7 A · 8 B · 9 A
+  sexta6: SextaB,
+  sabado6: SabadoB,
+  domingo6: DomingoB,
+  sabado7: Sabado,
+  sabado8: SabadoB,
+  domingo8: DomingoB,
+  sexta9: Sexta,
+  sabado9: Sabado,
 };
 
 const DUR: Record<Formato, number> = { feed: 240, story: 240, broll: 300 };
@@ -68,6 +77,11 @@ export const RemotionRoot: React.FC = () => (
         ["s3", AgendaV3, "16 A 18", [NOITES.sexta3, NOITES.sabado3, NOITES.domingo3]],
         ["s4", AgendaV1, "23 A 25", [NOITES.sexta4, NOITES.sabado4, NOITES.domingo4]],
         ["s5", AgendaV2, "30/10 A 01/11", [NOITES.sexta5, NOITES.sabado5, NOITES.domingo5]],
+        // novembro (terças 03, 10, 17, 24) — rodízio V3 → V1 → V2 → V3
+        ["s6", AgendaV3, "06 A 08", [NOITES.sexta6, NOITES.sabado6, NOITES.domingo6]],
+        // s7 (terça 10/11, semana 13–15): pendente — só o sáb 14 preenchido; agendas exigem 2+ noites. Refazer quando o Victor fechar 13/15
+        ["s8", AgendaV2, "21 E 22", [NOITES.sabado8, NOITES.domingo8]],
+        ["s9", AgendaV3, "27 E 28", [NOITES.sexta9, NOITES.sabado9]],
       ] as const
     ).flatMap(([s, C, periodo, ns]) =>
       (["feed", "story"] as const).flatMap((fmt) => {

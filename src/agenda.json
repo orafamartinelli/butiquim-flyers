@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-10-14T19:42:33.731Z",
+  "gerado_em": "2026-10-14T21:15:42.570Z",
   "de": "2026-10-01",
-  "ate": "2026-11-01",
+  "ate": "2026-11-30",
   "noites": [
     {
       "data": "2026-10-02",
@@ -121,6 +121,70 @@
       "slug": "ricardo-ribeiro",
       "nome": "Ricardo Ribeiro",
       "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-06",
+      "atracao": "HILANA",
+      "slug": "hilana",
+      "nome": "Hilana",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-07",
+      "atracao": "CQSAMBA",
+      "slug": "cqsamba",
+      "nome": "CQSamba",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-08",
+      "atracao": "BIANNCHI E CRISTIANO",
+      "slug": "biannchi-e-cristiano",
+      "nome": "Biannchi & Cristiano",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-14",
+      "atracao": "SOU VIBE",
+      "slug": "sou-vibe",
+      "nome": "Sou Vibe",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-21",
+      "atracao": "JUNINHO CARI",
+      "slug": "juninho-cari",
+      "nome": "Juninho Cari",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-22",
+      "atracao": "GUI SILVA",
+      "slug": "gui-silva",
+      "nome": "Gui Silva",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-27",
+      "atracao": "JUNTOU DEU SAMBA",
+      "slug": "juntou-deu-samba",
+      "nome": "Juntou Deu Samba",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-28",
+      "atracao": "DEIXA CLAREAR",
+      "slug": "deixa-clarear",
+      "nome": "Deixa Clarear",
+      "estilo": "PAGODE",
       "estilo_inferido": false
     }
   ]

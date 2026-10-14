@@ -129,7 +129,7 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         <Img src={staticFile("logos/butiquim-branco-h.png")} style={{ position: "absolute", left: 64, top: T + 86, width: 300, opacity: a.fade(2, 14), transform: `translateY(${(1 - a.fade(2, 14)) * -20}px)` }} />
         <div style={{ position: "absolute", left: 64, top: T + 190, width: 300, borderTop: `3px solid ${LIMA}`, borderBottom: `3px solid ${LIMA}`, padding: "16px 0", textAlign: "center", opacity: a.fade(6, 20), clipPath: `inset(0 ${(1 - a.fade(6, 22)) * 100}% 0 0)` }}>
           <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 64, color: OSSO, lineHeight: 0.95 }}>{periodo}</div>
-          <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 20, letterSpacing: "0.3em", color: OSSO, opacity: 0.8, marginTop: 6 }}>OUTUBRO</div>
+          <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 20, letterSpacing: "0.3em", color: OSSO, opacity: 0.8, marginTop: 6 }}>{noites[0].mesExtenso}</div>
         </div>
         <div style={{ position: "absolute", left: 64, top: T + 400, width: 300, fontFamily: ARCHIVO, fontWeight: 900, fontSize: 38, lineHeight: 1.02, color: OSSO, textAlign: "center", opacity: a.fade(12, 26) }}>
           {diasTexto(noites)}
@@ -271,7 +271,7 @@ export const AgendaV3: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
     <AbsoluteFill style={{ background: "#EEE9DC", overflow: "hidden" }}>
       <AbsoluteFill style={{ backgroundImage: "radial-gradient(circle, rgba(11,11,9,.12) 1.2px, transparent 1.8px)", backgroundSize: "14px 14px", opacity: 0.6 }} />
       <Img src={staticFile("logos/logo_obutiquim_policromia_horizontal.png")} style={{ position: "absolute", left: 56, top: T + 44, width: 230, opacity: a.fade(2, 14) }} />
-      <div style={{ position: "absolute", right: 56, top: T + 46, fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.16em", color: PRETO, opacity: a.fade(6, 18) }}>{periodo} ● OUT</div>
+      <div style={{ position: "absolute", right: 56, top: T + 46, fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.16em", color: PRETO, opacity: a.fade(6, 18) }}>{periodo} ● {noites[0].mes}</div>
       {/* AGENDA repetido: linhas entram de lados alternados e ficam deslizando devagar */}
       {Array.from({ length: linhas }, (_, i) => {
         const s = a.spr(i * 4, { damping: 18 });

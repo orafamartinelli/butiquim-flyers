@@ -69,7 +69,7 @@ const Vinil: React.FC<{ n: Noite; cx: number; cy: number; d: number; delay: numb
         <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "conic-gradient(from 20deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,.16) 30deg, rgba(255,255,255,0) 70deg, rgba(255,255,255,0) 180deg, rgba(255,255,255,.12) 215deg, rgba(255,255,255,0) 250deg)" }} />
         <div style={{ position: "absolute", left: d / 2 - lbl / 2, top: d / 2 - lbl / 2, width: lbl, height: lbl, borderRadius: "50%", transform: `rotate(${rot}deg)`, background: `radial-gradient(circle, ${ROXO} 0 4%, ${AMARELO} 4.5% 100%)`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: ROXO, boxShadow: "inset 0 0 0 4px rgba(42,8,56,.25)" }}>
           <Img src={staticFile("logos/o-simbolo.png")} style={{ width: lbl * 0.2, position: "absolute", top: lbl * 0.1, filter: "brightness(0) saturate(100%)", opacity: 0.8 }} />
-          <div style={{ fontFamily: ANTON, fontSize: lbl * 0.2, lineHeight: 1, marginTop: lbl * 0.08 }}>{n.dia}.10</div>
+          <div style={{ fontFamily: ANTON, fontSize: lbl * 0.2, lineHeight: 1, marginTop: lbl * 0.08 }}>{n.dia}.{n.data.slice(5, 7)}</div>
           <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: lbl * 0.07, letterSpacing: "0.2em", marginTop: lbl * 0.16 }}>LADO A ● {n.hora}</div>
         </div>
       </div>
@@ -147,7 +147,7 @@ const Estouro: React.FC<{ n: Noite; x: number; y: number; d: number; delay: numb
       <div style={{ position: "absolute", inset: 0, background: AMARELO, clipPath: `polygon(${pts})` }} />
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: ROXO, lineHeight: 0.95 }}>
         <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: d * 0.1, letterSpacing: "0.12em" }}>{n.diaSemana.slice(0, 3)}</div>
-        <div style={{ fontFamily: ANTON, fontSize: d * 0.3 }}>{n.dia}.10</div>
+        <div style={{ fontFamily: ANTON, fontSize: d * 0.3 }}>{n.dia}.{n.data.slice(5, 7)}</div>
         <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: d * 0.13 }}>{n.hora}</div>
       </div>
     </div>

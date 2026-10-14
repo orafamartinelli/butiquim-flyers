@@ -122,7 +122,7 @@ const Vidro: React.FC<{ n: Noite; x: number; y: number; w: number; h: number; de
       <div style={{ position: "absolute", left: -40, top: -120, width: w * 0.6, height: 200, background: "linear-gradient(90deg, rgba(255,255,255,.28), rgba(255,255,255,0))", transform: "rotate(-12deg)" }} />
       <div style={{ flex: "0 0 auto", padding: "0 34px 0 44px", textAlign: "center" }}>
         <div style={{ fontFamily: UNB, fontWeight: 900, fontSize: big, lineHeight: 0.95, color: BRANCO, letterSpacing: "-0.03em", textShadow: "0 0 20px rgba(255,46,147,.6)" }}>
-          {n.dia}.{n.mes === "OUT" ? "10" : n.mes}
+          {n.dia}.{n.data.slice(5, 7)}
         </div>
         <div style={{ fontFamily: UNB, fontWeight: 500, fontSize: big * 0.25, color: LIMA, letterSpacing: "0.2em", marginTop: 6 }}>
           SÁB ● {n.hora}

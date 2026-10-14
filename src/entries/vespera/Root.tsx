@@ -12,6 +12,7 @@ const DUR = { feed: 240, story: 240, broll: 300 } as const;
 const NOITES_VESPERA: [string, Noite][] = [
   ["vespera", NOITES.vespera1],
   ["vespera2", NOITES.vespera2],
+  ["vespera3", NOITES.vespera3],
 ];
 
 const Trilha: React.FC<{ n: Noite; dur: number }> = ({ n, dur }) => (

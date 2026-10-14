@@ -7,7 +7,7 @@ const H = { apikey: cred.secret_key, Authorization: `Bearer ${cred.secret_key}` 
 const get = async (q) => (await fetch(`${cred.project_url}/rest/v1/${q}`, { headers: H })).json();
 const slug = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/&/g, " e ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-const planilha = await get("butiquim_social_posts?select=data,atracao&tipo=eq.carrossel_dia&data=gte.2026-10-14&data=lte.2026-11-02&order=data");
+const planilha = await get("butiquim_social_posts?select=data,atracao&tipo=eq.carrossel_dia&data=gte.2026-10-14&data=lte.2026-12-31&order=data");
 const artistas = await get("butiquim_social_artistas?select=slug,instagram");
 const igDe = Object.fromEntries(artistas.map((a) => [a.slug, a.instagram]));
 const verdade = Object.fromEntries(planilha.map((p) => [p.data, { nome: p.atracao, ig: igDe[slug(p.atracao)] }]));
@@ -16,7 +16,9 @@ const erro = (m) => { erros++; console.log("❌ " + m); };
 
 // 1) composições (data.ts via agenda.json) — chave → data → artista
 const agenda = JSON.parse(readFileSync("src/agenda.json", "utf8")).noites;
-const MAPA = { sexta3: "2026-10-16", sabado3: "2026-10-17", domingo3: "2026-10-18", sexta4: "2026-10-23", sabado4: "2026-10-24", domingo4: "2026-10-25", sexta5: "2026-10-30", sabado5: "2026-10-31", domingo5: "2026-11-01", vespera2: "2026-11-01" };
+// chaves e datas lidas do próprio projeto (src/data.ts): toda noite produzida entra na revisão
+const hojeISO = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
+const MAPA = Object.fromEntries([...readFileSync("src/data.ts", "utf8").matchAll(/^\s*(\w+): noiteDe\("(\d{4}-\d{2}-\d{2})"\)/gm)].map((m) => [m[1], m[2]]).filter(([, d]) => d >= hojeISO));
 console.log("== peças (chave → data → artista na peça × planilha)");
 for (const [k, d] of Object.entries(MAPA)) {
   const a = agenda.find((x) => x.data === d);
@@ -27,7 +29,7 @@ for (const [k, d] of Object.entries(MAPA)) {
 
 // 2) fila pendente: cada post com artista marcado/legenda → bate com a data do show?
 // mapa arquivo → data do show
-const ARQ = { sexta3: "2026-10-16", sabado3: "2026-10-17", domingo3: "2026-10-18", sexta4: "2026-10-23", sabado4: "2026-10-24", domingo4: "2026-10-25", sexta5: "2026-10-30", sabado5: "2026-10-31", domingo5: "2026-11-01", vespera2: "2026-11-01" };
+const ARQ = MAPA;
 const fila = await get(`butiquim_social_avulso?select=id,campanha,publicar_em,formato,video_url,marcados,legenda&status=eq.pendente&order=publicar_em`);
 console.log(`\n== fila pendente (${fila.length} linhas): arquivo × marcação × legenda`);
 for (const r of fila) {
