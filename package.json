@@ -8,10 +8,12 @@
   },
   "dependencies": {
     "@react-three/fiber": "9.1.2",
+    "@remotion/bundler": "4.0.378",
     "@remotion/cli": "4.0.378",
     "@remotion/google-fonts": "4.0.378",
     "@remotion/layout-utils": "^4.0.378",
     "@remotion/media": "4.0.378",
+    "@remotion/renderer": "4.0.378",
     "@remotion/three": "4.0.378",
     "ag-psd": "^24.0.0",
     "pngjs": "^7.0.0",

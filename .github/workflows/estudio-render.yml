@@ -35,19 +35,26 @@ jobs:
           node-version: 20
 
       # node_modules + Chrome do Remotion (fica em node_modules/.remotion) no cache: sem isso são ~1,5 min a mais
-      - name: cache node_modules
+      - name: cache node_modules (restaura)
         id: nm
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-v1
 
-      - name: npm ci
+      - name: npm ci + chrome do remotion
         if: steps.nm.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+        run: |
+          npm ci --no-audit --no-fund
+          npx remotion browser ensure
 
-      - name: chrome do remotion
-        run: npx remotion browser ensure
+      # salva já aqui (e não no fim do job): assim o cache fica mesmo se o render falhar
+      - name: cache node_modules (salva)
+        if: steps.nm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-v1
 
       - name: render + envio da prova
         env:

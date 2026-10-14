@@ -15,6 +15,8 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { bundle } from "@remotion/bundler";
+import { openBrowser, renderMedia, renderStill, selectComposition } from "@remotion/renderer";
 
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
 const env = process.env;
@@ -106,20 +108,40 @@ const montaProps = (p, img) => {
   let regra = b.regra || b.letras_miudas || "";
   if (regra && norm(regra) === norm(chamada)) regra = "";
   const tons = ["promo", "evento", "convidado", "aviso"];
+  // TODOS os campos explícitos (null = não tem): o --props do Remotion se MESCLA com o defaultProps do exemplo
   return {
     titulo,
-    chamada: chamada || undefined,
-    regra: regra || undefined,
-    data_evento: b.data_evento || undefined,
-    hora: b.hora_evento || b.hora || undefined,
-    dia_semana: b.dia_semana || undefined,
-    tom: tons.includes(b.tom) ? b.tom : undefined,
+    chamada: chamada || null,
+    regra: regra || null,
+    data_evento: b.data_evento || null,
+    hora: b.hora_evento || b.hora || null,
+    dia_semana: b.dia_semana || null,
+    tom: tons.includes(b.tom) ? b.tom : null,
+    imagem: null,
+    imagem_modo: null,
     ...img,
   };
 };
 
 // ---------- render ----------
 const npx = (args) => execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", args, { cwd: RAIZ, stdio: ["ignore", "inherit", "inherit"], shell: process.platform === "win32" });
+
+const QUADROS_ENTRADA = 60;
+const DURACAO_VIDEO = 6; // segundos (Reels)
+
+// ffmpeg do sistema se houver (runner do GitHub tem); senão o que vem com o Remotion
+const ffmpeg = (args) => {
+  const temSistema = (() => {
+    try {
+      execFileSync(env.FFMPEG || "ffmpeg", ["-version"], { stdio: "ignore" });
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  if (temSistema) execFileSync(env.FFMPEG || "ffmpeg", args, { cwd: RAIZ, stdio: ["ignore", "inherit", "inherit"] });
+  else npx(["remotion", "ffmpeg", ...args.map((a) => (process.platform === "win32" && /[\s;\[\]'(),=]/.test(a) ? `"${a}"` : a))]);
+};
 
 const upload = async (arquivo, destino, tipo) => {
   const r = await fetch(`${SB}/storage/v1/object/${BUCKET}/${destino}`, { method: "POST", headers: { apikey: KEY, "Content-Type": tipo, "x-upsert": "true", "Cache-Control": "max-age=31536000" }, body: fs.readFileSync(arquivo) });
@@ -140,18 +162,58 @@ const main = async () => {
 
   const out = path.join(RAIZ, "out", "estudio");
   fs.mkdirSync(out, { recursive: true });
-  const propsFile = path.join(out, `props-${ID}.json`);
-  fs.writeFileSync(propsFile, JSON.stringify(props));
+  fs.writeFileSync(path.join(out, `props-${ID}.json`), JSON.stringify(props));
   const base = `pedido-${ID}-v${v}`;
   const f = { feed: path.join(out, `${base}-feed.jpg`), story: path.join(out, `${base}-story.jpg`), mp4: path.join(out, `${base}-feed.mp4`) };
 
-  npx(["remotion", "bundle", "src/entries/aviso/index.ts", "--out-dir=build-estudio", "--log=error"]);
+  // API do Remotion num processo só: 1 bundle + 1 Chrome reaproveitado em todos os renders
+  const serveUrl = await bundle({ entryPoint: path.join(RAIZ, "src", "entries", "aviso", "index.ts"), publicDir: path.join(RAIZ, "public") });
   log("bundle ok");
-  const comum = [`--props=${propsFile}`, `--gl=${GL}`, "--log=error"];
-  npx(["remotion", "still", "build-estudio", "aviso-feed", f.feed, "--frame=150", "--image-format=jpeg", "--jpeg-quality=92", ...comum]);
-  npx(["remotion", "still", "build-estudio", "aviso-story", f.story, "--frame=150", "--image-format=jpeg", "--jpeg-quality=92", ...comum]);
-  log("stills ok");
-  npx(["remotion", "render", "build-estudio", "aviso-story", f.mp4, "--codec=h264", "--crf=20", "--pixel-format=yuv420p", `--concurrency=${Math.max(1, os.cpus().length)}`, ...comum]);
+  const chromiumOptions = { gl: GL };
+  const browser = await openBrowser("chrome", { chromiumOptions });
+  const comp = (id, inputProps) => selectComposition({ serveUrl, id, inputProps, puppeteerInstance: browser, chromiumOptions, logLevel: "error" });
+  const still = async (id, output, inputProps, extra = {}) =>
+    renderStill({ composition: await comp(id, inputProps), serveUrl, output, inputProps, frame: 150, imageFormat: "jpeg", jpegQuality: 92, puppeteerInstance: browser, chromiumOptions, overwrite: true, logLevel: "error", ...extra });
+
+  try {
+    await still("aviso-feed", f.feed, props);
+    await still("aviso-story", f.story, props);
+    // o "O" 3D sai uma vez só, em PNG transparente, dentro da public/ do bundle; o vídeo anima esse PNG em 2D
+    const anelRel = `estudio/anel-${base}.png`;
+    const anelAbs = path.join(serveUrl, "public", anelRel);
+    fs.mkdirSync(path.dirname(anelAbs), { recursive: true });
+    await still("aviso-anel-story", anelAbs, props, { frame: 0, imageFormat: "png", jpegQuality: undefined });
+    log("stills ok");
+
+    // só a ENTRADA é renderizada (60 quadros = 2 s; no runner em CPU cada quadro custa ~1–2 s);
+    // o resto até 6 s é o último quadro segurado com um push-in suave feito no ffmpeg (segundos)
+    const propsVideo = { ...props, anelSrc: anelRel };
+    const entrada = path.join(out, `${base}-entrada.mp4`);
+    await renderMedia({
+      composition: await comp("aviso-video", propsVideo),
+      serveUrl,
+      codec: "h264",
+      outputLocation: entrada,
+      inputProps: propsVideo,
+      frameRange: [0, QUADROS_ENTRADA - 1],
+      crf: 14,
+      pixelFormat: "yuv420p",
+      imageFormat: "jpeg",
+      jpegQuality: 90,
+      enforceAudioTrack: true,
+      concurrency: Number(env.CONCURRENCY) || Math.max(1, os.cpus().length),
+      puppeteerInstance: browser,
+      chromiumOptions,
+      overwrite: true,
+      logLevel: "error",
+    });
+    log("entrada ok");
+  } finally {
+    await browser.close({ silent: true }).catch(() => {});
+  }
+  const entrada = path.join(out, `${base}-entrada.mp4`);
+  const filtro = `[0:v]tpad=stop_mode=clone:stop_duration=${DURACAO_VIDEO},scale=w='trunc(1080*(1+0.04*t/${DURACAO_VIDEO})/2)*2':h=-2:eval=frame:flags=bicubic,crop=1080:1920,setsar=1,format=yuv420p[v];[0:a]apad[a]`;
+  ffmpeg(["-y", "-v", "error", "-i", entrada, "-filter_complex", filtro, "-map", "[v]", "-map", "[a]", "-t", String(DURACAO_VIDEO), "-c:v", "libx264", "-crf", "20", "-preset", "veryfast", "-r", "30", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", f.mp4]);
   log(`vídeo ok (${Math.round(fs.statSync(f.mp4).size / 1024)} KB)`);
 
   if (SEM_ENVIO) {

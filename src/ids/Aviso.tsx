@@ -15,14 +15,14 @@ export type Tom = "promo" | "evento" | "convidado" | "aviso";
 
 export type AvisoProps = {
   titulo: string; // "Final do Paulistão - Camisa do Campeão" → 2ª parte vira a faixa lima
-  chamada?: string; // a oferta/chamada principal (vai na placa)
-  regra?: string; // letras miúdas
-  data_evento?: string; // AAAA-MM-DD
-  hora?: string; // "22:00" | "22h" | "22H30"
-  dia_semana?: string; // sobrescreve o calculado pela data
-  imagem?: string; // URL http(s) ou caminho em public/ (ex.: "estudio/pedido-1.png")
-  imagem_modo?: "logo" | "foto";
-  tom?: Tom;
+  chamada?: string | null; // a oferta/chamada principal (vai na placa)
+  regra?: string | null; // letras miúdas
+  data_evento?: string | null; // AAAA-MM-DD
+  hora?: string | null; // "22:00" | "22h" | "22H30"
+  dia_semana?: string | null; // sobrescreve o calculado pela data
+  imagem?: string | null; // URL http(s) ou caminho em public/ (ex.: "estudio/pedido-1.png")
+  imagem_modo?: "logo" | "foto" | null;
+  tom?: Tom | null;
 };
 
 export type FormatoAviso = "feed" | "story";
@@ -199,7 +199,24 @@ const CFG: Record<FormatoAviso, Cfg> = {
   story: { pad: 70, logoTop: 220, logoW: 250, topo: 326, base: 225, tit: [230, 104], titLin: 3, sub: [60, 38], ofe: [100, 54], ofeLin: 3, regra: 28, ringMax: 600, seloY: 214, seloSize: 38, numMax: 230 },
 };
 
-export const Aviso: React.FC<AvisoProps & { fmt: FormatoAviso }> = (p) => {
+// grão fixo (sem semente por quadro): no vídeo em CPU o feTurbulence animado custa caro
+const GraoFixo: React.FC<{ opacity: number }> = ({ opacity }) => (
+  <AbsoluteFill style={{ pointerEvents: "none", opacity, mixBlendMode: "overlay" }}>
+    <svg width="100%" height="100%">
+      <filter id="grao-fixo">
+        <feTurbulence type="fractalNoise" baseFrequency={0.9} numOctaves={2} seed={3} stitchTiles="stitch" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#grao-fixo)" />
+    </svg>
+  </AbsoluteFill>
+);
+
+// anel: "3d" = Three.js ao vivo (stills); "so-anel" = só o "O" parado em fundo transparente (vira PNG);
+// anelSrc = PNG pré-renderizado do "O", animado em 2D (vídeo na nuvem: WebGL por software leva ~3 s/quadro)
+export type ExtraAviso = { fmt: FormatoAviso; modoAnel?: "3d" | "so-anel"; anelSrc?: string | null };
+
+export const Aviso: React.FC<AvisoProps & ExtraAviso> = (p) => {
   const { fmt } = p;
   const C = CFG[fmt];
   const { w, h } = DIM_AVISO[fmt];
@@ -210,7 +227,7 @@ export const Aviso: React.FC<AvisoProps & { fmt: FormatoAviso }> = (p) => {
   const largTexto = w - 2 * C.pad;
 
   // ---- medidas (de cima pra baixo) ----
-  const tit = quebra(l1, largTexto, C.tit[0], C.tit[1], C.titLin, 0.47);
+  const tit = quebra(l1, largTexto, C.tit[0], C.tit[1], p.chamada ? C.titLin : C.titLin + 2, 0.47);
   const titLH = 0.9;
   const titH = tit.linhas.length * tit.s * titLH;
   const sub = l2 ? quebra(l2, largTexto - 80, C.sub[0], C.sub[1], 1, 0.66) : null;
@@ -231,7 +248,7 @@ export const Aviso: React.FC<AvisoProps & { fmt: FormatoAviso }> = (p) => {
   const yRegra = yPlaca + placaH + 16;
   const zonaTopo = ySub + subH + 10;
   const zona = yPlaca - zonaTopo - 12;
-  const ringH = Math.max(260, Math.min(C.ringMax, zona * 1.02));
+  const ringH = Math.max(260, Math.min(C.ringMax, zona * (p.chamada || d ? 1.02 : 0.8)));
   const ringCy = zonaTopo + zona / 2 + 6;
   const temImg = !!p.imagem;
   // com data: "O" à esquerda e a data à direita; sem data: "O" no centro
@@ -243,31 +260,50 @@ export const Aviso: React.FC<AvisoProps & { fmt: FormatoAviso }> = (p) => {
   const xData = ringCx + ringVis / 2 + gap;
 
   // ---- movimento ----
-  const inn = useSpr(0, { damping: 16, stiffness: 70 });
+  const inn = useSpr(0, { damping: 15, stiffness: 120 });
   const rotY = interpolate(inn, [0, 1], [1.5, 0.22]) + Math.sin(frame / 38) * 0.08;
   const rotX = Math.sin(frame / 55) * 0.05;
-  const push = interpolate(frame, [0, 210], [1, 1.03], clamp);
-  const placa = useSpr(30, { damping: 8, stiffness: 90 });
-  const subS = useSpr(22, { damping: 9 });
-  const regraO = useFade(44, 58);
-  const sw = interpolate((frame - 60 + 1200) % 120, [0, 30], [-40, 140], clamp);
+  const push = interpolate(frame, [0, 180], [1, 1.03], clamp);
+  const placa = useSpr(16, { damping: 10, stiffness: 120 });
+  const subS = useSpr(12, { damping: 10, stiffness: 150 });
+  const regraO = useFade(28, 40);
+  const sw = interpolate(frame, [30, 56], [-40, 140], clamp); // brilho passa uma vez na placa durante a entrada
+
+  if (p.modoAnel === "so-anel")
+    return (
+      <AbsoluteFill>
+        <RingPx width={w} height={h} look="lima" flat cx={ringCx} cy={ringCy} ringH={ringH} rotY={0.22} rotX={0} envIntensity={0.9} />
+      </AbsoluteFill>
+    );
+
+  // giro do "O" imitado em 2D: scaleX ~ cos(rotY) relativo à pose parada (0.22)
+  const giro = Math.max(0.04, Math.cos(rotY) / Math.cos(0.22));
+  const anel = p.anelSrc ? (
+    <AbsoluteFill style={{ transform: `scale(${push})` }}>
+      <AbsoluteFill style={{ transformOrigin: `${ringCx}px ${ringCy}px`, transform: `scale(${interpolate(inn, [0, 1], [0.55, 1])}) scaleX(${giro}) rotate(${Math.sin(frame / 55) * 1.2}deg)` }}>
+        <Img src={/^https?:/.test(p.anelSrc) ? p.anelSrc : staticFile(p.anelSrc)} style={{ width: w, height: h }} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  ) : (
+    <AbsoluteFill style={{ transform: `scale(${push})` }}>
+      <RingPx width={w} height={h} look="lima" flat cx={ringCx} cy={ringCy} ringH={ringH * interpolate(inn, [0, 1], [0.55, 1])} rotY={rotY} rotX={rotX} envIntensity={0.9} />
+    </AbsoluteFill>
+  );
 
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Fundo cx={ringCx} cy={ringCy} />
-      <AbsoluteFill style={{ transform: `scale(${push})` }}>
-        <RingPx width={w} height={h} look="lima" flat cx={ringCx} cy={ringCy} ringH={ringH * interpolate(inn, [0, 1], [0.55, 1])} rotY={rotY} rotX={rotX} envIntensity={0.9} />
-      </AbsoluteFill>
-      {temImg && <Medalhao cx={ringCx} cy={ringCy} diam={ringH * 0.5} src={p.imagem!} modo={p.imagem_modo || "logo"} delay={16} />}
-      {d && <BlocoData x={xData} cy={ringCy} num={num} d={d} delay={26} />}
+      {anel}
+      {temImg && <Medalhao cx={ringCx} cy={ringCy} diam={ringH * 0.5} src={p.imagem!} modo={p.imagem_modo || "logo"} delay={8} />}
+      {d && <BlocoData x={xData} cy={ringCy} num={num} d={d} delay={12} />}
 
       <Logo width={C.logoW} top={C.logoTop} />
-      <Selo x={fmt === "feed" ? 30 : 46} y={C.seloY} texto={SELO[tom]} delay={34} size={C.seloSize} />
+      <Selo x={fmt === "feed" ? 30 : 46} y={C.seloY} texto={SELO[tom]} delay={18} size={C.seloSize} />
 
       {/* título: letras caindo, como o SEXTA */}
       <div style={{ position: "absolute", top: yTit, left: C.pad }}>
         {tit.linhas.map((l, i) => {
-          const pr = interpolate(frame - 4 - i * 6, [0, 12], [0, 1], clamp);
+          const pr = interpolate(frame - 2 - i * 4, [0, 10], [0, 1], clamp);
           return (
             <div key={i} style={{ height: tit.s * titLH, display: "flex", alignItems: "center", opacity: pr, transform: `translateY(${(1 - pr) * -tit.s * 0.6}px)` }}>
               <Linha larg={largTexto} style={{ fontFamily: BIG, fontWeight: 900, fontSize: tit.s, lineHeight: 1, color: OSSO, letterSpacing: "-0.005em", textShadow: "0 10px 40px rgba(0,0,0,.55)" }}>
@@ -324,7 +360,7 @@ export const Aviso: React.FC<AvisoProps & { fmt: FormatoAviso }> = (p) => {
       )}
 
       <Slogan h={h} topo={C.topo} base={C.base + regraH + placaH + 20} />
-      <Grain opacity={0.14} />
+      {p.anelSrc ? <GraoFixo opacity={0.14} /> : <Grain opacity={0.14} />}
       <Vignette strength={0.45} />
     </AbsoluteFill>
   );
