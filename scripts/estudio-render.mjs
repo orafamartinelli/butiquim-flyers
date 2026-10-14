@@ -102,8 +102,11 @@ const baixaImagem = async (arqs) => {
 // ---------- props a partir do briefing ----------
 const montaProps = (p, img) => {
   const b = p.briefing || {};
-  const titulo = b.titulo_arte || p.titulo || b.texto || "O Butiquim";
-  let chamada = b.chamada || b.oferta || "";
+  // faixa lima = 2ª parte do título ("TÍTULO - FAIXA"); campo explícito `faixa` tem prioridade (14/10: o Hermes
+  // escreveu a faixa em `chamada` e ela foi parar na placa). Placa = oferta (ou chamada, legado).
+  const base = String(b.titulo_arte || p.titulo || b.texto || "O Butiquim");
+  const titulo = b.faixa ? `${base.split(" - ")[0].trim()} - ${b.faixa}` : base;
+  let chamada = b.oferta || b.chamada || "";
   if (!chamada && b.texto && norm(b.texto) !== norm(titulo)) chamada = b.texto;
   let regra = b.regra || b.letras_miudas || "";
   if (regra && norm(regra) === norm(chamada)) regra = "";
