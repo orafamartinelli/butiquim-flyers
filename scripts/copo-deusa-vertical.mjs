@@ -1,9 +1,9 @@
 // Remonta a arte "Uma Deusa, Uma Louca, Uma Butiqueira" (copos 2024) com uma palavra por linha,
 // recortando as palavras da arte original (mesma fonte, textura e cores).
-// Uso: node scripts/copo-deusa-vertical.mjs <arte-original.png> <saida.png>
+// Uso: node scripts/copo-deusa-vertical.mjs <arte-original.png> <saida.png> [centro|esquerda]
 import Jimp from 'jimp';
 
-const [, , inp, out] = process.argv;
+const [, , inp, out, alinhar = "centro"] = process.argv;
 const src = await Jimp.read(inp);
 const W = src.bitmap.width, H = src.bitmap.height;
 
@@ -28,7 +28,8 @@ const total = linhas.reduce((s, i) => s + i.bitmap.height, 0) + GAP * (linhas.le
 const tela = new Jimp(W, H, 0x00000000);
 let y = Math.round((H - total) / 2);
 for (const img of linhas) {
-  tela.composite(img, Math.round((W - img.bitmap.width) / 2), y);
+  const x = alinhar === "esquerda" ? Math.round((W - LARG) / 2) : Math.round((W - img.bitmap.width) / 2);
+  tela.composite(img, x, y);
   y += img.bitmap.height + GAP;
 }
 await tela.writeAsync(out);
