@@ -196,7 +196,7 @@ type Cfg = {
 };
 const CFG: Record<FormatoAviso, Cfg> = {
   feed: { pad: 70, logoTop: 40, logoW: 220, topo: 128, base: 48, tit: [210, 96], titLin: 2, sub: [54, 34], ofe: [96, 50], ofeLin: 3, regra: 25, ringMax: 560, seloY: 34, seloSize: 34, numMax: 190 },
-  story: { pad: 70, logoTop: 220, logoW: 250, topo: 326, base: 225, tit: [230, 104], titLin: 3, sub: [60, 38], ofe: [100, 54], ofeLin: 3, regra: 28, ringMax: 600, seloY: 214, seloSize: 38, numMax: 230 },
+  story: { pad: 70, logoTop: 220, logoW: 250, topo: 326, base: 225, tit: [230, 104], titLin: 3, sub: [60, 38], ofe: [100, 54], ofeLin: 3, regra: 28, ringMax: 500, seloY: 214, seloSize: 38, numMax: 230 },
 };
 
 // grão fixo (sem semente por quadro): no vídeo em CPU o feTurbulence animado custa caro
