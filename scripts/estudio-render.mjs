@@ -129,7 +129,7 @@ const npx = (args) => execFileSync(process.platform === "win32" ? "npx.cmd" : "n
 const QUADROS_ENTRADA = 60;
 const DURACAO_VIDEO = 6; // segundos (Reels)
 
-// ffmpeg do sistema se houver (runner do GitHub tem); senão o que vem com o Remotion
+// ffmpeg completo: FFMPEG (no runner, estático baixado para node_modules/.ffmpeg) ou o do PATH
 const ffmpeg = (args) => {
   const temSistema = (() => {
     try {
@@ -139,8 +139,9 @@ const ffmpeg = (args) => {
       return false;
     }
   })();
-  if (temSistema) execFileSync(env.FFMPEG || "ffmpeg", args, { cwd: RAIZ, stdio: ["ignore", "inherit", "inherit"] });
-  else npx(["remotion", "ffmpeg", ...args.map((a) => (process.platform === "win32" && /[\s;\[\]'(),=]/.test(a) ? `"${a}"` : a))]);
+  // o ffmpeg que vem com o Remotion NÃO serve (build mínimo: sem tpad/setsar/overlay)
+  if (!temSistema) throw new Error("ffmpeg completo não encontrado (defina FFMPEG)");
+  execFileSync(env.FFMPEG || "ffmpeg", args, { cwd: RAIZ, stdio: ["ignore", "inherit", "inherit"] });
 };
 
 const upload = async (arquivo, destino, tipo) => {
@@ -175,22 +176,30 @@ const main = async () => {
   const still = async (id, output, inputProps, extra = {}) =>
     renderStill({ composition: await comp(id, inputProps), serveUrl, output, inputProps, frame: 150, imageFormat: "jpeg", jpegQuality: 92, puppeteerInstance: browser, chromiumOptions, overwrite: true, logLevel: "error", ...extra });
 
+  const anelRel = `estudio/anel-${base}.png`;
   try {
     await still("aviso-feed", f.feed, props);
     await still("aviso-story", f.story, props);
     // o "O" 3D sai uma vez só, em PNG transparente, dentro da public/ do bundle; o vídeo anima esse PNG em 2D
-    const anelRel = `estudio/anel-${base}.png`;
     const anelAbs = path.join(serveUrl, "public", anelRel);
     fs.mkdirSync(path.dirname(anelAbs), { recursive: true });
     await still("aviso-anel-story", anelAbs, props, { frame: 0, imageFormat: "png", jpegQuality: undefined });
     log("stills ok");
+  } finally {
+    await browser.close({ silent: true }).catch(() => {});
+  }
 
+  // o vídeo não tem mais WebGL (o "O" é PNG): Chrome com GL padrão rasteriza 2D na CPU bem mais rápido que o swangle
+  const glVideo = env.GL_VIDEO === undefined ? null : env.GL_VIDEO || null;
+  const optsVideo = { gl: glVideo };
+  const browserVideo = await openBrowser("chrome", { chromiumOptions: optsVideo });
+  const entrada = path.join(out, `${base}-entrada.mp4`);
+  try {
     // só a ENTRADA é renderizada (60 quadros = 2 s; no runner em CPU cada quadro custa ~1–2 s);
     // o resto até 6 s é o último quadro segurado com um push-in suave feito no ffmpeg (segundos)
     const propsVideo = { ...props, anelSrc: anelRel };
-    const entrada = path.join(out, `${base}-entrada.mp4`);
     await renderMedia({
-      composition: await comp("aviso-video", propsVideo),
+      composition: await selectComposition({ serveUrl, id: "aviso-video", inputProps: propsVideo, puppeteerInstance: browserVideo, chromiumOptions: optsVideo, logLevel: "error" }),
       serveUrl,
       codec: "h264",
       outputLocation: entrada,
@@ -202,16 +211,15 @@ const main = async () => {
       jpegQuality: 90,
       enforceAudioTrack: true,
       concurrency: Number(env.CONCURRENCY) || Math.max(1, os.cpus().length),
-      puppeteerInstance: browser,
-      chromiumOptions,
+      puppeteerInstance: browserVideo,
+      chromiumOptions: optsVideo,
       overwrite: true,
       logLevel: "error",
     });
-    log("entrada ok");
+    log(`entrada ok (gl=${glVideo ?? "padrão"})`);
   } finally {
-    await browser.close({ silent: true }).catch(() => {});
+    await browserVideo.close({ silent: true }).catch(() => {});
   }
-  const entrada = path.join(out, `${base}-entrada.mp4`);
   const filtro = `[0:v]tpad=stop_mode=clone:stop_duration=${DURACAO_VIDEO},scale=w='trunc(1080*(1+0.04*t/${DURACAO_VIDEO})/2)*2':h=-2:eval=frame:flags=bicubic,crop=1080:1920,setsar=1,format=yuv420p[v];[0:a]apad[a]`;
   ffmpeg(["-y", "-v", "error", "-i", entrada, "-filter_complex", filtro, "-map", "[v]", "-map", "[a]", "-t", String(DURACAO_VIDEO), "-c:v", "libx264", "-crf", "20", "-preset", "veryfast", "-r", "30", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", f.mp4]);
   log(`vídeo ok (${Math.round(fs.statSync(f.mp4).size / 1024)} KB)`);

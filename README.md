@@ -21,8 +21,11 @@ uma identidade visual por noite. Criado em 26/09/2026 como teste para substituir
 
 ## Estúdio (peças pedidas pelo WhatsApp) — desde 14/10/2026
 - Composição `src/ids/Aviso.tsx` (entrada `src/entries/aviso/`): `aviso-feed` 1080×1350 e `aviso-story` 1080×1920
-  (still no frame 150 + vídeo de 7 s que vai pro feed como Reels). Props: titulo ("A - B" → B vira a faixa lima),
-  chamada, regra, data_evento, hora, dia_semana, imagem (+ imagem_modo logo|foto), tom (promo|evento|convidado|aviso).
+  (stills no frame 150) + `aviso-video` 1080×1920 de 6 s que vai pro feed como Reels. Props: titulo ("A - B" → B vira
+  a faixa lima), chamada, regra, data_evento, hora, dia_semana, imagem (+ imagem_modo logo|foto), tom (promo|evento|convidado|aviso).
+  `--props` se MESCLA com o defaultProps: mandar todos os campos (null = não tem).
+- Vídeo barato no runner (CPU, 2 núcleos, WebGL por software ≈ 1–2 s/quadro): o "O" 3D sai 1× em PNG (`aviso-anel-story`)
+  e anima em 2D; só a entrada (60 quadros) é renderizada e o resto até 6 s é push-in no ffmpeg. Medir: `scripts/estudio-bench.sh`.
 - Nuvem: `.github/workflows/estudio-render.yml` (repository_dispatch `estudio_render` {pedido_id} ou workflow_dispatch)
   roda `scripts/estudio-render.mjs`: lê o pedido no Supabase, renderiza, sobe em
   `butiquim-social/estudio/pedido-<id>-v<versao>-{feed.jpg,story.jpg,feed.mp4}`, grava `provas` + status `em_prova`
