@@ -102,7 +102,7 @@ export const SabadoD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "50% 45%" }}>
         {video ? (
           <div style={{ position: "absolute", left: 60, top: 500, width: 960, height: 790, transform: `rotate(-1deg) scale(${art})`, border: `10px solid ${NAVY}`, boxShadow: `inset 0 0 0 6px ${BRANCO}, 12px 12px 0 ${NAVY}`, background: NAVY, overflow: "hidden" }}>
-            <OffthreadVideo src={staticFile(n.clip)} style={{ position: "absolute", inset: 6, width: "calc(100% - 12px)", height: "calc(100% - 12px)", objectFit: "cover", objectPosition: "50% 15%", filter: "saturate(1.25) contrast(1.1)" }} volume={(fr) => interpolate(fr, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+            <OffthreadVideo src={staticFile(n.clip)} style={{ position: "absolute", inset: 6, width: "calc(100% - 12px)", height: "calc(100% - 12px)", objectFit: "cover", objectPosition: `50% ${Math.max(0, Math.round(((-(n.clipTop ?? -380)) * 0.96 / 917) * 100))}%`, filter: "saturate(1.25) contrast(1.1)" }} volume={(fr) => interpolate(fr, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
             <AbsoluteFill style={{ backgroundImage: `radial-gradient(circle, ${NAVY} 1.2px, transparent 1.8px)`, backgroundSize: "9px 9px", opacity: 0.12 }} />
           </div>
         ) : (
