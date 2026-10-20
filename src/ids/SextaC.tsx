@@ -141,7 +141,7 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
             </div>
             {/* lista */}
             <div style={{ position: "absolute", left: 60, right: 60, top: L.listaTop, textAlign: "center", opacity: useFade(44, 58) }}>
-              <div style={{ fontFamily: BEBAS, fontSize: 48, color: PRETO, lineHeight: 1, letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
+              <div style={{ fontFamily: BEBAS, fontSize: 42, color: PRETO, lineHeight: 1, letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
                 {n.lista[0]} <span style={{ color: "#8f9600" }}>●</span> {n.lista[1]}
               </div>
               <div style={{ fontFamily: ARCHIVO, fontWeight: 600, fontSize: 22, color: PRETO, opacity: 0.7, marginTop: 8 }}>{n.obs}</div>
@@ -156,7 +156,7 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
           <Fita x={L.pw / 2 - 80} y={L.ph - 30} rot={4} w={170} />
         </div>
         {/* o "O" do logo como carimbo lima, pousando no canto */}
-        <RingPx width={w} height={h} look="lima" flat cx={L.px + 95} cy={L.py + L.ph - 85} ringH={interpolate(anel, [0, 1], [300, 200])} rotY={interpolate(anel, [0, 1], [1.2, 0.35]) + Math.sin(frame / 40) * 0.08} rotZ={-0.3} envIntensity={0.9} style={{ opacity: anel, filter: "drop-shadow(0 20px 24px rgba(0,0,0,.5))" }} />
+        <RingPx width={w} height={h} look="lima" flat cx={L.px + L.pw - 40} cy={L.py + L.ph - 55} ringH={interpolate(anel, [0, 1], [260, 170])} rotY={interpolate(anel, [0, 1], [1.2, 0.35]) + Math.sin(frame / 40) * 0.08} rotZ={-0.3} envIntensity={0.9} style={{ opacity: anel, filter: "drop-shadow(0 20px 24px rgba(0,0,0,.5))" }} />
       </AbsoluteFill>
       <Estilo n={n} x={L.px + L.pw - 300} y={L.py + 22} delay={26} size={22} />
       <Carimbo n={n} x={L.px + L.pw - 265} y={L.titleTop + L.py + 290} delay={38} size={f === "feed" ? 0.8 : 0.9} />
