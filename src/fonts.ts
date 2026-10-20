@@ -40,3 +40,8 @@ export const GIZ = caveatBrush("normal", { weights: ["400"], subsets: ["latin"] 
 // Sexta D "Mesa do Butica": caneta/marcador
 import { loadFont as marker } from "@remotion/google-fonts/PermanentMarker";
 export const MARKER = marker("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+// Sabado D "Gibi do Butica": quadrinhos
+import { loadFont as bangers } from "@remotion/google-fonts/Bangers";
+import { loadFont as luckiest } from "@remotion/google-fonts/LuckiestGuy";
+export const BANGERS = bangers("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+export const LUCKIEST = luckiest("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;

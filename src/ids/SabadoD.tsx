@@ -1,92 +1,89 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
-import { UNB, BEBAS, LEAGUE, ARCHIVO } from "../fonts";
-import { Cutout, Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
+import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { BANGERS, LUCKIEST, ARCHIVO } from "../fonts";
+import { Cutout, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
 import { DIM, Formato, Noite, SUBESTILO } from "../data";
 
-// SABADÁ D — "Pôster de Cinema": cartaz de estreia — holofotes cruzando o céu, título metálico, "ESTRELANDO",
-// data "em cartaz" e o bloco de créditos condensado no pé, como nos pôsteres de filme
-const LIMA = "#C8D200";
-const PRETO = "#050609";
-const BRANCO = "#F5F3EE";
+// SABADÁ D — "Gibi do Butica": página de história em quadrinhos — amarelo, vermelho e azul, retícula de pontos,
+// raios pop, balão de fala "SABADÁ!", onomatopeia com o estilo e caixas de legenda. Paleta própria: o lima da
+// marca fica só no "O" pequeno. (Substitui o "Pôster de Cinema", reprovado 20/10: parecido com outra ID e
+// tudo preto/branco/verde.)
+const AMARELO = "#FFD60A";
+const VERMELHO = "#E63946";
+const AZUL = "#1E8BD9";
+const CIANO = "#5BD1F5";
+const NAVY = "#141A3A";
+const BRANCO = "#FFFDF5";
 
-const Ceu: React.FC<{ h: number }> = ({ h }) => {
+// contorno grosso de quadrinho (branco + navy) em volta do recorte
+const CONTORNO = [0, 45, 90, 135, 180, 225, 270, 315].map((a) => `drop-shadow(${Math.cos((a * Math.PI) / 180) * 7}px ${Math.sin((a * Math.PI) / 180) * 7}px 0 ${BRANCO})`).join(" ") + " " + [0, 90, 180, 270].map((a) => `drop-shadow(${Math.cos((a * Math.PI) / 180) * 12}px ${Math.sin((a * Math.PI) / 180) * 12}px 0 ${NAVY})`).join(" ");
+
+const Pagina: React.FC<{ w: number; h: number; cx: number; cy: number }> = ({ w, h, cx, cy }) => {
   const frame = useCurrentFrame();
-  const facho = (x: number, base: number, amp: number, speed: number, phase: number, cor: string) => {
-    const a = base + Math.sin(frame / speed + phase) * amp;
-    return <div style={{ position: "absolute", left: x - 160, bottom: -200, width: 320, height: h * 1.3, transformOrigin: "50% 100%", transform: `rotate(${a}deg)`, background: `linear-gradient(0deg, ${cor} 0%, rgba(0,0,0,0) 85%)`, clipPath: "polygon(44% 100%, 56% 100%, 100% 0, 0 0)", filter: "blur(10px)", mixBlendMode: "screen", opacity: 0.5 }} />;
-  };
   return (
     <>
-      <AbsoluteFill style={{ background: `linear-gradient(180deg, #0b0d16 0%, ${PRETO} 55%, #0a0b10 100%)` }} />
-      <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(200,210,0,.28) 0%, rgba(200,210,0,0) 55%)" }} />
-      {facho(120, -28, 7, 33, 0, "rgba(200,210,0,.9)")}
-      {facho(960, 28, 7, 29, 1.6, "rgba(200,210,0,.9)")}
-      {facho(380, -8, 10, 41, 0.8, "rgba(245,243,238,.7)")}
-      {facho(700, 8, 10, 37, 2.4, "rgba(245,243,238,.7)")}
-      <AbsoluteFill style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,.35) 0.6px, transparent 1.2px)", backgroundSize: "90px 90px", opacity: 0.5, WebkitMaskImage: "linear-gradient(180deg, #000 0%, transparent 45%)" }} />
+      <AbsoluteFill style={{ background: AMARELO }} />
+      {/* raios pop girando devagar */}
+      <AbsoluteFill style={{ background: `repeating-conic-gradient(from ${frame * 0.15}deg at ${cx}px ${cy}px, ${AZUL} 0deg 9deg, ${CIANO} 9deg 18deg)`, opacity: 0.95 }} />
+      {/* retícula vermelha, mais densa embaixo */}
+      <AbsoluteFill style={{ backgroundImage: `radial-gradient(circle, ${VERMELHO} 2.4px, transparent 3px)`, backgroundSize: "16px 16px", opacity: 0.55, WebkitMaskImage: "linear-gradient(180deg, transparent 20%, #000 75%)" }} />
+      <AbsoluteFill style={{ backgroundImage: `radial-gradient(circle, ${NAVY} 1.6px, transparent 2.2px)`, backgroundSize: "12px 12px", opacity: 0.18 }} />
+      {/* moldura do quadrinho */}
+      <div style={{ position: "absolute", inset: 18, border: `10px solid ${NAVY}`, boxShadow: `inset 0 0 0 6px ${BRANCO}` }} />
     </>
   );
 };
 
-// título metálico (lima → branco → lima), com brilho correndo
-const Metal: React.FC<{ text: string; size: number; top: number; delay: number; font?: string; spacing?: string }> = ({ text, size, top, delay, font = UNB, spacing = "-0.02em" }) => {
+// balão de fala com "SABADÁ!"
+const Balao: React.FC<{ x: number; y: number; w: number; size: number; delay: number }> = ({ x, y, w, size, delay }) => {
+  const s = useSpr(delay, { damping: 9, stiffness: 140 });
+  return (
+    <div style={{ position: "absolute", left: x, top: y, width: w, transform: `scale(${s}) rotate(-3deg)`, transformOrigin: "50% 100%" }}>
+      <div style={{ position: "relative", background: BRANCO, border: `9px solid ${NAVY}`, borderRadius: 60, padding: "14px 30px 20px", textAlign: "center", boxShadow: `12px 12px 0 ${NAVY}` }}>
+        <div style={{ fontFamily: BANGERS, fontSize: size, lineHeight: 0.9, color: NAVY, letterSpacing: "0.04em", textShadow: `5px 5px 0 ${VERMELHO}` }}>SABADÁ!</div>
+        <div style={{ fontFamily: LUCKIEST, fontSize: size * 0.3, lineHeight: 1, color: VERMELHO, marginTop: 6, letterSpacing: "0.04em" }}>DO BUTICA</div>
+      </div>
+      <svg width={120} height={90} viewBox="0 0 120 90" style={{ position: "absolute", left: w * 0.1, bottom: -74 }}>
+        <polygon points="10,0 110,0 40,86" fill={BRANCO} stroke={NAVY} strokeWidth={9} strokeLinejoin="round" />
+        <rect x={10} y={-10} width={100} height={20} fill={BRANCO} />
+      </svg>
+    </div>
+  );
+};
+
+// onomatopeia estrelada com o estilo musical
+const Estouro: React.FC<{ n: Noite; x: number; y: number; d: number; delay: number }> = ({ n, x, y, d, delay }) => {
+  const s = useSpr(delay, { damping: 8, stiffness: 180 });
   const frame = useCurrentFrame();
-  const s = useSpr(delay, { damping: 14, stiffness: 90 });
-  const sw = interpolate((frame - 50 + 1500) % 150, [0, 40], [-60, 160], clamp);
+  const pts = Array.from({ length: 24 }, (_, i) => { const a = (i * Math.PI) / 12; const r = i % 2 ? 0.72 : 1; return `${50 + Math.cos(a) * 50 * r},${50 + Math.sin(a) * 50 * r}`; }).join(" ");
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top, textAlign: "center", transform: `scale(${interpolate(s, [0, 1], [1.3, 1])})`, opacity: s }}>
-      <div style={{ position: "relative", display: "inline-block", fontFamily: font, fontWeight: 900, fontSize: size, lineHeight: 0.9, letterSpacing: spacing, background: `linear-gradient(180deg, #f6ffb0 0%, ${LIMA} 38%, #7f8800 50%, #e3ee45 62%, #b9c400 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", filter: "drop-shadow(0 6px 0 rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(200,210,0,.35))" }}>
-        {text}
-        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(100deg, rgba(255,255,255,0) ${sw - 12}%, rgba(255,255,255,.75) ${sw}%, rgba(255,255,255,0) ${sw + 12}%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{text}</div>
+    <div style={{ position: "absolute", left: x - d / 2, top: y - d / 2, width: d, height: d, transform: `scale(${s}) rotate(${-8 + Math.sin(frame / 30) * 3}deg)` }}>
+      <svg width={d} height={d} viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+        <polygon points={pts} fill={VERMELHO} stroke={NAVY} strokeWidth={4} strokeLinejoin="round" />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: BRANCO, textAlign: "center" }}>
+        <div style={{ fontFamily: BANGERS, fontSize: d * 0.26, lineHeight: 0.9, letterSpacing: "0.04em", textShadow: `3px 3px 0 ${NAVY}` }}>{n.estilo}!</div>
+        <div style={{ fontFamily: LUCKIEST, fontSize: d * 0.1, color: AMARELO, marginTop: 2 }}>{SUBESTILO}</div>
       </div>
     </div>
   );
 };
 
-// bloco de créditos de cinema: rótulos miúdos e nomes altos, tudo condensado
-const Creditos: React.FC<{ n: Noite; top: number; delay: number; size?: number; cta?: boolean }> = ({ n, top, delay, size = 19, cta }) => {
-  const o = useFade(delay, delay + 16);
-  const R = (t: string) => <span style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: size * 0.55, letterSpacing: "0.1em", opacity: 0.7, verticalAlign: "middle" }}>{t} </span>;
-  const N = (t: string) => <span style={{ fontFamily: LEAGUE, fontSize: size * 1.35, letterSpacing: "0.06em", verticalAlign: "middle" }}>{t}  </span>;
+// caixa de legenda de quadrinho (amarela, borda navy)
+const Legenda: React.FC<{ x?: number; y: number; w?: number; delay: number; children: React.ReactNode; rot?: number; bg?: string; align?: "left" | "center" }> = ({ x, y, w, delay, children, rot = 0, bg = AMARELO, align = "left" }) => {
+  const s = useSpr(delay, { damping: 13 });
   return (
-    <div style={{ position: "absolute", left: 50, right: 50, top, textAlign: "center", color: BRANCO, opacity: o, lineHeight: 1.5, textTransform: "uppercase" }}>
-      <div>{R("O Butiquim apresenta")}{N("uma noite de Sabadá do Butica")}{R("com")}{N(n.artista)}{R("trilha")}{N(`${n.estilo} ${SUBESTILO}`)}</div>
-      <div>{R("lista feminina")}{N(`free até ${n.lista[0].split("ATÉ ")[1]}`)}{R("lista masculina")}{N(`R$ 20 até ${n.lista[1].split("ATÉ ")[1]}`)}{R("depois da 1ª hora")}{N("desconto na portaria pra quem está na lista")}</div>
-      <div>{R("direção")}{N("a esquina")}{R("produção")}{N("Butica")}{R("classificação")}{N("livre pra dançar")}{cta ? <>{R("ingresso")}{N("nome na lista: link na bio")}</> : <>{R("sessão única")}{N(`${n.diaSemana} ${n.dia} ${n.mes} · ${n.hora}`)}</>}</div>
+    <div style={{ position: "absolute", left: x ?? 0, right: x === undefined ? 0 : undefined, top: y, width: w, marginLeft: x === undefined ? "auto" : undefined, marginRight: x === undefined ? "auto" : undefined, transform: `rotate(${rot}deg) translateY(${(1 - s) * 40}px)`, opacity: s, background: bg, border: `7px solid ${NAVY}`, boxShadow: `9px 9px 0 ${NAVY}`, padding: "12px 22px 14px", textAlign: align, boxSizing: "border-box" }}>
+      {children}
     </div>
   );
 };
 
-// selo de classificação, como o do cinema
-const Classificacao: React.FC<{ x: number; y: number; delay: number; size?: number }> = ({ x, y, delay, size = 92 }) => {
-  const s = useSpr(delay, { damping: 11 });
-  return (
-    <div style={{ position: "absolute", left: x, top: y, display: "flex", alignItems: "center", gap: 12, transform: `scale(${s})`, transformOrigin: "left center" }}>
-      <div style={{ width: size, height: size, background: LIMA, color: PRETO, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: UNB, fontWeight: 900, fontSize: size * 0.6, boxShadow: "0 10px 20px rgba(0,0,0,.5)" }}>L</div>
-      <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: size * 0.2, letterSpacing: "0.12em", color: BRANCO, lineHeight: 1.25 }}>LIVRE<br />PRA<br />DANÇAR</div>
-    </div>
-  );
-};
-
-const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 24 }) => {
-  const s = useSpr(delay, { damping: 12 });
-  return (
-    <div style={{ position: "absolute", right: x, top: y, transform: `translateY(${(1 - s) * -60}px)`, opacity: Math.min(1, s * 3), display: "flex", alignItems: "center", gap: 10, border: `2px solid ${LIMA}`, color: BRANCO, borderRadius: 8, padding: "7px 16px 8px 12px", background: "rgba(5,6,9,.6)" }}>
-      <Nota size={size * 1.1} color={LIMA} />
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <span style={{ fontFamily: BEBAS, fontSize: size * 1.5, lineHeight: 1, letterSpacing: "0.08em", color: LIMA }}>{n.estilo}</span>
-        <span style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: size * 0.56, opacity: 0.8 }}>{SUBESTILO}</span>
-      </div>
-    </div>
-  );
-};
-
-type L = { titleTop: number; titleSize: number; subTop: number; ringCy: number; ringH: number; artH: number; artTop: number; estrTop: number; nomeSize: number; dataTop: number; credTop: number; credSize: number; classY: number; cta?: boolean };
+type L = { balX: number; balY: number; balW: number; balSize: number; artH: number; artTop: number; estX: number; estY: number; estD: number; dataY: number; nomeY: number; listaY: number; cta?: boolean };
 const LAYOUT: Record<"feed" | "story", L> = {
-  feed: { titleTop: 118, titleSize: 210, subTop: 318, ringCy: 640, ringH: 640, artH: 900, artTop: 330, estrTop: 1000, nomeSize: 96, dataTop: 1120, credTop: 1215, credSize: 17, classY: 1070 },
-  story: { titleTop: 300, titleSize: 230, subTop: 520, ringCy: 900, ringH: 760, artH: 1080, artTop: 560, estrTop: 1330, nomeSize: 104, dataTop: 1460, credTop: 1590, credSize: 19, classY: 1410, cta: true },
+  feed: { balX: 40, balY: 60, balW: 520, balSize: 118, artH: 930, artTop: 340, estX: 890, estY: 230, estD: 290, dataY: 560, nomeY: 1000, listaY: 1190 },
+  story: { balX: 60, balY: 250, balW: 660, balSize: 160, artH: 1180, artTop: 470, estX: 890, estY: 440, estD: 320, dataY: 790, nomeY: 1330, listaY: 1560, cta: true },
 };
 
 export const SabadoD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
@@ -94,34 +91,39 @@ export const SabadoD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
-  const art = useSpr(14, { damping: 15 });
-  const anel = useSpr(0, { damping: 17, stiffness: 60 });
-  const nome = useFade(32, 46);
-  const push = interpolate(frame, [0, 240], [1, 1.03], clamp);
-  const nomeSize = Math.min(L.nomeSize, (w - 120) / (n.artista.length * 0.82));
+  const art = useSpr(14, { damping: 12, stiffness: 110 });
+  const anel = useSpr(50, { damping: 10, stiffness: 150 });
+  const push = interpolate(frame, [0, 240], [1, 1.025], clamp);
+  const nomeSize = Math.min(132, (w - 160) / (n.artista.length * 0.5));
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Ceu h={h} />
+      <Pagina w={w} h={h} cx={540} cy={L.artTop + L.artH * 0.4} />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "50% 45%" }}>
-        <RingPx width={w} height={h} look="cromo" cx={540} cy={L.ringCy} ringH={L.ringH * interpolate(anel, [0, 1], [0.6, 1])} rotY={interpolate(anel, [0, 1], [1.4, 0.26]) + Math.sin(frame / 45) * 0.09} rotX={Math.sin(frame / 60) * 0.05} envIntensity={1.3} lights={[{ color: LIMA, pos: [-3, -3, 3], intensity: 7 }, { color: "#ffffff", pos: [3, 3, 2], intensity: 4 }]} />
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 200} fadeFrom={0.7} filter="contrast(1.08) saturate(1.05) drop-shadow(0 0 2px rgba(200,210,0,.9)) drop-shadow(0 0 40px rgba(200,210,0,.35)) drop-shadow(0 30px 40px rgba(0,0,0,.7))" style={{ opacity: art }} />
+        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 220} fadeFrom={0.78} filter={`saturate(1.25) contrast(1.12) ${CONTORNO}`} style={{ opacity: art }} />
       </AbsoluteFill>
-      <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(5,6,9,0) 62%, rgba(5,6,9,.85) 76%, rgba(5,6,9,1) 90%)` }} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: f === "feed" ? 40 : 206, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 700, fontSize: 18, letterSpacing: "0.42em", color: BRANCO, opacity: useFade(0, 14) * 0.8 }}>O BUTIQUIM APRESENTA</div>
-      <Logo width={f === "feed" ? 170 : 200} top={f === "feed" ? 66 : 232} />
-      <Metal text="SABADÁ" size={L.titleSize} top={L.titleTop} delay={6} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: L.subTop, textAlign: "center", fontFamily: BEBAS, fontSize: 44, letterSpacing: "0.5em", paddingLeft: "0.5em", color: BRANCO, opacity: useFade(16, 30) * 0.9 }}>DO BUTICA</div>
-      <Estilo n={n} x={44} y={f === "feed" ? 40 : 206} delay={24} size={f === "feed" ? 20 : 23} />
-      {/* ESTRELANDO + nome */}
-      <div style={{ position: "absolute", left: 0, right: 0, top: L.estrTop, textAlign: "center", opacity: nome }}>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 18, letterSpacing: "0.5em", paddingLeft: "0.5em", color: LIMA }}>ESTRELANDO</div>
-        <div style={{ fontFamily: UNB, fontWeight: 900, fontSize: nomeSize, lineHeight: 1, color: BRANCO, whiteSpace: "nowrap", marginTop: 4, textShadow: "0 6px 30px rgba(0,0,0,.8)" }}>{n.artista}</div>
-      </div>
-      <Metal text={`EM CARTAZ ${n.dia} DE ${n.mesExtenso} · ${n.hora}`} size={f === "feed" ? 54 : 60} top={L.dataTop} delay={40} font={BEBAS} spacing="0.06em" />
-      <Classificacao x={44} y={f === "feed" ? 40 : 206} delay={44} size={f === "feed" ? 60 : 70} />
-      <Creditos n={n} top={L.credTop} delay={50} size={L.credSize} cta={L.cta} />
-      <Grain opacity={0.14} />
-      <Vignette strength={0.5} />
+      {/* logo em navy no canto */}
+      <Img src={staticFile("logos/butiquim-mono-branco-h.png")} style={{ position: "absolute", width: f === "feed" ? 190 : 220, right: 54, top: f === "feed" ? 52 : 220, filter: "invert(1) brightness(0.35) sepia(1) hue-rotate(200deg) saturate(3)" }} />
+      <Balao x={L.balX} y={L.balY} w={L.balW} size={L.balSize} delay={6} />
+      <Estouro n={n} x={L.estX} y={L.estY} d={L.estD} delay={26} />
+      <Legenda x={w - 330} y={L.dataY} w={290} delay={32} rot={4}>
+        <div style={{ fontFamily: LUCKIEST, fontSize: 20, color: NAVY, letterSpacing: "0.06em" }}>ENQUANTO ISSO, NO {n.diaSemana}...</div>
+        <div style={{ fontFamily: BANGERS, fontSize: 96, lineHeight: 0.9, color: VERMELHO, textShadow: `4px 4px 0 ${NAVY}` }}>{n.dia} {n.mes}</div>
+        <div style={{ fontFamily: LUCKIEST, fontSize: 30, color: NAVY }}>ÀS {n.hora}</div>
+      </Legenda>
+      {/* nome do artista: faixa vermelha torta, letra de gibi */}
+      <Legenda y={L.nomeY} w={w - 100} delay={40} rot={-2} bg={VERMELHO} align="center">
+        <div style={{ fontFamily: LUCKIEST, fontSize: 22, color: AMARELO, letterSpacing: "0.12em" }}>NO PALCO DO BUTICA</div>
+        <div style={{ fontFamily: BANGERS, fontSize: nomeSize, lineHeight: 0.95, color: BRANCO, letterSpacing: "0.04em", whiteSpace: "nowrap", textShadow: `6px 6px 0 ${NAVY}` }}>{n.artista}</div>
+      </Legenda>
+      <Legenda y={L.listaY} w={w - 100} delay={48} bg={BRANCO} align="center">
+        <div style={{ fontFamily: LUCKIEST, fontSize: 30, color: NAVY, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
+          {n.lista[0]} <span style={{ color: VERMELHO }}>★</span> {n.lista[1]}
+        </div>
+        <div style={{ fontFamily: ARCHIVO, fontWeight: 600, fontSize: 18, color: NAVY, opacity: 0.75, marginTop: 4 }}>{n.obs}</div>
+        {L.cta && <div style={{ fontFamily: LUCKIEST, fontSize: 26, color: VERMELHO, marginTop: 6 }}>NOME NA LISTA: LINK NA BIO!</div>}
+      </Legenda>
+      {/* o "O" do logo como adesivo lima, único verde da peça */}
+      <RingPx width={w} height={h} look="lima" flat cx={95} cy={h - 70} ringH={120 * interpolate(anel, [0, 1], [1.6, 1])} rotY={0.3} rotZ={-0.2} envIntensity={0.9} style={{ opacity: anel, filter: `drop-shadow(0 0 0 ${NAVY}) drop-shadow(5px 5px 0 ${NAVY})` }} />
     </AbsoluteFill>
   );
 };
