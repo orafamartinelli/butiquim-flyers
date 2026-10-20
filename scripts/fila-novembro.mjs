@@ -39,13 +39,14 @@ const soma = (d, n) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.ge
 const NOITES = [
   ["2026-11-06", "sexta6", "B"], ["2026-11-07", "sabado6", "B"], ["2026-11-08", "domingo6", "B"],
   ["2026-11-14", "sabado7", "A", "vespera3"],
+  ["2026-11-15", "domingo7", "A"], // Victor preencheu depois do lote (João Maurício) — gravado 19/10
   ["2026-11-21", "sabado8", "B"], ["2026-11-22", "domingo8", "B"],
   ["2026-11-27", "sexta9", "A"], ["2026-11-28", "sabado9", "A"],
 ];
 const AGENDAS = [ // terça, agenda, noites da semana
   ["2026-11-03", "s6", ["sexta6", "sabado6", "domingo6"]],
   // REGRA DO RAFA (14/10): agenda da semana SÓ com a semana completa (sex/sáb/dom preenchidos) — senão só aviso "agenda incompleta".
-  // s7 (10/11, semana 13–15: faltam 13 e 15), s8 (17/11, semana 20–22: falta 20), s9 (24/11, semana 27–29: falta 29) → fora até fechar.
+  // s7 (10/11, semana 13–15: falta o 13), s8 (17/11, semana 20–22: falta 20), s9 (24/11, semana 27–29: falta 29) → fora até fechar.
 ];
 const dataDe = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
 const REGRA = { 5: { dia: "sexta", noite: "Sexta do Butica", ate: "00h", abre: "23h", nome: "Sexta" }, 6: { dia: "sabado", noite: "Sabadá do Butica", ate: "00h", abre: "23h", nome: "Sábado" }, 0: { dia: "domingo", noite: "Saideira da Semana", ate: "23h", abre: "22h", nome: "Domingo" } };

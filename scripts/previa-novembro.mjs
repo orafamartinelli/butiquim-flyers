@@ -10,7 +10,7 @@ const DIAS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sáb
 const dia = (d) => `${DIAS[new Date(`${d}T12:00:00Z`).getUTCDay()]} ${d.slice(8)}/${d.slice(5, 7)}`;
 const NOITES = [
   ["2026-11-06", "sexta6", "B"], ["2026-11-07", "sabado6", "B"], ["2026-11-08", "domingo6", "B"],
-  ["2026-11-14", "sabado7", "A"], ["2026-11-21", "sabado8", "B"], ["2026-11-22", "domingo8", "B"],
+  ["2026-11-14", "sabado7", "A"], ["2026-11-15", "domingo7", "A"], ["2026-11-21", "sabado8", "B"], ["2026-11-22", "domingo8", "B"],
   ["2026-11-27", "sexta9", "A"], ["2026-11-28", "sabado9", "A"],
 ];
 const grupos = [
@@ -39,7 +39,7 @@ writeFileSync(`${DEST}/previa.html`, `<!doctype html><html lang="pt-BR"><meta ch
 h2{font-size:17px;margin:30px 0 12px;color:#d4f53c}.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 figure{margin:0}img,video{width:100%;border-radius:8px;background:#222}figcaption{font-size:13px;color:#aaa;margin-top:4px}</style>
 <h1>Butiquim — material de NOVEMBRO na nossa identidade</h1>
-<p>8 noites + Folhinha (véspera 15/11) + 3 agendas de terça · rodízio A/B por semana · tudo conferido contra a planilha.</p>
-<p>⚠️ Na planilha ainda vazias: <b>13, 15, 20 e 29/11</b> (Victor). Agenda da semana 13–15 sai quando ele preencher.</p>
+<p>9 noites + Folhinha (véspera 15/11) + 3 agendas de terça · rodízio A/B por semana · tudo conferido contra a planilha.</p>
+<p>⚠️ Na planilha ainda vazias: <b>13, 20 e 29/11</b> (Victor). Dom 15/11 entrou em 19/10. As agendas das semanas 13–15, 20–22 e 27–29 saem quando ele fechar.</p>
 ${secoes}</html>`);
 console.log(DEST + "/previa.html");

@@ -139,6 +139,7 @@ export const NOITES = {
   domingo6: noiteDe("2026-11-08"),
   sabado7: noiteDe("2026-11-14"),
   vespera3: noiteDe("2026-11-14"), // sábado 14, véspera da Proclamação da República (dom 15)
+  domingo7: noiteDe("2026-11-15"), // Victor preencheu depois de 14/10 (João Maurício); produzido 19/10
   sabado8: noiteDe("2026-11-21"),
   domingo8: noiteDe("2026-11-22"),
   sexta9: noiteDe("2026-11-27"),

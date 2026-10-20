@@ -35,6 +35,7 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   sabado6: SabadoB,
   domingo6: DomingoB,
   sabado7: Sabado,
+  domingo7: Domingo,
   sabado8: SabadoB,
   domingo8: DomingoB,
   sexta9: Sexta,
@@ -79,7 +80,7 @@ export const RemotionRoot: React.FC = () => (
         ["s5", AgendaV2, "30/10 A 01/11", [NOITES.sexta5, NOITES.sabado5, NOITES.domingo5]],
         // novembro (terças 03, 10, 17, 24) — rodízio V3 → V1 → V2 → V3
         ["s6", AgendaV3, "06 A 08", [NOITES.sexta6, NOITES.sabado6, NOITES.domingo6]],
-        // s7 (terça 10/11, semana 13–15): pendente — só o sáb 14 preenchido; agendas exigem 2+ noites. Refazer quando o Victor fechar 13/15
+        // s7 (terça 10/11, semana 13–15): pendente — sáb 14 e dom 15 preenchidos, falta a sexta 13. Entra quando o Victor fechar o 13
         ["s8", AgendaV2, "21 E 22", [NOITES.sabado8, NOITES.domingo8]],
         ["s9", AgendaV3, "27 E 28", [NOITES.sexta9, NOITES.sabado9]],
       ] as const
