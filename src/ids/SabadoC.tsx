@@ -1,127 +1,114 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
-import { BIG, UNB, ARCHIVO, LEAGUE } from "../fonts";
-import { Cutout, Grain, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { SKETCH, GIZ, ARCHIVO } from "../fonts";
+import { Cutout, Grain, Logo, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
-import { rnd } from "../shared/icones";
+import { Ico, rnd } from "../shared/icones";
 import { DIM, Formato, Noite, SUBESTILO } from "../data";
 
-// SABADÁ C — "Chope Gelado": a noite vista de dentro do copo — espuma no alto, chope dourado, bolhas subindo
-// e o vidro suado na frente de tudo; o nome do artista escrito no bafo do copo
-const CHOPE = "#F2B233";
-const CHOPE_ESCURO = "#7A3D08";
-const ESPUMA = "#FFF8E8";
-const GELO = "#CFF3FF";
-const LIMA = "#C8D200";
-const NOITE = "#06120E";
+// SABADÁ C — "Lousa do Butica": o quadro-negro do boteco escrito a giz (branco + lima), moldura de madeira,
+// rabiscos, setas e estrelas em volta do artista — que fica inteiro, em cor, sem nada na frente do rosto
+// (substitui o "Chope Gelado", reprovado pelo Rafa em 20/10: as gotas tapavam a cara dos músicos)
+const LOUSA = "#16211C";
+const GIZ_BRANCO = "#F4F1E6";
+const GIZ_LIMA = "#D9E65A";
+const MADEIRA = "#6B4423";
 
-const Copo: React.FC<{ h: number; espumaY: number }> = ({ h, espumaY }) => {
-  const frame = useCurrentFrame();
-  return (
-    <>
-      <AbsoluteFill style={{ background: `linear-gradient(180deg, ${NOITE} 0%, #0d1b14 ${(espumaY / h) * 100 - 6}%, #c7811c ${(espumaY / h) * 100 + 6}%, ${CHOPE} 55%, #d98f1f 80%, ${CHOPE_ESCURO} 100%)` }} />
-      {/* luz atravessando o chope */}
-      <AbsoluteFill style={{ background: `radial-gradient(ellipse at 50% ${(espumaY / h) * 100 + 35}%, rgba(255,235,170,.55) 0%, rgba(255,235,170,0) 55%)` }} />
-      <AbsoluteFill style={{ background: `repeating-linear-gradient(${90 + Math.sin(frame / 90) * 4}deg, rgba(255,255,255,.05) 0 3px, transparent 3px 28px)`, WebkitMaskImage: `linear-gradient(180deg, transparent ${(espumaY / h) * 100}%, #000 ${(espumaY / h) * 100 + 10}%)` }} />
-    </>
-  );
-};
+// traço de giz: texto com leve borrão e falhas
+const giz = (cor: string) => ({ color: cor, textShadow: `0 0 1px ${cor}, 0 0 6px rgba(255,255,255,.18)`, WebkitMaskImage: "radial-gradient(circle at 30% 40%, #000 70%, rgba(0,0,0,.85) 100%)" } as React.CSSProperties);
 
-// bolhas subindo no chope
-const Bolhas: React.FC<{ w: number; h: number; de: number; n?: number }> = ({ w, h, de, n = 46 }) => {
-  const frame = useCurrentFrame();
-  return (
-    <AbsoluteFill style={{ pointerEvents: "none" }}>
-      {Array.from({ length: n }, (_, i) => {
-        const size = 5 + rnd(i) * 16;
-        const x = rnd(i + 50) * w;
-        const speed = 0.9 + rnd(i + 90) * 1.8;
-        const span = h - de + 60;
-        const y = h + 40 - ((frame * speed + rnd(i + 130) * span) % span);
-        const o = interpolate(y, [de, de + 120], [0, 0.75], clamp);
-        return <div key={i} style={{ position: "absolute", left: x + Math.sin((frame + i * 9) / 18) * 4, top: y, width: size, height: size, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, rgba(255,255,255,.95), rgba(255,255,255,.25) 55%, rgba(255,255,255,0) 72%)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.35)", opacity: o }} />;
-      })}
-    </AbsoluteFill>
-  );
-};
-
-// espuma com borda irregular e furinhos
-const Espuma: React.FC<{ y: number; w: number }> = ({ y, w }) => {
-  const frame = useCurrentFrame();
-  const blobs = Array.from({ length: 14 }, (_, i) => ({ x: (i / 13) * w, r: 70 + rnd(i + 3) * 70, dy: Math.sin(frame / 50 + i) * 6 }));
-  return (
-    <div style={{ position: "absolute", left: 0, top: 0, width: w, height: y + 160, filter: "drop-shadow(0 18px 24px rgba(120,70,0,.35))" }}>
-      <svg width={w} height={y + 160} style={{ position: "absolute", inset: 0 }}>
-        <rect x={0} y={0} width={w} height={y} fill={ESPUMA} />
-        {blobs.map((b, i) => <circle key={i} cx={b.x} cy={y + b.dy} r={b.r} fill={ESPUMA} />)}
-        {Array.from({ length: 40 }, (_, i) => <circle key={`f${i}`} cx={rnd(i + 200) * w} cy={rnd(i + 300) * (y + 40)} r={3 + rnd(i + 400) * 12} fill="rgba(230,205,150,.55)" />)}
-      </svg>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: y, background: "linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 60%)" }} />
+const Quadro: React.FC<{ w: number; h: number }> = ({ w, h }) => (
+  <>
+    <AbsoluteFill style={{ background: `linear-gradient(180deg, #4b2e16 0%, ${MADEIRA} 50%, #3d2411 100%)` }} />
+    <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(92deg, rgba(0,0,0,.18) 0 2px, transparent 2px 11px, rgba(255,255,255,.04) 11px 13px, transparent 13px 30px)" }} />
+    <div style={{ position: "absolute", left: 34, top: 34, width: w - 68, height: h - 68, background: `radial-gradient(ellipse at 50% 40%, #1d2b25 0%, ${LOUSA} 60%, #0f1714 100%)`, boxShadow: "inset 0 0 0 6px #2a1a0c, inset 0 10px 30px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08)" }}>
+      {/* giz apagado com a mão: manchas claras */}
+      {Array.from({ length: 9 }, (_, i) => (
+        <div key={i} style={{ position: "absolute", left: rnd(i + 1) * (w - 300), top: rnd(i + 20) * (h - 400), width: 260 + rnd(i + 40) * 300, height: 120 + rnd(i + 60) * 160, borderRadius: "50%", background: "rgba(244,241,230,.06)", filter: "blur(26px)", transform: `rotate(${rnd(i + 80) * 60 - 30}deg)` }} />
+      ))}
     </div>
+  </>
+);
+
+// rabiscos de giz em SVG: estrelas e raios em volta do artista
+const Rabiscos: React.FC<{ w: number; h: number; cx: number; cy: number; r: number; delay: number }> = ({ w, h, cx, cy, r, delay }) => {
+  const frame = useCurrentFrame();
+  const p = interpolate(frame - delay, [0, 40], [0, 1], clamp);
+  const estrela = (x: number, y: number, s: number, k: number) => {
+    const pts = Array.from({ length: 10 }, (_, i) => { const a = (i * Math.PI) / 5 - Math.PI / 2; const rr = i % 2 ? s * 0.45 : s; return `${x + Math.cos(a) * rr},${y + Math.sin(a) * rr}`; }).join(" ");
+    return <polygon key={k} points={pts} fill="none" stroke={k % 2 ? GIZ_LIMA : GIZ_BRANCO} strokeWidth={4} strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} opacity={0.9} />;
+  };
+  const raios = Array.from({ length: 14 }, (_, i) => {
+    const a = (i / 14) * Math.PI * 2 + 0.2;
+    const r1 = r + 20 + rnd(i) * 30, r2 = r1 + 50 + rnd(i + 9) * 70;
+    return <line key={i} x1={cx + Math.cos(a) * r1} y1={cy + Math.sin(a) * r1 * 1.25} x2={cx + Math.cos(a) * r2} y2={cy + Math.sin(a) * r2 * 1.25} stroke={i % 3 ? GIZ_BRANCO : GIZ_LIMA} strokeWidth={5} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} opacity={0.75} />;
+  });
+  return (
+    <svg width={w} height={h} style={{ position: "absolute", inset: 0, pointerEvents: "none", filter: "blur(.4px)" }}>
+      {raios}
+      {estrela(110, 940, 22, 1)}
+      {estrela(980, 700, 20, 2)}
+      {estrela(150, 820, 16, 3)}
+      {estrela(930, 300, 30, 4)}
+    </svg>
   );
 };
 
-// gotas de condensação no vidro (na frente de tudo), com algumas escorrendo
-const Suor: React.FC<{ w: number; h: number; n?: number }> = ({ w, h, n = 70 }) => {
+const Nota: React.FC<{ x: number; y: number; size: number; rot: number; delay: number; cor?: string }> = ({ x, y, size, rot, delay, cor = GIZ_BRANCO }) => {
   const frame = useCurrentFrame();
+  const d = interpolate(frame - delay, [0, 20], [0, 1], clamp);
+  return <div style={{ position: "absolute", left: x, top: y, transform: `rotate(${rot}deg)` }}><Ico i="nota" size={size} color={cor} stroke={2.2} draw={d} /></div>;
+};
+
+// "hoje!" circulado a giz, com seta pro artista
+const Hoje: React.FC<{ x: number; y: number; delay: number }> = ({ x, y, delay }) => {
+  const frame = useCurrentFrame();
+  const p = interpolate(frame - delay, [0, 24], [0, 1], clamp);
   return (
-    <AbsoluteFill style={{ pointerEvents: "none" }}>
-      {Array.from({ length: n }, (_, i) => {
-        const escorre = rnd(i + 11) > 0.84;
-        const size = escorre ? 14 + rnd(i) * 10 : 6 + rnd(i) * 26;
-        const x = rnd(i + 20) * w;
-        const y0 = rnd(i + 40) * h;
-        const y = escorre ? (y0 + Math.max(0, frame - 30 - rnd(i + 60) * 120) * (1.4 + rnd(i + 70))) % (h + 100) : y0;
-        return (
-          <React.Fragment key={i}>
-            {escorre && <div style={{ position: "absolute", left: x + size * 0.3, top: y0 - 10, width: size * 0.4, height: Math.max(0, y - y0), background: "linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.25))", borderRadius: size }} />}
-            <div style={{ position: "absolute", left: x, top: y, width: size, height: size * (escorre ? 1.35 : 1), borderRadius: "50% 50% 50% 50% / 45% 45% 55% 55%", background: "radial-gradient(circle at 35% 30%, rgba(255,255,255,.85), rgba(255,255,255,.12) 45%, rgba(0,0,0,.08) 75%, rgba(255,255,255,.25) 100%)", boxShadow: "0 1px 2px rgba(0,0,0,.25), inset 0 0 2px rgba(255,255,255,.6)" }} />
-          </React.Fragment>
-        );
-      })}
-    </AbsoluteFill>
+    <div style={{ position: "absolute", left: x, top: y, width: 230, height: 120, opacity: p > 0 ? 1 : 0 }}>
+      <div style={{ position: "absolute", left: 20, top: 14, fontFamily: GIZ, fontSize: 74, lineHeight: 1, transform: "rotate(-6deg)", ...giz(GIZ_LIMA) }}>hoje!</div>
+      <svg width={230} height={120} style={{ position: "absolute", inset: 0 }}>
+        <ellipse cx={100} cy={56} rx={92} ry={46} fill="none" stroke={GIZ_BRANCO} strokeWidth={4} transform="rotate(-6 100 56)" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} opacity={0.9} />
+        <path d="M190 70 C 215 80, 225 95, 226 118" fill="none" stroke={GIZ_BRANCO} strokeWidth={4} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} />
+        <path d="M214 108 L 226 118 L 230 104" fill="none" stroke={GIZ_BRANCO} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} />
+      </svg>
+    </div>
   );
 };
 
 const Estilo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: number }> = ({ n, x, y, delay, size = 26 }) => {
-  const s = useSpr(delay, { damping: 12 });
+  const o = useFade(delay, delay + 14);
   return (
-    <div style={{ position: "absolute", left: x, top: y, transform: `translateY(${(1 - s) * -60}px)`, opacity: Math.min(1, s * 3), display: "flex", alignItems: "center", gap: 10, background: "rgba(207,243,255,.92)", color: NOITE, borderRadius: 40, padding: "8px 20px 9px 12px", boxShadow: "0 10px 24px rgba(0,0,0,.35)" }}>
-      <Nota size={size * 1.1} color={NOITE} />
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <span style={{ fontFamily: BIG, fontWeight: 900, fontSize: size * 1.3, lineHeight: 1, letterSpacing: "0.06em" }}>{n.estilo}</span>
-        <span style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: size * 0.56, opacity: 0.7, marginTop: 2 }}>{SUBESTILO}</span>
-      </div>
+    <div style={{ position: "absolute", left: x, top: y, opacity: o, transform: "rotate(-3deg)", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+      <div style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: size * 1.5, lineHeight: 1, letterSpacing: "0.04em", ...giz(GIZ_LIMA) }}>{n.estilo}</div>
+      <div style={{ fontFamily: GIZ, fontSize: size * 1.1, lineHeight: 1, marginTop: 2, ...giz(GIZ_BRANCO) }}>{SUBESTILO}</div>
+      <div style={{ width: "100%", height: 3, background: GIZ_BRANCO, opacity: 0.7, marginTop: 4, transform: "rotate(1deg)" }} />
     </div>
   );
 };
 
-// bolacha de chope com a data
-const Bolacha: React.FC<{ n: Noite; x: number; y: number; d: number; delay: number }> = ({ n, x, y, d, delay }) => {
-  const s = useSpr(delay, { damping: 11, stiffness: 130 });
+// data escrita a giz dentro de um círculo rabiscado
+const Data: React.FC<{ n: Noite; x: number; y: number; d: number; delay: number }> = ({ n, x, y, d, delay }) => {
   const frame = useCurrentFrame();
-  const rot = interpolate(s, [0, 1], [40, 8]) + Math.sin(frame / 55) * 1.5;
-  const circ = 2 * Math.PI * 78 - 4;
+  const p = interpolate(frame - delay, [0, 26], [0, 1], clamp);
+  const o = useFade(delay + 8, delay + 20);
   return (
-    <div style={{ position: "absolute", left: x - d / 2, top: y - d / 2, width: d, height: d, transform: `scale(${interpolate(s, [0, 1], [1.8, 1])}) rotate(${rot}deg)`, opacity: Math.min(1, s * 1.5), filter: "drop-shadow(0 18px 26px rgba(60,30,0,.5))" }}>
-      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: `radial-gradient(circle at 40% 35%, #fffaf0, ${ESPUMA} 55%, #e8d9b8 100%)`, boxShadow: `inset 0 0 0 6px ${NOITE}, inset 0 0 0 10px ${ESPUMA}, inset 0 0 0 13px ${LIMA}` }} />
+    <div style={{ position: "absolute", left: x - d / 2, top: y - d / 2, width: d, height: d, transform: "rotate(5deg)" }}>
       <svg width={d} height={d} viewBox="0 0 200 200" style={{ position: "absolute", inset: 0 }}>
-        <defs><path id="circC" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
-        <text fontFamily={ARCHIVO} fontWeight={800} fontSize="13.5" fill={NOITE} textLength={circ} lengthAdjust="spacing"><textPath href="#circC" textLength={circ} lengthAdjust="spacing">{`SABADÁ DO BUTICA ● CHOPE GELADO ● ${n.diaSemana} ● `}</textPath></text>
+        <path d="M100 12 C 150 8, 192 50, 188 100 C 184 150, 150 190, 100 188 C 50 186, 10 150, 12 100 C 14 50, 50 16, 100 12 Z M 100 22 C 60 24, 24 56, 22 100 C 20 144, 60 180, 100 178" fill="none" stroke={GIZ_LIMA} strokeWidth={5} strokeLinecap="round" pathLength={1} strokeDasharray={1} strokeDashoffset={1 - p} opacity={0.95} />
       </svg>
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: NOITE, transform: "rotate(-8deg)" }}>
-        <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: d * 0.34, lineHeight: 0.9 }}>{n.dia}</div>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: d * 0.1, letterSpacing: "0.16em" }}>{n.mes}</div>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: d * 0.1, marginTop: 2 }}>ÀS {n.hora}</div>
+      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: o }}>
+        <div style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: d * 0.42, lineHeight: 0.9, ...giz(GIZ_BRANCO) }}>{n.dia}</div>
+        <div style={{ fontFamily: GIZ, fontSize: d * 0.17, lineHeight: 1, ...giz(GIZ_LIMA) }}>{n.mes.toLowerCase()} · {n.hora.toLowerCase()}</div>
       </div>
     </div>
   );
 };
 
-type L = { espumaY: number; ringCy: number; ringH: number; artH: number; artTop: number; titleTop: number; titleSize: number; bafoTop: number; bafoH: number; bolX: number; bolY: number; bolD: number; listaTop: number; cta?: boolean };
+type L = { ringCy: number; ringH: number; artH: number; artTop: number; titleTop: number; titleSize: number; nomeTop: number; dataX: number; dataY: number; dataD: number; listaTop: number; hojeX: number; hojeY: number; cta?: boolean };
 const LAYOUT: Record<"feed" | "story", L> = {
-  feed: { espumaY: 330, ringCy: 700, ringH: 640, artH: 960, artTop: 300, titleTop: 92, titleSize: 230, bafoTop: 940, bafoH: 190, bolX: 905, bolY: 500, bolD: 220, listaTop: 1180 },
-  story: { espumaY: 520, ringCy: 980, ringH: 760, artH: 1200, artTop: 470, titleTop: 290, titleSize: 240, bafoTop: 1300, bafoH: 210, bolX: 895, bolY: 700, bolD: 240, listaTop: 1590, cta: true },
+  feed: { ringCy: 600, ringH: 560, artH: 980, artTop: 250, titleTop: 96, titleSize: 196, nomeTop: 1010, dataX: 920, dataY: 470, dataD: 210, listaTop: 1180, hojeX: 70, hojeY: 300 },
+  story: { ringCy: 860, ringH: 680, artH: 1200, artTop: 450, titleTop: 290, titleSize: 210, nomeTop: 1330, dataX: 910, dataY: 690, dataD: 230, listaTop: 1560, hojeX: 70, hojeY: 520, cta: true },
 };
 
 export const SabadoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
@@ -129,41 +116,52 @@ export const SabadoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
-  const art = useSpr(12, { damping: 15 });
-  const anel = useSpr(0, { damping: 17, stiffness: 60 });
-  const bafo = useSpr(30, { damping: 14 });
-  const tit = useFade(6, 22);
-  const push = interpolate(frame, [0, 240], [1, 1.03], clamp);
-  const nomeSize = Math.min(110, (w - 160) / (n.artista.length * 0.86));
+  const art = useSpr(14, { damping: 15 });
+  const anel = useSpr(6, { damping: 16, stiffness: 70 });
+  const tit = useFade(4, 18);
+  const nome = useFade(34, 48);
+  const push = interpolate(frame, [0, 240], [1, 1.025], clamp);
+  const nomeSize = Math.min(120, (w - 160) / (n.artista.length * 0.56));
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Copo h={h} espumaY={L.espumaY} />
-      <Bolhas w={w} h={h} de={L.espumaY} />
+      <Quadro w={w} h={h} />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "50% 45%" }}>
-        <RingPx width={w} height={h} look="lima" cx={540} cy={L.ringCy} ringH={L.ringH * interpolate(anel, [0, 1], [0.6, 1])} rotY={interpolate(anel, [0, 1], [1.4, 0.28]) + Math.sin(frame / 45) * 0.09} rotX={Math.sin(frame / 60) * 0.05} envIntensity={1.2} lights={[{ color: "#ffd27a", pos: [-3, -2, 3], intensity: 5 }, { color: GELO, pos: [3, 3, 2], intensity: 4 }]} />
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 200} fadeFrom={0.72} filter="saturate(1.12) contrast(1.06) drop-shadow(0 0 40px rgba(255,220,140,.35)) drop-shadow(0 30px 40px rgba(60,30,0,.5))" style={{ opacity: art }} />
+        <Rabiscos w={w} h={h} cx={540} cy={L.artTop + L.artH * 0.45} r={L.artH * 0.3} delay={20} />
+        {/* o "O" do logo como ímã lima preso na lousa, atrás do artista */}
+        <RingPx width={w} height={h} look="lima" cx={540} cy={L.ringCy} ringH={L.ringH * interpolate(anel, [0, 1], [0.6, 1])} rotY={interpolate(anel, [0, 1], [1.3, 0.3]) + Math.sin(frame / 45) * 0.08} rotX={Math.sin(frame / 60) * 0.04} envIntensity={0.9} lights={[{ color: "#fff6d0", pos: [-3, 3, 3], intensity: 3 }]} />
+        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 160} fadeFrom={0.74} filter="saturate(1.08) contrast(1.05) drop-shadow(0 0 2px rgba(244,241,230,.9)) drop-shadow(0 30px 40px rgba(0,0,0,.6))" style={{ opacity: art }} />
       </AbsoluteFill>
-      <Espuma y={L.espumaY} w={w} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: L.titleTop, textAlign: "center", fontFamily: LEAGUE, fontSize: L.titleSize, lineHeight: 0.85, color: "#3B2208", letterSpacing: "0.02em", opacity: tit, textShadow: "0 2px 0 rgba(255,255,255,.6), 0 -1px 0 rgba(120,70,0,.25)", zIndex: 2 }}>SABADÁ <span style={{ fontFamily: ARCHIVO, fontStyle: "italic", fontWeight: 900, fontSize: L.titleSize * 0.3, color: "#8f9600" }}>do Butica</span></div>
-      <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(122,61,8,0) 60%, rgba(90,40,5,.6) 78%, rgba(60,25,3,.92) 92%)` }} />
-      {/* faixa limpa no vidro: o nome do artista escrito no bafo */}
-      <div style={{ position: "absolute", left: 50, right: 50, top: L.bafoTop, height: L.bafoH, transform: `scaleX(${bafo})`, transformOrigin: "left center", borderRadius: L.bafoH / 2, background: "rgba(255,255,255,.10)", border: "1.5px solid rgba(255,255,255,.35)", backdropFilter: "blur(2px)", boxShadow: "inset 0 0 40px rgba(255,255,255,.12), 0 20px 40px rgba(60,30,0,.35)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 22, letterSpacing: "0.34em", color: GELO, marginBottom: 2 }}>NO PALCO DO BUTICA</div>
-        <div style={{ fontFamily: UNB, fontWeight: 900, fontSize: nomeSize, lineHeight: 1, color: ESPUMA, whiteSpace: "nowrap", textShadow: "0 3px 0 rgba(120,60,0,.35), 0 0 30px rgba(255,255,255,.35)" }}>{n.artista}</div>
+      <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(22,33,28,0) 66%, rgba(22,33,28,.85) 80%, rgba(22,33,28,.97) 100%)" }} />
+      <Logo width={f === "feed" ? 200 : 240} top={f === "feed" ? 46 : 214} />
+      {/* título a giz, em duas cores */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: L.titleTop, textAlign: "center", opacity: tit, transform: "rotate(-2deg)" }}>
+        <span style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: L.titleSize, lineHeight: 0.9, letterSpacing: "0.01em", ...giz(GIZ_BRANCO) }}>Sabadá</span>
+        <span style={{ fontFamily: GIZ, fontSize: L.titleSize * 0.42, marginLeft: 18, ...giz(GIZ_LIMA) }}>do Butica</span>
       </div>
-      <Suor w={w} h={h} />
-      <Img src={staticFile("logos/butiquim-mono-branco-h.png")} style={{ position: "absolute", width: f === "feed" ? 200 : 240, top: f === "feed" ? 30 : 200, left: `calc(50% - ${(f === "feed" ? 200 : 240) / 2}px)`, filter: "invert(1) brightness(0.25) sepia(1) saturate(2)" }} />
-      <Estilo n={n} x={44} y={f === "feed" ? 30 : 200} delay={26} size={22} />
-      <Bolacha n={n} x={L.bolX} y={L.bolY} d={L.bolD} delay={36} />
-      <div style={{ position: "absolute", left: 0, right: 0, top: L.listaTop, textAlign: "center", opacity: useFade(46, 60) }}>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 30, color: ESPUMA, letterSpacing: "0.04em" }}>
-          {n.lista[0]} <span style={{ color: LIMA }}>●</span> {n.lista[1]}
+      <Estilo n={n} x={66} y={f === "feed" ? 450 : 670} delay={22} size={f === "feed" ? 22 : 25} />
+      <Hoje x={L.hojeX} y={L.hojeY} delay={28} />
+      <Data n={n} x={L.dataX} y={L.dataY} d={L.dataD} delay={30} />
+      <Nota x={90} y={L.artTop + 380} size={60} rot={-15} delay={40} cor={GIZ_LIMA} />
+      <Nota x={940} y={L.artTop + 420} size={50} rot={12} delay={46} />
+      <Nota x={860} y={L.artTop - 30} size={40} rot={-8} delay={50} cor={GIZ_LIMA} />
+      {/* nome do artista: giz branco grande, sublinhado a giz lima */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: L.nomeTop, textAlign: "center", opacity: nome }}>
+        <div style={{ fontFamily: GIZ, fontSize: 34, lineHeight: 1, ...giz(GIZ_LIMA) }}>no palco do Butica:</div>
+        <div style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: nomeSize, lineHeight: 1, whiteSpace: "nowrap", marginTop: 4, ...giz(GIZ_BRANCO) }}>{n.artista}</div>
+        <svg width={w} height={22} style={{ display: "block", marginTop: -4 }}>
+          <path d={`M${w / 2 - nomeSize * n.artista.length * 0.27} 10 Q ${w / 2} 2, ${w / 2 + nomeSize * n.artista.length * 0.27} 12`} fill="none" stroke={GIZ_LIMA} strokeWidth={5} strokeLinecap="round" opacity={0.9} />
+        </svg>
+      </div>
+      {/* lista a giz */}
+      <div style={{ position: "absolute", left: 0, right: 0, top: L.listaTop, textAlign: "center", opacity: useFade(50, 64) }}>
+        <div style={{ fontFamily: GIZ, fontSize: 40, lineHeight: 1, ...giz(GIZ_BRANCO) }}>
+          lista fem. <span style={{ fontFamily: SKETCH, fontWeight: 700, ...giz(GIZ_LIMA) }}>FREE</span> até {n.lista[0].split("ATÉ ")[1].toLowerCase()} · lista masc. <span style={{ fontFamily: SKETCH, fontWeight: 700, ...giz(GIZ_LIMA) }}>R$ 20</span> até {n.lista[1].split("ATÉ ")[1].toLowerCase()}
         </div>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 500, fontSize: 19, color: ESPUMA, opacity: 0.8, marginTop: 6 }}>{n.obs}</div>
-        {L.cta && <div style={{ marginTop: 14 }}><span style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, color: NOITE, background: LIMA, padding: "8px 20px", letterSpacing: "0.12em" }}>NOME NA LISTA: LINK NA BIO</span></div>}
+        <div style={{ fontFamily: ARCHIVO, fontWeight: 500, fontSize: 19, color: GIZ_BRANCO, opacity: 0.75, marginTop: 8 }}>{n.obs}</div>
+        {L.cta && <div style={{ fontFamily: GIZ, fontSize: 36, marginTop: 10, ...giz(GIZ_LIMA) }}>→ nome na lista: link na bio</div>}
       </div>
-      <Grain opacity={0.08} />
-      <Vignette strength={0.4} color="40,20,0" />
+      <Grain opacity={0.22} freq={1.1} />
+      <Vignette strength={0.45} />
     </AbsoluteFill>
   );
 };

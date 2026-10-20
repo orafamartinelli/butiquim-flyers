@@ -5,9 +5,9 @@ import { copyFileSync, mkdirSync, writeFileSync } from "fs";
 const DEST = "G:/Meu Drive/02 O Butiquim/Agenda Claude/IDs C - amostra 19-10";
 mkdirSync(DEST, { recursive: true });
 const PECAS = [
-  ["sexta", "Sexta C — “Lambe-lambe”", "Cartaz de show colado no poste: papel osso, tinta preta e lima, rasgos, fita, carimbo da data e canhotos pra arrancar. Exemplo: Juntou Deu Samba, 27/11."],
-  ["sabado", "Sabadá C — “Chope Gelado”", "A noite vista de dentro do copo: espuma no alto, chope dourado, bolhas subindo e o vidro suado na frente; o nome do artista no bafo do copo, data na bolacha. Exemplo: Deixa Clarear, 28/11."],
-  ["domingo", "Saideira C — “Comanda”", "A conta da última rodada saindo da impressora, na mesa de madeira: artista impresso em risografia preto + lima, itens da noite, TOTAL = saudade de segunda, carimbo SAIDEIRA e o “O” como peso de papel. Exemplo: João Maurício, 15/11."],
+  ["sexta", "Sexta C — “Lambe-lambe” (v2)", "Cartaz de show colado no poste: papel osso, tinta preta, rasgos, fita, carimbo da data. Sem o bloco amarelo (ficava igual à Comanda); canhotos “LISTA VIP” no rodapé, alguns já arrancados. Exemplo: Juntou Deu Samba, 27/11."],
+  ["sabado", "Sabadá C — “Lousa do Butica” (novo)", "O quadro-negro do boteco escrito a giz branco e lima, moldura de madeira, rabiscos, “hoje!” circulado, estrelas e notas em volta do artista — que fica inteiro, em cor, sem nada na frente do rosto. Exemplo: Deixa Clarear, 28/11."],
+  ["domingo", "Saideira C — “Comanda” ✅ aprovada", "A conta da última rodada saindo da impressora, na mesa de madeira: artista impresso em risografia preto + lima, itens da noite, TOTAL = saudade de segunda, carimbo SAIDEIRA e o “O” como peso de papel. Exemplo: João Maurício, 15/11."],
 ];
 const secoes = PECAS.map(([k, t, d]) => {
   const arq = `${k}-C-FEED.png`;

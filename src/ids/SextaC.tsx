@@ -71,7 +71,8 @@ const Carimbo: React.FC<{ n: Noite; x: number; y: number; delay: number; size?: 
   );
 };
 
-// canhotos destacáveis no pé do cartaz (um já foi arrancado)
+// canhotos "LISTA VIP" destacáveis no pé do cartaz (alguns já foram arrancados — pedido do Rafa 20/10)
+const ARRANCADOS = [1, 4, 7];
 const Canhotos: React.FC<{ w: number; delay: number }> = ({ w, delay }) => {
   const o = useFade(delay, delay + 12);
   const n = 9;
@@ -79,11 +80,11 @@ const Canhotos: React.FC<{ w: number; delay: number }> = ({ w, delay }) => {
   return (
     <div style={{ position: "absolute", left: 20, bottom: 0, width: w - 40, height: 86, display: "flex", opacity: o, borderTop: `2px dashed rgba(11,11,9,.5)` }}>
       {Array.from({ length: n }, (_, i) =>
-        i === 3 ? (
-          <div key={i} style={{ width: cw, height: 20, borderRight: "2px dashed rgba(11,11,9,.5)" }} />
+        ARRANCADOS.includes(i) ? (
+          <div key={i} style={{ width: cw, height: 14 + rnd(i) * 14, borderRight: "2px dashed rgba(11,11,9,.5)", background: OSSO, clipPath: `polygon(0 0, 100% 0, 100% 60%, ${50 + rnd(i + 2) * 30}% 100%, ${rnd(i + 3) * 30}% 70%)` }} />
         ) : (
           <div key={i} style={{ width: cw, height: "100%", borderRight: i < n - 1 ? "2px dashed rgba(11,11,9,.5)" : undefined, display: "flex", alignItems: "center", justifyContent: "center", transform: `rotate(${(rnd(i + 7) - 0.5) * 2}deg)` }}>
-            <div style={{ transform: "rotate(-90deg)", fontFamily: ARCHIVO, fontWeight: 900, fontSize: 17, letterSpacing: "0.14em", color: PRETO, whiteSpace: "nowrap", opacity: 0.85 }}>LISTA · BIO</div>
+            <div style={{ transform: "rotate(-90deg)", fontFamily: ARCHIVO, fontWeight: 900, fontSize: 17, letterSpacing: "0.14em", color: PRETO, whiteSpace: "nowrap", opacity: 0.85 }}>LISTA VIP</div>
           </div>
         ),
       )}
@@ -126,8 +127,8 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
             <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 118, background: PRETO }} />
             <Logo width={230} top={34} />
             
-            {/* bloco lima atrás do artista */}
-            <div style={{ position: "absolute", left: 90, top: L.artTop + 60, width: L.pw - 180, height: L.artH * 0.55, background: LIMA, transform: "skewY(-3deg)", opacity: interpolate(art, [0, 1], [0, 1]) }} />
+            {/* sem bloco de cor atrás do artista (Rafa 20/10: o amarelo deixava igual à Comanda) — só um traço de pincel preto */}
+            <div style={{ position: "absolute", left: 60, top: L.artTop + L.artH * 0.62, width: L.pw - 120, height: 22, background: PRETO, transform: "rotate(-2deg)", opacity: interpolate(art, [0, 1], [0, 0.9]), clipPath: "polygon(0 30%, 3% 0, 97% 10%, 100% 60%, 98% 100%, 2% 90%)" }} />
             {/* SEXTA gigante */}
             <div style={{ position: "absolute", left: 0, right: 0, top: L.titleTop + 60, textAlign: "center", fontFamily: BEBAS, fontSize: L.titleSize, lineHeight: 0.8, color: PRETO, letterSpacing: "-0.01em", opacity: useFade(8, 20) }}>SEXTA</div>
             {/* artista impresso em preto (duotone de cartaz) */}

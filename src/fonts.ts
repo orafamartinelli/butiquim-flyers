@@ -32,3 +32,8 @@ export const ALFA = alfa("normal", { weights: ["400"], subsets: ["latin"] }).fon
 export const LEAGUE = league("normal", { weights: ["400"], subsets: latin }).fontFamily;
 export const COURIER = courier("normal", { weights: ["400", "700"], subsets: ["latin"] }).fontFamily;
 courier("italic", { weights: ["400", "700"], subsets: ["latin"] });
+// Sabado C "Lousa do Butica": giz
+import { loadFont as cabinSketch } from "@remotion/google-fonts/CabinSketch";
+import { loadFont as caveatBrush } from "@remotion/google-fonts/CaveatBrush";
+export const SKETCH = cabinSketch("normal", { weights: ["400", "700"], subsets: ["latin"] }).fontFamily;
+export const GIZ = caveatBrush("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
