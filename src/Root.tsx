@@ -11,6 +11,8 @@ import { DomingoB } from "./ids/DomingoB";
 import { SextaC } from "./ids/SextaC";
 import { SabadoC } from "./ids/SabadoC";
 import { DomingoC } from "./ids/DomingoC";
+import { SextaD } from "./ids/SextaD";
+import { SabadoD } from "./ids/SabadoD";
 import { TesteO } from "./Teste";
 import { AGENDA_DUR, AgendaV1, AgendaV2, AgendaV3, TrilhaAgenda } from "./agenda/AgendaSemana";
 
@@ -59,8 +61,12 @@ export const RemotionRoot: React.FC = () => (
     {(
       [
         ["sexta", SextaC, NOITES.sexta9],
+        ["sexta2", SextaC, NOITES.sexta6], // lambe com artista sozinha (Hilana), pedido do Rafa 20/10
         ["sabado", SabadoC, NOITES.sabado9],
         ["domingo", DomingoC, NOITES.domingo7],
+        // identidades D (20/10, "mais 2 novas"): mesa vista de cima (sexta) e pôster de cinema (sábado)
+        ["sextaD", SextaD, NOITES.sexta6],
+        ["sabadoD", SabadoD, NOITES.sabado8],
       ] as const
     ).map(([k, C, n]) => {
       const Comp: React.FC = () => <C n={n} fmt="feed" />;

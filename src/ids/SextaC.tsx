@@ -94,8 +94,9 @@ const Canhotos: React.FC<{ w: number; delay: number }> = ({ w, delay }) => {
 
 type L = { px: number; py: number; pw: number; ph: number; artH: number; artTop: number; titleTop: number; titleSize: number; nomeTop: number; listaTop: number };
 const LAYOUT: Record<"feed" | "story", L> = {
-  feed: { px: 60, py: 56, pw: 960, ph: 1236, artH: 850, artTop: 330, titleTop: 70, titleSize: 300, nomeTop: 740, listaTop: 950 },
-  story: { px: 60, py: 180, pw: 960, ph: 1580, artH: 1050, artTop: 420, titleTop: 100, titleSize: 320, nomeTop: 1080, listaTop: 1300 },
+  // Rafa 20/10: faixa do nome mais baixa, pra não cair no rosto de ninguém
+  feed: { px: 60, py: 56, pw: 960, ph: 1236, artH: 820, artTop: 330, titleTop: 70, titleSize: 300, nomeTop: 830, listaTop: 1035 },
+  story: { px: 60, py: 180, pw: 960, ph: 1580, artH: 1020, artTop: 420, titleTop: 100, titleSize: 320, nomeTop: 1160, listaTop: 1350 },
 };
 
 export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
@@ -109,7 +110,7 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
   const anel = useSpr(10, { damping: 16, stiffness: 70 });
   const push = interpolate(frame, [0, 240], [1, 1.03], clamp);
   const nomeTxt = n.artista;
-  const nomeSize = Math.min(190, (L.pw - 140) / (nomeTxt.replace(/ /g, "").length * 0.43 + (nomeTxt.split(" ").length - 1) * 0.25));
+  const nomeSize = Math.min(150, (L.pw - 140) / (nomeTxt.replace(/ /g, "").length * 0.43 + (nomeTxt.split(" ").length - 1) * 0.25));
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Muro />
@@ -132,7 +133,7 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
             {/* SEXTA gigante */}
             <div style={{ position: "absolute", left: 0, right: 0, top: L.titleTop + 60, textAlign: "center", fontFamily: BEBAS, fontSize: L.titleSize, lineHeight: 0.8, color: PRETO, letterSpacing: "-0.01em", opacity: useFade(8, 20) }}>SEXTA</div>
             {/* artista impresso em preto (duotone de cartaz) */}
-            <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: L.artH, width: L.artH * n.foto.ratio, left: L.pw / 2 - (L.artH * n.foto.ratio) / 2, top: L.artTop + (1 - art) * 120, opacity: art, filter: "grayscale(1) contrast(1.35) brightness(1.02)", mixBlendMode: "multiply", WebkitMaskImage: "linear-gradient(180deg, #000 78%, transparent 97%)" }} />
+            <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: L.artH, width: L.artH * n.foto.ratio, left: L.pw / 2 - (L.artH * n.foto.ratio) / 2, top: L.artTop + (1 - art) * 120, opacity: art, filter: "grayscale(1) contrast(1.35) brightness(1.02)", mixBlendMode: "multiply", WebkitMaskImage: "linear-gradient(180deg, #000 70%, transparent 85%)" }} />
             {/* nome do artista: tarja preta torta, tipografia de cartaz */}
             <div style={{ position: "absolute", left: 40, right: 40, top: L.nomeTop, transform: `rotate(-2deg) scaleX(${nome})`, transformOrigin: "left center", background: PRETO, color: OSSO, textAlign: "center", padding: "14px 20px 18px", boxShadow: "0 14px 30px rgba(0,0,0,.35)" }}>
               <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 22, letterSpacing: "0.36em", color: LIMA, marginBottom: 4 }}>DO BUTICA COM</div>
@@ -155,7 +156,7 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
           <Fita x={L.pw / 2 - 80} y={L.ph - 30} rot={4} w={170} />
         </div>
         {/* o "O" do logo como carimbo lima, pousando no canto */}
-        <RingPx width={w} height={h} look="lima" flat cx={L.px + L.pw - 95} cy={L.py + L.ph - 95} ringH={interpolate(anel, [0, 1], [320, 210])} rotY={interpolate(anel, [0, 1], [1.2, 0.35]) + Math.sin(frame / 40) * 0.08} rotZ={-0.3} envIntensity={0.9} style={{ opacity: anel, filter: "drop-shadow(0 20px 24px rgba(0,0,0,.5))" }} />
+        <RingPx width={w} height={h} look="lima" flat cx={L.px + 95} cy={L.py + L.ph - 85} ringH={interpolate(anel, [0, 1], [300, 200])} rotY={interpolate(anel, [0, 1], [1.2, 0.35]) + Math.sin(frame / 40) * 0.08} rotZ={-0.3} envIntensity={0.9} style={{ opacity: anel, filter: "drop-shadow(0 20px 24px rgba(0,0,0,.5))" }} />
       </AbsoluteFill>
       <Estilo n={n} x={L.px + L.pw - 300} y={L.py + 22} delay={26} size={22} />
       <Carimbo n={n} x={L.px + L.pw - 265} y={L.titleTop + L.py + 290} delay={38} size={f === "feed" ? 0.8 : 0.9} />

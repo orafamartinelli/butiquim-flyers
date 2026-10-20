@@ -37,3 +37,6 @@ import { loadFont as cabinSketch } from "@remotion/google-fonts/CabinSketch";
 import { loadFont as caveatBrush } from "@remotion/google-fonts/CaveatBrush";
 export const SKETCH = cabinSketch("normal", { weights: ["400", "700"], subsets: ["latin"] }).fontFamily;
 export const GIZ = caveatBrush("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+// Sexta D "Mesa do Butica": caneta/marcador
+import { loadFont as marker } from "@remotion/google-fonts/PermanentMarker";
+export const MARKER = marker("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
