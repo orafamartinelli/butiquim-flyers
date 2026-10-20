@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BEBAS, MARKER, ARCHIVO } from "../fonts";
 import { Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
@@ -35,7 +35,7 @@ const Estampa: React.FC<{ top: number; size: number; delay: number }> = ({ top, 
 };
 
 // polaroid com o artista (recorte em cor sobre fundo escuro) e legenda à caneta
-const Polaroid: React.FC<{ n: Noite; x: number; y: number; w: number; h: number; delay: number; rot: number }> = ({ n, x, y, w, h, delay, rot }) => {
+const Polaroid: React.FC<{ n: Noite; x: number; y: number; w: number; h: number; delay: number; rot: number; video?: boolean }> = ({ n, x, y, w, h, delay, rot, video }) => {
   const s = useSpr(delay, { damping: 13, stiffness: 80 });
   const fotoH = h - 150;
   const fotoW = w - 40;
@@ -45,7 +45,11 @@ const Polaroid: React.FC<{ n: Noite; x: number; y: number; w: number; h: number;
     <div style={{ position: "absolute", left: x, top: y, width: w, height: h, transform: `rotate(${rot}deg) translateY(${(1 - s) * -80}px)`, opacity: s, background: PAPEL, padding: 20, boxSizing: "border-box", boxShadow: "0 30px 50px rgba(0,0,0,.65), 0 2px 0 rgba(255,255,255,.3) inset" }}>
       <div style={{ position: "relative", width: fotoW, height: fotoH, background: "radial-gradient(ellipse at 50% 35%, #2a2622 0%, #0d0c0a 70%)", overflow: "hidden" }}>
         <div style={{ position: "absolute", left: "50%", top: "22%", width: 600, height: 600, marginLeft: -300, borderRadius: "50%", background: "rgba(200,210,0,.22)", filter: "blur(90px)" }} />
-        <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: artH, width: artW, left: fotoW / 2 - artW / 2, top: 10, filter: "saturate(1.08) contrast(1.04) drop-shadow(0 20px 30px rgba(0,0,0,.6))", WebkitMaskImage: "linear-gradient(180deg, #000 86%, transparent 100%)" }} />
+        {video ? (
+          <OffthreadVideo src={staticFile(n.clip)} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 18%", filter: "saturate(1.06) contrast(1.04)" }} volume={(fr) => interpolate(fr, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+        ) : (
+          <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: artH, width: artW, left: fotoW / 2 - artW / 2, top: 10, filter: "saturate(1.08) contrast(1.04) drop-shadow(0 20px 30px rgba(0,0,0,.6))", WebkitMaskImage: "linear-gradient(180deg, #000 86%, transparent 100%)" }} />
+        )}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,0) 40%)" }} />
       </div>
       <div style={{ position: "absolute", left: 24, right: 24, bottom: 26, display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: MARKER, color: TINTA }}>
@@ -113,7 +117,8 @@ const LAYOUT: Record<"feed" | "story", L> = {
 };
 
 export const SextaD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
-  const f = fmt === "broll" ? "story" : fmt;
+  const video = fmt === "broll";
+  const f = video ? "story" : fmt;
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
@@ -124,7 +129,7 @@ export const SextaD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
       <Mesa w={w} h={h} />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "40% 40%" }}>
         <Estampa top={L.estTop} size={L.estSize} delay={2} />
-        <Polaroid n={n} x={L.polX} y={L.polY} w={L.polW} h={L.polH} delay={8} rot={-4} />
+        <Polaroid n={n} x={L.polX} y={L.polY} w={L.polW} h={L.polH} delay={8} rot={-4} video={video} />
         <Estilo n={n} x={L.polX + L.polW - 30} y={L.polY + 40} d={170} delay={40} />
         <Guardanapo n={n} x={L.guaX} y={L.guaY} w={L.guaW} h={L.guaH} delay={24} rot={2} cta={L.cta} />
         {/* bolacha de chope lima com o "O" em relevo */}

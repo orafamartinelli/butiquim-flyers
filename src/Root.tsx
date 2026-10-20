@@ -68,10 +68,17 @@ export const RemotionRoot: React.FC = () => (
         ["sextaD", SextaD, NOITES.sexta6],
         ["sabadoD", SabadoD, NOITES.sabado8],
       ] as const
-    ).map(([k, C, n]) => {
-      const Comp: React.FC = () => <C n={n} fmt="feed" />;
-      return <Composition key={`c-${k}-feed`} id={`c-${k}-feed`} component={Comp} durationInFrames={240} fps={30} width={1080} height={1350} />;
-    })}
+    ).flatMap(([k, C, n]) =>
+      (["feed", "story", "broll"] as Formato[]).map((fmt) => {
+        const Comp: React.FC = () => (
+          <AbsoluteFill>
+            <C n={n} fmt={fmt} />
+            {fmt !== "broll" && <Trilha src={n.clip} dur={DUR[fmt]} />}
+          </AbsoluteFill>
+        );
+        return <Composition key={`c-${k}-${fmt}`} id={`c-${k}-${fmt}`} component={Comp} durationInFrames={DUR[fmt]} fps={30} width={DIM[fmt].w} height={DIM[fmt].h} />;
+      }),
+    )}
     {/* agenda da semana 02–04/10: 3 versões × feed/story, estática (parado) e vídeo com a trilha dos artistas */}
     {([["v1", AgendaV1], ["v2", AgendaV2], ["v3", AgendaV3]] as const).flatMap(([v, C]) =>
       (["feed", "story"] as const).flatMap((fmt) => {

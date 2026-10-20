@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { SKETCH, GIZ, ARCHIVO } from "../fonts";
 import { Cutout, Grain, Logo, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
@@ -112,7 +112,8 @@ const LAYOUT: Record<"feed" | "story", L> = {
 };
 
 export const SabadoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
-  const f = fmt === "broll" ? "story" : fmt;
+  if (fmt === "broll") return <SabadoCBroll n={n} />;
+  const f = fmt;
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
@@ -159,6 +160,54 @@ export const SabadoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
         </div>
         <div style={{ fontFamily: ARCHIVO, fontWeight: 500, fontSize: 19, color: GIZ_BRANCO, opacity: 0.75, marginTop: 8 }}>{n.obs}</div>
         {L.cta && <div style={{ fontFamily: GIZ, fontSize: 36, marginTop: 10, ...giz(GIZ_LIMA) }}>→ nome na lista: link na bio</div>}
+      </div>
+      <Grain opacity={0.22} freq={1.1} />
+      <Vignette strength={0.45} />
+    </AbsoluteFill>
+  );
+};
+
+// STORY com B-roll: o vídeo do artista preso na lousa com um ímã, giz em volta; título em cima, nome e lista embaixo
+const SabadoCBroll: React.FC<{ n: Noite }> = ({ n }) => {
+  const { w, h } = DIM.broll;
+  const frame = useCurrentFrame();
+  const vid = useSpr(10, { damping: 14 });
+  const tit = useFade(4, 18);
+  const nome = useFade(34, 48);
+  const VX = 80, VY = 420, VW = 920, VH = 760;
+  const nomeSize = Math.min(120, (w - 160) / (n.artista.length * 0.56));
+  return (
+    <AbsoluteFill style={{ overflow: "hidden" }}>
+      <Quadro w={w} h={h} />
+      <Rabiscos w={w} h={h} cx={540} cy={VY + VH / 2} r={VW * 0.42} delay={20} />
+      <Logo width={240} top={200} />
+      <div style={{ position: "absolute", left: 0, right: 0, top: 280, textAlign: "center", opacity: tit, transform: "rotate(-2deg)" }}>
+        <span style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: 190, lineHeight: 0.9, ...giz(GIZ_BRANCO) }}>Sabadá</span>
+        <span style={{ fontFamily: GIZ, fontSize: 80, marginLeft: 18, ...giz(GIZ_LIMA) }}>do Butica</span>
+      </div>
+      {/* a "foto" presa com ímã: papel branco em volta do vídeo */}
+      <div style={{ position: "absolute", left: VX, top: VY, width: VW, height: VH, transform: `rotate(-1.5deg) translateY(${(1 - vid) * 60}px)`, opacity: vid, background: GIZ_BRANCO, padding: 16, boxSizing: "border-box", boxShadow: "0 30px 50px rgba(0,0,0,.6)" }}>
+        <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", background: "#000" }}>
+          <OffthreadVideo src={staticFile(n.clip)} style={{ width: VW - 32, height: (VW - 32) * (1920 / 1080), objectFit: "cover", marginTop: (n.clipTop ?? -380) * ((VW - 32) / 1000), filter: "contrast(1.05) saturate(1.08)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+        </div>
+        <div style={{ position: "absolute", left: VW / 2 - 28, top: -26, width: 56, height: 56, borderRadius: "50%", background: `radial-gradient(circle at 35% 30%, #e9f27a, ${GIZ_LIMA} 55%, #8f9a1a 100%)`, boxShadow: "0 8px 14px rgba(0,0,0,.5)" }} />
+      </div>
+      <Hoje x={60} y={1200} delay={28} />
+      <Data n={n} x={900} y={1270} d={220} delay={30} />
+      <Estilo n={n} x={330} y={1215} delay={22} size={24} />
+      <Nota x={990} y={380} size={56} rot={12} delay={46} />
+      <Nota x={40} y={1090} size={54} rot={-15} delay={40} cor={GIZ_LIMA} />
+      <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(22,33,28,0) 70%, rgba(22,33,28,.85) 82%, rgba(22,33,28,.97) 100%)" }} />
+      <div style={{ position: "absolute", left: 0, right: 0, top: 1400, textAlign: "center", opacity: nome }}>
+        <div style={{ fontFamily: GIZ, fontSize: 34, lineHeight: 1, ...giz(GIZ_LIMA) }}>no palco do Butica:</div>
+        <div style={{ fontFamily: SKETCH, fontWeight: 700, fontSize: nomeSize, lineHeight: 1, whiteSpace: "nowrap", marginTop: 4, ...giz(GIZ_BRANCO) }}>{n.artista}</div>
+      </div>
+      <div style={{ position: "absolute", left: 0, right: 0, top: 1600, textAlign: "center", opacity: useFade(50, 64) }}>
+        <div style={{ fontFamily: GIZ, fontSize: 40, lineHeight: 1, ...giz(GIZ_BRANCO) }}>
+          lista fem. <span style={{ fontFamily: SKETCH, fontWeight: 700, ...giz(GIZ_LIMA) }}>FREE</span> até {n.lista[0].split("ATÉ ")[1].toLowerCase()} · lista masc. <span style={{ fontFamily: SKETCH, fontWeight: 700, ...giz(GIZ_LIMA) }}>R$ 20</span> até {n.lista[1].split("ATÉ ")[1].toLowerCase()}
+        </div>
+        <div style={{ fontFamily: ARCHIVO, fontWeight: 500, fontSize: 19, color: GIZ_BRANCO, opacity: 0.75, marginTop: 8 }}>{n.obs}</div>
+        <div style={{ fontFamily: GIZ, fontSize: 36, marginTop: 10, ...giz(GIZ_LIMA) }}>→ nome na lista: link na bio</div>
       </div>
       <Grain opacity={0.22} freq={1.1} />
       <Vignette strength={0.45} />

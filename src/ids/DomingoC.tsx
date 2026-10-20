@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { COURIER, BEBAS, ARCHIVO } from "../fonts";
 import { Grain, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
@@ -72,7 +72,8 @@ const LAYOUT: Record<"feed" | "story", L> = {
 };
 
 export const DomingoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
-  const f = fmt === "broll" ? "story" : fmt;
+  const video = fmt === "broll";
+  const f = video ? "story" : fmt;
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
@@ -102,7 +103,11 @@ export const DomingoC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
           {/* o artista impresso: risografia preto + lima */}
           <div style={{ position: "relative", height: L.fotoH, margin: "4px 0 10px", overflow: "hidden", opacity: foto }}>
             <div style={{ position: "absolute", left: "8%", right: "8%", top: 30, bottom: 0, background: LIMA, transform: "skewY(-2deg)", opacity: 0.9 }} />
-            <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: L.fotoH * 1.12, width: L.fotoH * 1.12 * n.foto.ratio, left: `calc(50% - ${(L.fotoH * 1.12 * n.foto.ratio) / 2}px)`, top: 0, filter: "grayscale(1) contrast(1.4) brightness(1.05)", mixBlendMode: "multiply", WebkitMaskImage: "linear-gradient(180deg, #000 85%, transparent 100%)" }} />
+            {video ? (
+              <OffthreadVideo src={staticFile(n.clip)} style={{ position: "absolute", left: "8%", top: 30, width: "84%", height: L.fotoH - 30, objectFit: "cover", objectPosition: "50% 15%", filter: "grayscale(1) contrast(1.35) brightness(1.05)", mixBlendMode: "multiply" }} volume={(fr) => interpolate(fr, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+            ) : (
+              <Img src={staticFile(n.foto.src)} style={{ position: "absolute", height: L.fotoH * 1.12, width: L.fotoH * 1.12 * n.foto.ratio, left: `calc(50% - ${(L.fotoH * 1.12 * n.foto.ratio) / 2}px)`, top: 0, filter: "grayscale(1) contrast(1.4) brightness(1.05)", mixBlendMode: "multiply", WebkitMaskImage: "linear-gradient(180deg, #000 85%, transparent 100%)" }} />
+            )}
             {/* retícula de impressão */}
             <AbsoluteFill style={{ backgroundImage: "radial-gradient(circle, rgba(247,244,234,.9) 0.9px, transparent 1.4px)", backgroundSize: "5px 5px", opacity: 0.35, mixBlendMode: "screen" }} />
           </div>

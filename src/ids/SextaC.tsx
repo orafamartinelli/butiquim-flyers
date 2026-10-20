@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BEBAS, ALFA, LEAGUE, ARCHIVO } from "../fonts";
 import { Grain, Logo, Nota, Vignette, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
@@ -100,7 +100,8 @@ const LAYOUT: Record<"feed" | "story", L> = {
 };
 
 export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
-  const f = fmt === "broll" ? "story" : fmt;
+  if (fmt === "broll") return <SextaCBroll n={n} />;
+  const f = fmt;
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
@@ -160,6 +161,64 @@ export const SextaC: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
       </AbsoluteFill>
       <Estilo n={n} x={L.px + L.pw - 300} y={L.py + 22} delay={26} size={22} />
       <Carimbo n={n} x={L.px + L.pw - 265} y={L.titleTop + L.py + 290} delay={38} size={f === "feed" ? 0.8 : 0.9} />
+      <Grain opacity={0.2} />
+      <Vignette strength={0.5} />
+    </AbsoluteFill>
+  );
+};
+
+// STORY com B-roll: o vídeo do artista colado no cartaz como uma foto grande, com fita; nome, lista e canhotos embaixo
+const SextaCBroll: React.FC<{ n: Noite }> = ({ n }) => {
+  const { w, h } = DIM.broll;
+  const L = LAYOUT.story;
+  const frame = useCurrentFrame();
+  const cola = useSpr(4, { damping: 13, stiffness: 90 });
+  const vid = useFade(12, 26);
+  const nome = useSpr(30, { damping: 11 });
+  const anel = useSpr(10, { damping: 16, stiffness: 70 });
+  const nomeTxt = n.artista;
+  const nomeSize = Math.min(150, (L.pw - 140) / (nomeTxt.replace(/ /g, "").length * 0.43 + (nomeTxt.split(" ").length - 1) * 0.25));
+  const VX = 70, VY = 330, VW = L.pw - 140, VH = 760;
+  return (
+    <AbsoluteFill style={{ overflow: "hidden" }}>
+      <Muro />
+      <Velho x={-60} y={200} w={520} h={300} rot={-7} cor={OSSO} texto="SEXTA" seed={3} />
+      <Velho x={700} y={h - 420} w={480} h={320} rot={-4} cor={PRETO} texto="LISTA" seed={23} o={0.7} />
+      <div style={{ position: "absolute", left: L.px, top: L.py, width: L.pw, height: L.ph, transform: `rotate(-1.6deg) scale(${interpolate(cola, [0, 1], [1.06, 1])})`, transformOrigin: "50% 20%", opacity: cola, filter: "drop-shadow(0 30px 40px rgba(0,0,0,.55))" }}>
+        <div style={{ position: "absolute", inset: 0, background: OSSO, clipPath: rasgo(5, 1.1), overflow: "hidden" }}>
+          <AbsoluteFill style={{ background: "linear-gradient(115deg, rgba(0,0,0,.06) 0%, rgba(255,255,255,0) 30%, rgba(0,0,0,.05) 55%, rgba(255,255,255,0) 80%, rgba(0,0,0,.08) 100%)" }} />
+          <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 118, background: PRETO }} />
+          <Logo width={230} top={34} />
+          <div style={{ position: "absolute", left: 60, top: 130, fontFamily: BEBAS, fontSize: 200, lineHeight: 0.8, color: PRETO, opacity: useFade(8, 20) }}>SEXTA</div>
+          {/* o vídeo, colado torto como uma foto */}
+          <div style={{ position: "absolute", left: VX, top: VY, width: VW, height: VH, transform: "rotate(1.2deg)", background: PRETO, padding: 14, boxSizing: "border-box", boxShadow: "0 18px 30px rgba(0,0,0,.45)", opacity: vid }}>
+            <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
+              <OffthreadVideo src={staticFile(n.clip)} style={{ width: VW - 28, height: (VW - 28) * (1920 / 1080), objectFit: "cover", marginTop: (n.clipTop ?? -380) * ((VW - 28) / 1000), filter: "contrast(1.06) saturate(1.05)" }} volume={(f) => interpolate(f, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+              <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0) 80%, rgba(0,0,0,.45) 100%)" }} />
+            </div>
+            <Fita x={-30} y={-18} rot={-30} w={140} />
+            <Fita x={VW - 120} y={-18} rot={26} w={140} />
+          </div>
+          <div style={{ position: "absolute", left: 40, right: 40, top: VY + VH + 60, transform: `rotate(-2deg) scaleX(${nome})`, transformOrigin: "left center", background: PRETO, color: OSSO, textAlign: "center", padding: "14px 20px 18px", boxShadow: "0 14px 30px rgba(0,0,0,.35)" }}>
+            <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 22, letterSpacing: "0.36em", color: LIMA, marginBottom: 4 }}>DO BUTICA COM</div>
+            <div style={{ fontFamily: BEBAS, fontSize: nomeSize, lineHeight: 0.88, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>{nomeTxt}</div>
+          </div>
+          <div style={{ position: "absolute", left: 60, right: 60, top: VY + VH + 290, textAlign: "center", opacity: useFade(44, 58) }}>
+            <div style={{ fontFamily: BEBAS, fontSize: 42, color: PRETO, lineHeight: 1, letterSpacing: "0.03em", whiteSpace: "nowrap" }}>
+              {n.lista[0]} <span style={{ color: "#8f9600" }}>●</span> {n.lista[1]}
+            </div>
+            <div style={{ fontFamily: ARCHIVO, fontWeight: 600, fontSize: 22, color: PRETO, opacity: 0.7, marginTop: 8 }}>{n.obs}</div>
+            <div style={{ display: "inline-block", fontFamily: ALFA, fontSize: 24, color: OSSO, background: PRETO, padding: "6px 18px", letterSpacing: "0.1em", marginTop: 12 }}>NOME NA LISTA: LINK NA BIO</div>
+          </div>
+          <Canhotos w={L.pw} delay={52} />
+          <div style={{ position: "absolute", right: -40, bottom: -30, width: 180, height: 150, background: MURO, clipPath: "polygon(100% 0, 100% 100%, 0 100%, 20% 70%, 45% 60%, 55% 35%, 80% 20%)" }} />
+        </div>
+        <Fita x={-30} y={-14} rot={-32} />
+        <Fita x={L.pw - 120} y={-16} rot={28} />
+      </div>
+      <RingPx width={w} height={h} look="lima" flat cx={L.px + L.pw - 40} cy={L.py + L.ph - 55} ringH={interpolate(anel, [0, 1], [260, 170])} rotY={interpolate(anel, [0, 1], [1.2, 0.35]) + Math.sin(frame / 40) * 0.08} rotZ={-0.3} envIntensity={0.9} style={{ opacity: anel, filter: "drop-shadow(0 20px 24px rgba(0,0,0,.5))" }} />
+      <Estilo n={n} x={L.px + L.pw - 300} y={L.py + 22} delay={26} size={22} />
+      <Carimbo n={n} x={L.px + L.pw - 300} y={L.py + 120} delay={38} size={0.72} />
       <Grain opacity={0.2} />
       <Vignette strength={0.5} />
     </AbsoluteFill>

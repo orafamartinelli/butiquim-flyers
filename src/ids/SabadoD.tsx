@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BANGERS, LUCKIEST, ARCHIVO } from "../fonts";
 import { Cutout, clamp, useFade, useSpr } from "../shared/fx";
 import { RingPx } from "../shared/Ring3D";
@@ -87,7 +87,8 @@ const LAYOUT: Record<"feed" | "story", L> = {
 };
 
 export const SabadoD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
-  const f = fmt === "broll" ? "story" : fmt;
+  const video = fmt === "broll";
+  const f = video ? "story" : fmt;
   const L = LAYOUT[f];
   const { w, h } = DIM[f];
   const frame = useCurrentFrame();
@@ -99,13 +100,20 @@ export const SabadoD: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Pagina w={w} h={h} cx={540} cy={L.artTop + L.artH * 0.4} />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "50% 45%" }}>
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 220} fadeFrom={0.78} filter={`saturate(1.25) contrast(1.12) ${CONTORNO}`} style={{ opacity: art }} />
+        {video ? (
+          <div style={{ position: "absolute", left: 60, top: 500, width: 960, height: 790, transform: `rotate(-1deg) scale(${art})`, border: `10px solid ${NAVY}`, boxShadow: `inset 0 0 0 6px ${BRANCO}, 12px 12px 0 ${NAVY}`, background: NAVY, overflow: "hidden" }}>
+            <OffthreadVideo src={staticFile(n.clip)} style={{ position: "absolute", inset: 6, width: "calc(100% - 12px)", height: "calc(100% - 12px)", objectFit: "cover", objectPosition: "50% 15%", filter: "saturate(1.25) contrast(1.1)" }} volume={(fr) => interpolate(fr, [0, 8, 285, 300], [0, 1, 1, 0], clamp)} />
+            <AbsoluteFill style={{ backgroundImage: `radial-gradient(circle, ${NAVY} 1.2px, transparent 1.8px)`, backgroundSize: "9px 9px", opacity: 0.12 }} />
+          </div>
+        ) : (
+          <Cutout src={n.foto.src} ratio={n.foto.ratio} height={L.artH} cx={540} top={L.artTop + (1 - art) * 220} fadeFrom={0.78} filter={`saturate(1.25) contrast(1.12) ${CONTORNO}`} style={{ opacity: art }} />
+        )}
       </AbsoluteFill>
       {/* logo em navy no canto */}
       <Img src={staticFile("logos/butiquim-mono-branco-h.png")} style={{ position: "absolute", width: f === "feed" ? 190 : 220, right: 54, top: f === "feed" ? 52 : 220, filter: "invert(1) brightness(0.35) sepia(1) hue-rotate(200deg) saturate(3)" }} />
       <Balao x={L.balX} y={L.balY} w={L.balW} size={L.balSize} delay={6} />
-      <Estouro n={n} x={L.estX} y={L.estY} d={L.estD} delay={26} />
-      <Legenda x={w - 330} y={L.dataY} w={290} delay={32} rot={4}>
+      <Estouro n={n} x={L.estX} y={video ? 330 : L.estY} d={L.estD} delay={26} />
+      <Legenda x={w - 330} y={video ? 1130 : L.dataY} w={290} delay={32} rot={4}>
         <div style={{ fontFamily: LUCKIEST, fontSize: 20, color: NAVY, letterSpacing: "0.06em" }}>ENQUANTO ISSO, NO {n.diaSemana}...</div>
         <div style={{ fontFamily: BANGERS, fontSize: 96, lineHeight: 0.9, color: VERMELHO, textShadow: `4px 4px 0 ${NAVY}` }}>{n.dia} {n.mes}</div>
         <div style={{ fontFamily: LUCKIEST, fontSize: 30, color: NAVY }}>ÀS {n.hora}</div>
