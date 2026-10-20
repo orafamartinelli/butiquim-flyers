@@ -21,3 +21,14 @@ barlowCond("italic", { weights: ["800", "900"], subsets: latin });
 export const ANTON = anton("normal", { weights: ["400"], subsets: latin }).fontFamily;
 export const YELLOWTAIL = yellowtail("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
 export const MONOTON = monoton("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+
+// identidades C (19/10): lambe-lambe, chope gelado, comanda
+import { loadFont as bebas } from "@remotion/google-fonts/BebasNeue";
+import { loadFont as alfa } from "@remotion/google-fonts/AlfaSlabOne";
+import { loadFont as league } from "@remotion/google-fonts/LeagueGothic";
+import { loadFont as courier } from "@remotion/google-fonts/CourierPrime";
+export const BEBAS = bebas("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+export const ALFA = alfa("normal", { weights: ["400"], subsets: ["latin"] }).fontFamily;
+export const LEAGUE = league("normal", { weights: ["400"], subsets: latin }).fontFamily;
+export const COURIER = courier("normal", { weights: ["400", "700"], subsets: ["latin"] }).fontFamily;
+courier("italic", { weights: ["400", "700"], subsets: ["latin"] });

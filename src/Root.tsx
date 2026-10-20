@@ -8,6 +8,9 @@ import { Domingo } from "./ids/Domingo";
 import { SextaB } from "./ids/SextaB";
 import { SabadoB } from "./ids/SabadoB";
 import { DomingoB } from "./ids/DomingoB";
+import { SextaC } from "./ids/SextaC";
+import { SabadoC } from "./ids/SabadoC";
+import { DomingoC } from "./ids/DomingoC";
 import { TesteO } from "./Teste";
 import { AGENDA_DUR, AgendaV1, AgendaV2, AgendaV3, TrilhaAgenda } from "./agenda/AgendaSemana";
 
@@ -52,6 +55,17 @@ const Trilha: React.FC<{ src: string; dur: number }> = ({ src, dur }) => (
 export const RemotionRoot: React.FC = () => (
   <>
     <Still id="teste-o" component={TesteO} width={1620} height={600} />
+    {/* identidades C (19/10): amostras só em feed, com um artista de exemplo por dia, para o Rafa validar */}
+    {(
+      [
+        ["sexta", SextaC, NOITES.sexta9],
+        ["sabado", SabadoC, NOITES.sabado9],
+        ["domingo", DomingoC, NOITES.domingo7],
+      ] as const
+    ).map(([k, C, n]) => {
+      const Comp: React.FC = () => <C n={n} fmt="feed" />;
+      return <Composition key={`c-${k}-feed`} id={`c-${k}-feed`} component={Comp} durationInFrames={240} fps={30} width={1080} height={1350} />;
+    })}
     {/* agenda da semana 02–04/10: 3 versões × feed/story, estática (parado) e vídeo com a trilha dos artistas */}
     {([["v1", AgendaV1], ["v2", AgendaV2], ["v3", AgendaV3]] as const).flatMap(([v, C]) =>
       (["feed", "story"] as const).flatMap((fmt) => {
