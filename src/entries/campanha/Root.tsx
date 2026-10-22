@@ -23,6 +23,7 @@ import {
 } from "../../campanha/pecas";
 import { AnuncioPV, CartazQR, DIMS_PV, ZapConfirmada, ZapPassaporte } from "../../campanha/primeira-vez";
 import { PassaporteV2, V2, V3 } from "../../campanha/primeira-vez-v23";
+import { Acrilico, DIMS_ACR, DIMS_WA, WA_VID_DUR, WaConfirmadaImg, WaConfirmadaVideo } from "../../campanha/primeira-vez-wa-acrilico";
 import { CLIPS_V5, CLIPS_V6, DIMS_PVV, DUR_V4, V4, V5, V6, durClips } from "../../campanha/primeira-vez-videos";
 
 // Campanha "A CASA TE DEVE" (out/2026): tiro de alerta, o que é, 3 ações, disparo e apoio.
@@ -66,6 +67,9 @@ const ESTATICOS: Est[] = [
     ]),
   ),
   { id: "pv-zap-passaporte-v2", el: <PassaporteV2 />, dim: DIMS_PV.zap },
+  { id: "pv-wa-conf-img", el: <WaConfirmadaImg />, dim: DIMS_WA.img },
+  { id: "pv-acrilico", el: <Acrilico />, dim: DIMS_ACR },
+  { id: "pv-acrilico-guias", el: <Acrilico guias />, dim: DIMS_ACR },
 ];
 
 export const RemotionRoot: React.FC = () => (
@@ -74,6 +78,7 @@ export const RemotionRoot: React.FC = () => (
       <Still key={e.id} id={e.id} component={parado(e.el)} width={e.dim.w} height={e.dim.h} />
     ))}
     <Composition id="alerta-video" component={AlertaVideo} durationInFrames={ALERTA_DUR} fps={30} width={1080} height={1920} />
+    <Composition id="pv-wa-conf-video" component={WaConfirmadaVideo} durationInFrames={WA_VID_DUR} fps={30} width={DIMS_WA.vid.w} height={DIMS_WA.vid.h} />
     <Composition id="casa-video" component={CasaVideo} durationInFrames={CASA_DUR} fps={30} width={1080} height={1920} />
     {(["primeira", "paga", "carimbo"] as const).flatMap((a) => [
       <Composition key={`${a}-video-story`} id={`${a}-video-story`} component={() => <AcaoVideo acao={a} fmt="story" />} durationInFrames={VIDEO_DUR.story} fps={30} width={1080} height={1920} />,
