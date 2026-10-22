@@ -52,6 +52,13 @@ const ESTATICOS = [
   ["pv-zap-confirmada", `${P.pv}/whatsapp-cabecalho-lista-confirmada-1910x1000.png`],
   ["pv-zap-passaporte", `${P.pv}/whatsapp-cabecalho-seu-passaporte-1910x1000.png`],
   ["pv-cartaz-qr", `${P.pv}/cartaz-porta-QR-A4-2480x3508.png`],
+  ...["2", "3"].flatMap((v) =>
+    [["geral", "A-geral"], ["pagode", "B-pagode"], ["sertanejo", "C-sertanejo"]].flatMap(([t, nome]) => [
+      [`pv${v}-${t}-feed`, `${P.pv}/V${v}/V${v}-anuncio-${nome}-FEED-1080x1350.png`],
+      [`pv${v}-${t}-story`, `${P.pv}/V${v}/V${v}-anuncio-${nome}-STORY-1080x1920.png`],
+    ]),
+  ),
+  ["pv-zap-passaporte-v2", `${P.pv}/whatsapp-cabecalho-seu-passaporte-v2-1910x1000.png`],
 ];
 
 const VIDEOS = [
