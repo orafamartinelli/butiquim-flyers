@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-10-20T02:40:52.953Z",
+  "gerado_em": "2026-10-22T15:00:23.718Z",
   "de": "2026-10-01",
-  "ate": "2026-12-06",
+  "ate": "2026-12-31",
   "noites": [
     {
       "data": "2026-10-02",
@@ -197,6 +197,70 @@
     },
     {
       "data": "2026-12-04",
+      "atracao": "RICARDO RIBEIRO",
+      "slug": "ricardo-ribeiro",
+      "nome": "Ricardo Ribeiro",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-11",
+      "atracao": "SOU VIBE",
+      "slug": "sou-vibe",
+      "nome": "Sou Vibe",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-12",
+      "atracao": "JUNINHO CARI",
+      "slug": "juninho-cari",
+      "nome": "Juninho Cari",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-13",
+      "atracao": "BIANNCHI E CRISTIANO",
+      "slug": "biannchi-e-cristiano",
+      "nome": "Biannchi & Cristiano",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-18",
+      "atracao": "GUI SILVA",
+      "slug": "gui-silva",
+      "nome": "Gui Silva",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-19",
+      "atracao": "JUNINHO CARI",
+      "slug": "juninho-cari",
+      "nome": "Juninho Cari",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-20",
+      "atracao": "HILANA",
+      "slug": "hilana",
+      "nome": "Hilana",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-26",
+      "atracao": "DEIXA CLAREAR",
+      "slug": "deixa-clarear",
+      "nome": "Deixa Clarear",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-27",
       "atracao": "RICARDO RIBEIRO",
       "slug": "ricardo-ribeiro",
       "nome": "Ricardo Ribeiro",
