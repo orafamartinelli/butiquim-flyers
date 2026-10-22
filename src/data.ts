@@ -144,6 +144,17 @@ export const NOITES = {
   domingo8: noiteDe("2026-11-22"),
   sexta9: noiteDe("2026-11-27"),
   sabado9: noiteDe("2026-11-28"),
+  // DEZEMBRO (produzido 22/10) — daqui em diante a identidade vem da rotação (src/rotacao.ts): sem 10 C · 11 D · 12 A · 13 B.
+  // Vazias na planilha: sáb 05, dom 06 e sex 25 (Natal). Chave = dia + número da semana (scripts/_rotacao.mjs chaveDe).
+  sexta10: noiteDe("2026-12-04"),
+  sexta11: noiteDe("2026-12-11"),
+  sabado11: noiteDe("2026-12-12"),
+  domingo11: noiteDe("2026-12-13"),
+  sexta12: noiteDe("2026-12-18"),
+  sabado12: noiteDe("2026-12-19"),
+  domingo12: noiteDe("2026-12-20"),
+  sabado13: noiteDe("2026-12-26"),
+  domingo13: noiteDe("2026-12-27"),
 };
 export type NoiteKey = keyof typeof NOITES;
 

@@ -8,6 +8,7 @@
 // Chaves e datas vêm do próprio projeto: src/data.ts (NOITES) e src/Root.tsx (agendas sN).
 // Uso: node scripts/etiqueta-datas-show.mjs (simula) · node scripts/etiqueta-datas-show.mjs --gravar
 import { readFileSync } from "fs";
+import { noitesDoMes } from "./_rotacao.mjs";
 
 const GRAVAR = process.argv.includes("--gravar");
 const cred = JSON.parse(readFileSync("C:/Users/User/Documents/projetos/.credentials/supabase-new-api-keys.json", "utf8"));
@@ -22,6 +23,11 @@ const AGENDA = Object.fromEntries(
 );
 // a Folhinha da véspera vem de src/entries/vespera (vespera = vespera1)
 if (NOITE.vespera1) NOITE.vespera = NOITE.vespera1;
+// agendas automáticas (semanas ≥ 10, Root.tsx AGENDAS_AUTO): vêm da rotação, não do regex acima
+for (let m = 0; m < 18; m++) {
+  const d = new Date(Date.UTC(2026, 11 + m, 1));
+  for (const a of noitesDoMes(d.toISOString().slice(0, 7)).agendas) AGENDA[a.s] ??= a.datas;
+}
 
 const datasDe = (r) => {
   const s = new Set();

@@ -1,7 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Composition, Html5Audio, Still, interpolate, staticFile } from "remotion";
 import "./fonts";
-import { DIM, Formato, NOITES, Noite, NoiteKey } from "./data";
+import { DIM, DiaKey, Formato, NOITES, Noite, NoiteKey } from "./data";
+import { Identidade, agendaVersao, identidadeDe, semanaDe } from "./rotacao";
 import { Sexta } from "./ids/Sexta";
 import { Sabado } from "./ids/Sabado";
 import { Domingo } from "./ids/Domingo";
@@ -46,6 +47,28 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta9: Sexta,
   sabado9: Sabado,
 };
+// da semana 10 (dez/2026) em diante a identidade vem da rotação (Rafa 22/10: "rotação de todas as IDs daqui em diante")
+const POR_ID: Record<DiaKey, Record<Identidade, Id>> = {
+  sexta: { A: Sexta, B: SextaB, C: SextaC, D: SextaD },
+  sabado: { A: Sabado, B: SabadoB, C: SabadoC, D: SabadoD },
+  domingo: { A: Domingo, B: DomingoB, C: DomingoC, D: DomingoC },
+};
+const compDe = (k: NoiteKey): Id => IDS[k] ?? POR_ID[NOITES[k].key][identidadeDe(NOITES[k].data)];
+const CHAVES_NOITE = (Object.keys(NOITES) as NoiteKey[]).filter((k) => !k.startsWith("vespera"));
+// agendas automáticas: semanas ≥ 10 com sex, sáb e dom cadastrados (regra do Rafa: só semana completa)
+const AGENDAS_AUTO = (() => {
+  const porSemana: Record<number, NoiteKey[]> = {};
+  for (const k of CHAVES_NOITE) { const s = semanaDe(NOITES[k].data); if (s >= 10) (porSemana[s] ??= []).push(k); }
+  const V = { V1: AgendaV1, V2: AgendaV2, V3: AgendaV3 };
+  return Object.entries(porSemana)
+    .filter(([, ks]) => (["sexta", "sabado", "domingo"] as DiaKey[]).every((d) => ks.some((k) => NOITES[k].key === d)))
+    .map(([s, ks]) => {
+      const ns = ks.map((k) => NOITES[k]).sort((a, b) => a.data.localeCompare(b.data));
+      const a = ns[0], z = ns[ns.length - 1];
+      const periodo = a.mes === z.mes ? `${a.dia} A ${z.dia}` : `${a.dia}/${a.data.slice(5, 7)} A ${z.dia}/${z.data.slice(5, 7)}`;
+      return [`s${s}`, V[agendaVersao(+s)], periodo, ns] as const;
+    });
+})();
 
 const DUR: Record<Formato, number> = { feed: 240, story: 240, broll: 300 };
 
@@ -110,6 +133,7 @@ export const RemotionRoot: React.FC = () => (
         // s7 (terça 10/11, semana 13–15): pendente — sáb 14 e dom 15 preenchidos, falta a sexta 13. Entra quando o Victor fechar o 13
         ["s8", AgendaV2, "21 E 22", [NOITES.sabado8, NOITES.domingo8]],
         ["s9", AgendaV3, "27 E 28", [NOITES.sexta9, NOITES.sabado9]],
+        ...AGENDAS_AUTO,
       ] as const
     ).flatMap(([s, C, periodo, ns]) =>
       (["feed", "story"] as const).flatMap((fmt) => {
@@ -128,9 +152,9 @@ export const RemotionRoot: React.FC = () => (
         ];
       }),
     )}
-    {(Object.keys(IDS) as NoiteKey[]).flatMap((k) =>
+    {CHAVES_NOITE.flatMap((k) =>
       (["feed", "story", "broll"] as Formato[]).map((fmt) => {
-        const C = IDS[k]!;
+        const C = compDe(k);
         const n = NOITES[k];
         const Comp: React.FC = () => (
           <AbsoluteFill>
