@@ -142,8 +142,8 @@ export const AnuncioPV: React.FC<{ tema: Tema; fmt: "feed" | "story" }> = ({ tem
             <CartaoOferta w={cardW} h={cardH} s={s} destaqueNunca={tema === "geral"} />
           </div>
           <div style={{ position: "absolute", left: 0, right: 0, bottom: story ? 30 : 4 }}>
-            <Texto size={story ? 30 : 25} color={C.cinza} weight={500}>
-              Brinde: caipirinha de Smirnoff em dobro ou Smirnoff Ice.
+            <Texto size={story ? 34 : 29} color={C.cinza} weight={500}>
+              Brinde: 1 caipirinha de Smirnoff ou 1 Smirnoff Ice.
             </Texto>
           </div>
         </div>
