@@ -157,7 +157,7 @@ export const AlertaVideo: React.FC = () => (
 const JEITOS: { n: string; nome: string; sub: string }[] = [
   { n: "1", nome: "A primeira é nossa", sub: "Nunca veio? Drink de boas-vindas + R$20 pra voltar." },
   { n: "2", nome: "A gente paga pra você vir", sub: "Sumiu faz 45 dias? R$50 no bar na sua volta." },
-  { n: "3", nome: "Carimbo no CPF", sub: "3 visitas = balde de cerveja ou garrafa de vodka." },
+  { n: "3", nome: "Carimbo no CPF", sub: "3 visitas = balde de cerveja Bud ou garrafa de Smirnoff." },
 ];
 
 const Jeito: React.FC<{ j: (typeof JEITOS)[number]; start: number; size?: number }> = ({ j, start, size = 60 }) => {
@@ -264,7 +264,7 @@ export const CasaSlide: React.FC<{ n: number }> = ({ n }) => {
           <Linha h={50} />
           <Cartela w={936} carimbos={2} />
           <Linha h={46} />
-          <Texto size={40}>Cada visita com consumo é um carimbo no seu CPF. Juntou 3: balde de cerveja ou garrafa de vodka.</Texto>
+          <Texto size={40}>Cada visita com consumo é um carimbo no seu CPF. Juntou 3: balde de cerveja Bud ou garrafa de Smirnoff.</Texto>
         </Moldura>
       );
     default:
@@ -459,7 +459,7 @@ export const PagaSlide: React.FC<{ n: number }> = ({ n }) => {
               numero="0845"
               linhas={[
                 ["CRÉDITO DA CASA", "R$ 50,00"],
-                ["2× CAIPIRINHA", "R$ 50,00"],
+                ["2× CAIPIRINHA DE SMIRNOFF", "R$ 50,00"],
               ]}
               total={["VOCÊ PAGA", "R$ 0,00"]}
               carimbo={<Carimbo linhas={["Pago pela", "casa"]} size={270} rot={-16} seed={62} />}
@@ -563,7 +563,7 @@ export const CarimboSlide: React.FC<{ n: number }> = ({ n }) => {
             <Balde size={72} color={C.lima} />
             <Ico i="garrafa" size={72} color={C.lima} stroke={1.5} />
             <Texto size={42} style={{ whiteSpace: "nowrap", marginLeft: 10 }}>
-              Balde de cerveja <span style={{ color: C.cinza }}>ou</span> garrafa de vodka
+              Balde de cerveja Bud <span style={{ color: C.cinza }}>ou</span> garrafa de Smirnoff
             </Texto>
           </div>
         </Moldura>
@@ -596,12 +596,12 @@ export const CarimboSlide: React.FC<{ n: number }> = ({ n }) => {
           <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-end" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
               <Balde size={300} color={C.lima} stroke={1.1} />
-              <div style={{ fontFamily: F.display, fontSize: 56, color: C.branco }}>BALDE DE CERVEJA</div>
+              <div style={{ fontFamily: F.display, fontSize: 56, color: C.branco }}>BALDE DE CERVEJA BUD</div>
             </div>
             <div style={{ fontFamily: F.mao, fontSize: 70, color: C.rosa, paddingBottom: 140 }}>ou</div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
               <Ico i="garrafa" size={300} color={C.lima} stroke={1.1} />
-              <div style={{ fontFamily: F.display, fontSize: 56, color: C.branco }}>GARRAFA DE VODKA</div>
+              <div style={{ fontFamily: F.display, fontSize: 56, color: C.branco }}>GARRAFA DE SMIRNOFF</div>
             </div>
           </div>
           <Linha h={60} />
@@ -652,7 +652,7 @@ export const CarimboSlide: React.FC<{ n: number }> = ({ n }) => {
             itens={[
               "1 carimbo por noite, com consumo a partir de R$30 na comanda.",
               "Sexta e domingo valem 2 carimbos.",
-              "3 carimbos em até 60 dias = 1 balde de cerveja ou 1 garrafa de vodka.",
+              "3 carimbos em até 60 dias = 1 balde de cerveja Bud ou 1 garrafa de Smirnoff.",
               "O prêmio é pessoal e sai na noite em que você completa os carimbos.",
             ]}
           />
@@ -738,7 +738,7 @@ export const Story: React.FC<{ acao: Acao }> = ({ acao }) => {
       <Cartela w={920} carimbos={2} dobro />
       <Linha h={50} />
       <Texto size={46}>
-        Balde de cerveja ou garrafa de vodka. <b style={{ color: C.rosa }}>Sexta e domingo: carimbo em dobro.</b>
+        Balde de cerveja Bud ou garrafa de Smirnoff. <b style={{ color: C.rosa }}>Sexta e domingo: carimbo em dobro.</b>
       </Texto>
       <Linha h={60} />
       <Cta acao="Responde CARIMBO" />
@@ -817,7 +817,7 @@ export const Zap: React.FC<{ acao: Acao | "lembrete" }> = ({ acao }) => {
             <Titulo linhas={["A 3ª visita", [{ t: "já ganha.", c: C.lima }]]} size={150} />
             <Linha h={24} />
             <Texto size={40}>
-              Balde ou vodka. <span style={{ color: C.rosa }}>Sexta e domingo: carimbo em dobro.</span>
+              Bud ou Smirnoff. <span style={{ color: C.rosa }}>Sexta e domingo: carimbo em dobro.</span>
             </Texto>
           </>
         }
@@ -912,7 +912,7 @@ export const ROTEIROS: Record<Exclude<Acao, "casa">, Roteiro> = {
     from: 20,
     gancho: { eyebrow: "Carimbo no CPF", titulo: ["A 3ª visita", [{ t: "já ganha.", c: C.lima }]] },
     objeto: (fmt, s) => <Cartela w={fmt === "story" ? 920 : 900} carimbos={2} start={s} />,
-    explica: "Cada visita com consumo é um carimbo no seu CPF. Juntou 3: balde de cerveja ou garrafa de vodka.",
+    explica: "Cada visita com consumo é um carimbo no seu CPF. Juntou 3: balde de cerveja Bud ou garrafa de Smirnoff.",
     bonus: { de: "1", para: "2", texto: "Sexta e domingo valem 2 carimbos por visita: dá pra ganhar já na 2ª." },
     cta: { acao: "Entra na lista pela bio", detalhe: "seu CPF já é seu cartão" },
   },
@@ -1055,7 +1055,7 @@ export const RegrasStory: React.FC = () => (
       [
         ["A primeira é nossa", ["Só pra quem nunca veio (CPF).", "Drink de boas-vindas + R$20 em até 21 dias. R$40 sexta e domingo."]],
         ["A gente paga pra você vir", ["Pra quem não vem há 45 dias ou mais (CPF).", "R$50 no bar; R$70 sexta e domingo. Código vale 15 dias."]],
-        ["Carimbo no CPF", ["1 carimbo por noite com consumo de R$30+. Sexta e domingo: 2.", "3 carimbos em 60 dias = balde de cerveja ou garrafa de vodka."]],
+        ["Carimbo no CPF", ["1 carimbo por noite com consumo de R$30+. Sexta e domingo: 2.", "3 carimbos em 60 dias = balde de cerveja Bud ou garrafa de Smirnoff."]],
       ] as [string, string[]][]
     ).map(([t, itens], i) => (
       <div key={i} style={{ marginBottom: 46 }}>
