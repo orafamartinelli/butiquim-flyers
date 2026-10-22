@@ -21,6 +21,7 @@ import {
   VIDEO_DUR,
   Zap,
 } from "../../campanha/pecas";
+import { AnuncioPV, CartazQR, DIMS_PV, ZapConfirmada, ZapPassaporte } from "../../campanha/primeira-vez";
 
 // Campanha "A CASA TE DEVE" (out/2026): tiro de alerta, o que é, 3 ações, disparo e apoio.
 // Estáticos = <Still> com tudo no estado final; vídeos = <Composition> 30 fps.
@@ -47,6 +48,14 @@ const ESTATICOS: Est[] = [
   { id: "regras-story", el: <RegrasStory />, dim: DIMS.story },
   { id: "destaque-capa", el: <Destaque />, dim: DIMS.story },
   { id: "cartaz-a4", el: <Cartaz />, dim: DIMS.a4 },
+  // 06 · A primeira é nossa (Meta Ads de cadastro p/ quem nunca veio)
+  ...(["geral", "pagode", "sertanejo"] as const).flatMap((t) => [
+    { id: `pv-${t}-feed`, el: <AnuncioPV tema={t} fmt="feed" />, dim: DIMS_PV.feed },
+    { id: `pv-${t}-story`, el: <AnuncioPV tema={t} fmt="story" />, dim: DIMS_PV.story },
+  ]),
+  { id: "pv-zap-confirmada", el: <ZapConfirmada />, dim: DIMS_PV.zap },
+  { id: "pv-zap-passaporte", el: <ZapPassaporte />, dim: DIMS_PV.zap },
+  { id: "pv-cartaz-qr", el: <CartazQR />, dim: DIMS_PV.a4 },
 ];
 
 export const RemotionRoot: React.FC = () => (

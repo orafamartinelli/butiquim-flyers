@@ -24,6 +24,7 @@ const P = {
   paga: "03-a-gente-paga-pra-voce-vir",
   carimbo: "04-carimbo-no-cpf",
   apoio: "05-apoio",
+  pv: "06-primeira-vez",
 };
 
 const ESTATICOS = [
@@ -43,6 +44,14 @@ const ESTATICOS = [
   ["regras-story", `${P.apoio}/regras-STORY.png`],
   ["destaque-capa", `${P.apoio}/capa-destaque-instagram.png`],
   ["cartaz-a4", `${P.apoio}/cartaz-A4-portaria-e-balcao.png`],
+  // 06 · A primeira é nossa (Meta Ads p/ quem nunca veio)
+  ...[["geral", "A-geral"], ["pagode", "B-pagode"], ["sertanejo", "C-sertanejo"]].flatMap(([t, nome]) => [
+    [`pv-${t}-feed`, `${P.pv}/anuncio-${nome}-FEED-1080x1350.png`],
+    [`pv-${t}-story`, `${P.pv}/anuncio-${nome}-STORY-1080x1920.png`],
+  ]),
+  ["pv-zap-confirmada", `${P.pv}/whatsapp-cabecalho-lista-confirmada-1910x1000.png`],
+  ["pv-zap-passaporte", `${P.pv}/whatsapp-cabecalho-seu-passaporte-1910x1000.png`],
+  ["pv-cartaz-qr", `${P.pv}/cartaz-porta-QR-A4-2480x3508.png`],
 ];
 
 const VIDEOS = [
