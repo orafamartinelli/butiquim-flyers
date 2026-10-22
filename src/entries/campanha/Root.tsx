@@ -23,6 +23,7 @@ import {
 } from "../../campanha/pecas";
 import { AnuncioPV, CartazQR, DIMS_PV, ZapConfirmada, ZapPassaporte } from "../../campanha/primeira-vez";
 import { PassaporteV2, V2, V3 } from "../../campanha/primeira-vez-v23";
+import { CLIPS_V5, CLIPS_V6, DIMS_PVV, DUR_V4, V4, V5, V6, durClips } from "../../campanha/primeira-vez-videos";
 
 // Campanha "A CASA TE DEVE" (out/2026): tiro de alerta, o que é, 3 ações, disparo e apoio.
 // Estáticos = <Still> com tudo no estado final; vídeos = <Composition> 30 fps.
@@ -77,6 +78,12 @@ export const RemotionRoot: React.FC = () => (
     {(["primeira", "paga", "carimbo"] as const).flatMap((a) => [
       <Composition key={`${a}-video-story`} id={`${a}-video-story`} component={() => <AcaoVideo acao={a} fmt="story" />} durationInFrames={VIDEO_DUR.story} fps={30} width={1080} height={1920} />,
       <Composition key={`${a}-video-feed`} id={`${a}-video-feed`} component={() => <AcaoVideo acao={a} fmt="feed" />} durationInFrames={VIDEO_DUR.feed} fps={30} width={1080} height={1350} />,
+    ])}
+    {/* 06 · Primeira vez — vídeos Meta Ads V4 (convite animado), V5 e V6 (filmagem real) */}
+    {(["story", "feed"] as const).flatMap((fm) => [
+      <Composition key={`pv4-${fm}`} id={`pv4-${fm}`} component={() => <V4 fmt={fm} />} durationInFrames={DUR_V4} fps={30} width={DIMS_PVV[fm].w} height={DIMS_PVV[fm].h} />,
+      <Composition key={`pv5-${fm}`} id={`pv5-${fm}`} component={() => <V5 fmt={fm} />} durationInFrames={durClips(CLIPS_V5)} fps={30} width={DIMS_PVV[fm].w} height={DIMS_PVV[fm].h} />,
+      <Composition key={`pv6-${fm}`} id={`pv6-${fm}`} component={() => <V6 fmt={fm} />} durationInFrames={durClips(CLIPS_V6)} fps={30} width={DIMS_PVV[fm].w} height={DIMS_PVV[fm].h} />,
     ])}
   </>
 );

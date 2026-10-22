@@ -12,8 +12,8 @@ import { Ico } from "../shared/icones";
 // ouro #FFB800 sobre #0C0C0C.
 
 const latin: ("latin" | "latin-ext")[] = ["latin", "latin-ext"];
-const BB = bebas("normal", { weights: ["400"], subsets: latin }).fontFamily;
-const NU = nunito("normal", { weights: ["600", "700", "800", "900"], subsets: latin }).fontFamily;
+export const BB = bebas("normal", { weights: ["400"], subsets: latin }).fontFamily;
+export const NU = nunito("normal", { weights: ["600", "700", "800", "900"], subsets: latin }).fontFamily;
 
 export const K = {
   bg: "#0C0C0C",
@@ -25,20 +25,20 @@ export const K = {
   verde: "#22C55E",
 };
 export const URL_PV = "lista.obutiquim.com.br/primeira-vez";
-const ENDERECO = "Praça Manoel Ribas, 255 · Maringá";
+export const ENDERECO = "Praça Manoel Ribas, 255 · Maringá";
 
 export type TemaV = "geral" | "pagode" | "sertanejo";
 type Fmt = "feed" | "story";
 type L = { t: string; c?: string; s: number };
 
-const B: React.FC<{ size: number; color?: string; ls?: string; style?: React.CSSProperties; children: React.ReactNode }> = ({ size, color = K.branco, ls = "0.01em", style, children }) => (
+export const B: React.FC<{ size: number; color?: string; ls?: string; style?: React.CSSProperties; children: React.ReactNode }> = ({ size, color = K.branco, ls = "0.01em", style, children }) => (
   <div style={{ fontFamily: BB, fontSize: size, lineHeight: 0.98, color, letterSpacing: ls, whiteSpace: "nowrap", ...style }}>{children}</div>
 );
-const N: React.FC<{ size: number; color?: string; weight?: number; style?: React.CSSProperties; children: React.ReactNode }> = ({ size, color = K.branco, weight = 800, style, children }) => (
+export const N: React.FC<{ size: number; color?: string; weight?: number; style?: React.CSSProperties; children: React.ReactNode }> = ({ size, color = K.branco, weight = 800, style, children }) => (
   <div style={{ fontFamily: NU, fontSize: size, lineHeight: 1.22, color, fontWeight: weight, textWrap: "balance", ...style }}>{children}</div>
 );
 
-const Botao: React.FC<{ size: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ size, children, style }) => (
+export const Botao: React.FC<{ size: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ size, children, style }) => (
   <div
     style={{
       background: K.ouro,
@@ -58,7 +58,7 @@ const Botao: React.FC<{ size: number; children: React.ReactNode; style?: React.C
   </div>
 );
 
-const Rodape: React.FC<{ size: number; align?: "left" | "center" }> = ({ size, align = "left" }) => (
+export const Rodape: React.FC<{ size: number; align?: "left" | "center" }> = ({ size, align = "left" }) => (
   <div style={{ fontFamily: NU, fontWeight: 700, fontSize: size, color: K.cinza, textAlign: align, lineHeight: 1.4 }}>
     <span style={{ color: K.branco }}>{URL_PV}</span>
     <span style={{ opacity: 0.7 }}> · {ENDERECO}</span>
@@ -66,7 +66,7 @@ const Rodape: React.FC<{ size: number; align?: "left" | "center" }> = ({ size, a
 );
 
 // manchete de cada tema (linhas literais)
-const MANCHETE: Record<TemaV, { v2: L[]; v3: L[] }> = {
+export const MANCHETE: Record<TemaV, { v2: L[]; v3: L[] }> = {
   geral: {
     v2: [
       { t: "SUA ENTRADA", s: 1 },
@@ -101,7 +101,7 @@ const MANCHETE: Record<TemaV, { v2: L[]; v3: L[] }> = {
   },
 };
 
-const Manchete: React.FC<{ linhas: L[]; size: number; align?: "left" | "center" }> = ({ linhas, size, align = "left" }) => (
+export const Manchete: React.FC<{ linhas: L[]; size: number; align?: "left" | "center" }> = ({ linhas, size, align = "left" }) => (
   <div style={{ display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : "flex-start" }}>
     {linhas.map((l, i) => (
       <B key={i} size={size * l.s} color={l.c ?? K.branco} style={{ paddingTop: i === 0 ? size * l.s * 0.08 : size * l.s * 0.02, textShadow: "0 6px 30px rgba(0,0,0,.45)" }}>
@@ -177,7 +177,7 @@ export const V2: React.FC<{ tema: TemaV; fmt: Fmt }> = ({ tema, fmt }) => {
 // =====================================================================
 // V3 · O CONVITE — ingresso com canhoto, fundo escuro + ouro
 // =====================================================================
-const Ingresso: React.FC<{ tema: TemaV; w: number; z: number }> = ({ tema, w, z }) => {
+export const Ingresso: React.FC<{ tema: TemaV; w: number; z: number; carimboStart?: number }> = ({ tema, w, z, carimboStart = 0 }) => {
   const geral = tema === "geral";
   const furo = 34 * z;
   const stubH = 150 * z;
@@ -286,7 +286,7 @@ const Ingresso: React.FC<{ tema: TemaV; w: number; z: number }> = ({ tema, w, z 
       ))}
       {/* carimbo */}
       <div style={{ position: "absolute", right: (geral ? 50 : 30) * z, top: (geral ? 262 : 12) * z }}>
-        <Carimbo linhas={["Entrada", "liberada"]} cor={K.verde} size={190 * z} rot={-9} seed={141} style={{ mixBlendMode: "normal", fontFamily: FK.display }} />
+        <Carimbo linhas={["Entrada", "liberada"]} cor={K.verde} size={190 * z} rot={-9} seed={141} start={carimboStart} style={{ mixBlendMode: "normal", fontFamily: FK.display }} />
       </div>
     </div>
   );
