@@ -111,6 +111,63 @@ const ArteConfirmada: React.FC<{ carimboEm: number }> = ({ carimboEm }) => {
 export const WaConfirmadaImg: React.FC = () => <ArteConfirmada carimboEm={0} />;
 
 // ---------------------------------------------------------------------
+// Cabeçalho WhatsApp "HOJE É A SUA PRIMEIRA NOITE" (23/10/2026): lembrete do dia de quem está na Lista Primeira Vez.
+// Mesmo ingresso preto/ouro da confirmação, com o carimbo verde ENTRADA LIBERADA.
+// ---------------------------------------------------------------------
+export const WaHojePrimeiraImg: React.FC = () => (
+  <AbsoluteFill style={{ background: K.bg }}>
+    <AbsoluteFill style={{ background: "radial-gradient(ellipse 62% 70% at 50% 52%, rgba(255,184,0,.16), transparent 72%)" }} />
+    <Grain opacity={0.07} />
+    <div style={{ position: "absolute", left: 150, right: 150, top: 92, bottom: 92 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(160deg, #1d1a12 0%, ${K.card} 45%, #101010 100%)`,
+          border: `5px solid ${K.ouro}`,
+          borderRadius: 40,
+          overflow: "hidden",
+          boxShadow: "0 40px 90px rgba(0,0,0,.65), 0 0 0 14px rgba(255,184,0,.06)",
+        }}
+      >
+        <Grain opacity={0.08} />
+        <div style={{ position: "absolute", inset: 22, border: "2px solid rgba(255,184,0,.35)", borderRadius: 26 }} />
+      </div>
+      {[-1, 1].map((lado) => (
+        <div
+          key={lado}
+          style={{
+            position: "absolute",
+            top: "50%",
+            marginTop: -46,
+            [lado < 0 ? "left" : "right"]: -46,
+            width: 92,
+            height: 92,
+            borderRadius: "50%",
+            background: K.bg,
+            border: `5px solid ${K.ouro}`,
+            clipPath: lado < 0 ? "inset(0 0 0 50%)" : "inset(0 50% 0 0)",
+          }}
+        />
+      ))}
+      <div style={{ position: "absolute", left: 40, right: 40, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingBottom: 10 }}>
+        <Logo width={230} />
+        <div style={{ height: 18 }} />
+        <B size={170} ls="0.03em" style={{ textAlign: "center", paddingTop: 10 }}>
+          HOJE É A SUA
+        </B>
+        <B size={250} color={K.ouro} ls="0.03em" style={{ textAlign: "center", marginTop: -8 }}>
+          PRIMEIRA NOITE
+        </B>
+      </div>
+      <div style={{ position: "absolute", right: -10, top: -44 }}>
+        <Carimbo linhas={["Entrada", "liberada"]} cor={K.verde} size={300} rot={-10} start={-90} seed={181} style={{ mixBlendMode: "normal", fontFamily: FK.display, background: "rgba(12,12,12,.55)" }} />
+      </div>
+    </div>
+  </AbsoluteFill>
+);
+
+// ---------------------------------------------------------------------
 // Cabeçalho WhatsApp "CARIMBO DUPLO" (23/10/2026): sai 5 min depois do check-in da 1ª visita.
 // Mesmo ingresso preto/ouro da confirmação, com os 2 carimbos verdes da 1ª visita.
 // ---------------------------------------------------------------------
