@@ -110,6 +110,67 @@ const ArteConfirmada: React.FC<{ carimboEm: number }> = ({ carimboEm }) => {
 
 export const WaConfirmadaImg: React.FC = () => <ArteConfirmada carimboEm={0} />;
 
+// ---------------------------------------------------------------------
+// Cabeçalho WhatsApp "CARIMBO DUPLO" (23/10/2026): sai 5 min depois do check-in da 1ª visita.
+// Mesmo ingresso preto/ouro da confirmação, com os 2 carimbos verdes da 1ª visita.
+// ---------------------------------------------------------------------
+export const WaCarimboDuploImg: React.FC = () => (
+  <AbsoluteFill style={{ background: K.bg }}>
+    <AbsoluteFill style={{ background: "radial-gradient(ellipse 62% 70% at 50% 52%, rgba(255,184,0,.16), transparent 72%)" }} />
+    <Grain opacity={0.07} />
+    <div style={{ position: "absolute", left: 150, right: 150, top: 92, bottom: 92 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `linear-gradient(160deg, #1d1a12 0%, ${K.card} 45%, #101010 100%)`,
+          border: `5px solid ${K.ouro}`,
+          borderRadius: 40,
+          overflow: "hidden",
+          boxShadow: "0 40px 90px rgba(0,0,0,.65), 0 0 0 14px rgba(255,184,0,.06)",
+        }}
+      >
+        <Grain opacity={0.08} />
+        <div style={{ position: "absolute", inset: 22, border: "2px solid rgba(255,184,0,.35)", borderRadius: 26 }} />
+      </div>
+      {[-1, 1].map((lado) => (
+        <div
+          key={lado}
+          style={{
+            position: "absolute",
+            top: "50%",
+            marginTop: -46,
+            [lado < 0 ? "left" : "right"]: -46,
+            width: 92,
+            height: 92,
+            borderRadius: "50%",
+            background: K.bg,
+            border: `5px solid ${K.ouro}`,
+            clipPath: lado < 0 ? "inset(0 0 0 50%)" : "inset(0 50% 0 0)",
+          }}
+        />
+      ))}
+      <div style={{ position: "absolute", left: 40, right: 430, top: 0, bottom: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingBottom: 10 }}>
+        <Logo width={230} />
+        <div style={{ height: 18 }} />
+        <B size={118} ls="0.03em" style={{ textAlign: "center", paddingTop: 10 }}>
+          1ª VISITA NO PASSAPORTE
+        </B>
+        <B size={212} color={K.ouro} ls="0.03em" style={{ textAlign: "center", marginTop: -4 }}>
+          CARIMBO DUPLO
+        </B>
+      </div>
+      {/* os 2 carimbos da 1ª visita, empilhados à direita */}
+      <div style={{ position: "absolute", right: 70, top: 120 }}>
+        <Carimbo linhas={["Carimbo", "1"]} cor={K.verde} size={215} rot={-10} start={-90} seed={171} style={{ mixBlendMode: "normal", fontFamily: FK.display, background: "rgba(12,12,12,.55)" }} />
+      </div>
+      <div style={{ position: "absolute", right: 90, bottom: 120 }}>
+        <Carimbo linhas={["Carimbo", "2"]} cor={K.verde} size={215} rot={7} start={-90} seed={173} style={{ mixBlendMode: "normal", fontFamily: FK.display, background: "rgba(12,12,12,.55)" }} />
+      </div>
+    </div>
+  </AbsoluteFill>
+);
+
 // vídeo 1280x670: a mesma arte em escala; o carimbo bate em ~1 s
 export const WaConfirmadaVideo: React.FC = () => (
   <AbsoluteFill style={{ background: K.bg, overflow: "hidden" }}>
