@@ -22,7 +22,7 @@ import {
   Zap,
 } from "../../campanha/pecas";
 import { AnuncioPV, CartazQR, DIMS_PV, ZapConfirmada, ZapPassaporte } from "../../campanha/primeira-vez";
-import { PassaporteV2, V2, V3 } from "../../campanha/primeira-vez-v23";
+import { PassaporteV2, PassaporteV3, V2, V3 } from "../../campanha/primeira-vez-v23";
 import { Acrilico, DIMS_ACR, DIMS_WA, WA_VID_DUR, WaCarimboDuploImg, WaConfirmadaImg, WaConfirmadaVideo } from "../../campanha/primeira-vez-wa-acrilico";
 import { CLIPS_V5, CLIPS_V6, DIMS_PVV, DUR_V4, V4, V5, V6, durClips } from "../../campanha/primeira-vez-videos";
 
@@ -69,6 +69,7 @@ const ESTATICOS: Est[] = [
   { id: "pv-zap-passaporte-v2", el: <PassaporteV2 />, dim: DIMS_PV.zap },
   { id: "pv-wa-conf-img", el: <WaConfirmadaImg />, dim: DIMS_WA.img },
   { id: "pv-wa-carimbo-img", el: <WaCarimboDuploImg />, dim: DIMS_WA.img },
+  { id: "pv-wa-passaporte-img", el: <PassaporteV3 />, dim: DIMS_WA.img },
   { id: "pv-acrilico", el: <Acrilico />, dim: DIMS_ACR },
   { id: "pv-acrilico-guias", el: <Acrilico guias />, dim: DIMS_ACR },
 ];

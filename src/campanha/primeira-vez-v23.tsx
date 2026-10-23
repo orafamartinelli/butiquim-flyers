@@ -322,7 +322,7 @@ export const V3: React.FC<{ tema: TemaV; fmt: Fmt }> = ({ tema, fmt }) => {
 // CABEÇALHO WHATSAPP · SEU PASSAPORTE v2 (igual para todos, sem nome)
 // =====================================================================
 const LIMA = "#C8D200";
-const Tampinha2: React.FC<{ d: number; n: number; carimbada: boolean; seed: number }> = ({ d, n, carimbada, seed }) => {
+const Tampinha2: React.FC<{ d: number; n: number; carimbada: boolean; seed: number; rotulo?: string }> = ({ d, n, carimbada, seed, rotulo }) => {
   const dentes = 21;
   const pts = Array.from({ length: dentes * 2 }, (_, i) => {
     const a = (Math.PI * i) / dentes;
@@ -358,11 +358,34 @@ const Tampinha2: React.FC<{ d: number; n: number; carimbada: boolean; seed: numb
         )}
       </div>
       <B size={d * 0.22} color={cheia ? K.branco : "#8a8a8a"} ls="0.06em">
-        {n}ª VISITA
+        {rotulo ?? `${n}ª VISITA`}
       </B>
     </div>
   );
 };
+
+// Passaporte v3 (23/10/2026): 4 carimbos em 3 visitas — a 1ª visita vale 2 (carimbo duplo),
+// a 2ª libera o crédito e a 3ª o brinde. Cabeçalho do template butiquim_pv_passaporte_img.
+const ROTULOS_V3 = ["1ª VISITA", "1ª VISITA", "2ª · CRÉDITO", "3ª · BRINDE"];
+export const PassaporteV3: React.FC<{ carimbos?: number }> = ({ carimbos = 2 }) => (
+  <AbsoluteFill style={{ background: K.bg }}>
+    <AbsoluteFill style={{ background: "radial-gradient(ellipse 70% 60% at 50% 70%, rgba(200,210,0,.12), transparent 70%)" }} />
+    <Grain opacity={0.07} />
+    <AbsoluteFill style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "50px 90px 60px" }}>
+      <Logo width={250} />
+      <div style={{ height: 10 }} />
+      <B size={250} ls="0.02em" style={{ textAlign: "center" }}>
+        SEU <span style={{ color: LIMA }}>PASSAPORTE</span>
+      </B>
+      <div style={{ height: 34 }} />
+      <div style={{ display: "flex", gap: 70, alignItems: "flex-start" }}>
+        {[1, 2, 3, 4].map((n) => (
+          <Tampinha2 key={n} d={290} n={n} carimbada={n <= carimbos} seed={150 + n} rotulo={ROTULOS_V3[n - 1]} />
+        ))}
+      </div>
+    </AbsoluteFill>
+  </AbsoluteFill>
+);
 
 export const PassaporteV2: React.FC = () => (
   <AbsoluteFill style={{ background: K.bg }}>
