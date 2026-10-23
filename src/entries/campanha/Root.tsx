@@ -70,6 +70,8 @@ const ESTATICOS: Est[] = [
   { id: "pv-wa-conf-img", el: <WaConfirmadaImg />, dim: DIMS_WA.img },
   { id: "pv-wa-carimbo-img", el: <WaCarimboDuploImg />, dim: DIMS_WA.img },
   { id: "pv-wa-passaporte-img", el: <PassaporteV3 />, dim: DIMS_WA.img },
+  { id: "pv-wa-passaporte3-img", el: <PassaporteV3 carimbos={3} />, dim: DIMS_WA.img },
+  { id: "pv-wa-passaporte4-img", el: <PassaporteV3 carimbos={4} />, dim: DIMS_WA.img },
   { id: "pv-acrilico", el: <Acrilico />, dim: DIMS_ACR },
   { id: "pv-acrilico-guias", el: <Acrilico guias />, dim: DIMS_ACR },
 ];
