@@ -184,12 +184,15 @@ export const FechadoStory: React.FC<P> = ({ noites, fechadas, titulo = "AGENDA A
     return p;
   });
   const tit = a.spr(2);
+  // domingo fechado puxa o fds seguinte (dom → sex = 5 dias): aí não é mais "este fim de semana"
+  const dias = (Date.parse(noites[noites.length - 1].data) - Date.parse(noites[0].data)) / 864e5;
+  const sub = dias > 2 ? "PRÓXIMAS NOITES" : "ESTE FIM DE SEMANA";
   return (
     <AbsoluteFill style={{ background: PRETO, overflow: "hidden" }}>
       <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 16%, rgba(200,210,0,.14) 0%, rgba(200,210,0,0) 60%)" }} />
       <Img src={staticFile("logos/butiquim-branco-h.png")} style={{ position: "absolute", left: 540 - 170, top: 170, width: 340, opacity: a.fade(0, 12) }} />
       <div style={{ position: "absolute", left: 0, right: 0, top: 280, textAlign: "center", fontFamily: BIG, fontWeight: 900, fontSize: 96, color: OSSO, lineHeight: 1, opacity: Math.min(1, tit * 2), transform: `translateY(${(1 - tit) * 30}px)` }}>{titulo}</div>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 386, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 700, fontSize: 28, letterSpacing: "0.3em", color: LIMA, opacity: a.fade(8, 20) }}>ESTE FIM DE SEMANA</div>
+      <div style={{ position: "absolute", left: 0, right: 0, top: 386, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 700, fontSize: 28, letterSpacing: "0.3em", color: LIMA, opacity: a.fade(8, 20) }}>{sub}</div>
       {pos.map((p, i) =>
         p.fechada ? <FaixaFechada key={p.n.data} n={p.n} top={p.top} h={p.h} d={10} />
         : p.ordem === 0 ? <FaixaSaindo key={p.n.data} n={p.n} top={p.top} h={p.h} d={18} />
