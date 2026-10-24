@@ -66,7 +66,7 @@ const Anel: React.FC<{ texto: string; cx: number; cy: number; rx: number; ry: nu
   return (
     <>
       {letras.map((c, i) => {
-        const ang = i * passo + t;
+        const ang = i * passo - t; // gira no sentido em que a frente corre pra esquerda, como letreiro (Rafa 24/10: o contrário ficava ruim de ler)
         const z = Math.sin(ang); // >0 = frente
         if ((lado === "frente") !== z > 0) return null;
         const x = cx - Math.cos(ang) * rx; // menos: na metade da frente o texto corre da esquerda pra direita
