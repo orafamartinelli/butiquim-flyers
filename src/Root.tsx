@@ -16,7 +16,7 @@ import { SextaD } from "./ids/SextaD";
 import { SabadoD } from "./ids/SabadoD";
 import { TesteO } from "./Teste";
 import { AGENDA_DUR, AgendaV1, AgendaV2, AgendaV3, TrilhaAgenda } from "./agenda/AgendaSemana";
-import { FechadoStory } from "./avisos/FechadoStory";
+import { FECHADO_DUR, FechadoStory, TrilhaFechado } from "./avisos/FechadoStory";
 
 type Id = React.FC<{ n: Noite; fmt: Formato }>;
 
@@ -104,7 +104,12 @@ export const RemotionRoot: React.FC = () => (
       }),
     )}
     {/* aviso de casa fechada 23/10/2026 (sexta fechada, sáb/dom normais) */}
-    <Still id="aviso-fechado-2026-10-23" component={() => <FechadoStory noites={[NOITES.sexta4, NOITES.sabado4, NOITES.domingo4]} fechadas={["2026-10-23"]} />} width={1080} height={1920} />
+    <Composition id="aviso-fechado-2026-10-23" component={() => (
+      <AbsoluteFill>
+        <FechadoStory noites={[NOITES.sexta4, NOITES.sabado4, NOITES.domingo4]} fechadas={["2026-10-23"]} />
+        <TrilhaFechado noites={[NOITES.sabado4, NOITES.domingo4]} />
+      </AbsoluteFill>
+    )} durationInFrames={FECHADO_DUR} fps={30} width={1080} height={1920} />
     {/* agenda da semana 02–04/10: 3 versões × feed/story, estática (parado) e vídeo com a trilha dos artistas */}
     {([["v1", AgendaV1], ["v2", AgendaV2], ["v3", AgendaV3]] as const).flatMap(([v, C]) =>
       (["feed", "story"] as const).flatMap((fmt) => {
