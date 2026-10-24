@@ -147,16 +147,17 @@ const FaixaQuadrado: React.FC<{ n: Noite; top: number; h: number; d: number }> =
       <AbsoluteFill style={{ background: `radial-gradient(ellipse at 80% 70%, ${cor}2E 0%, transparent 60%)` }} />
       {/* fundo do quadrado */}
       <div style={{ position: "absolute", left: qx, top: qy, width: q, height: q, background: `linear-gradient(160deg, ${cor}55, ${cor}10)`, opacity: desenha }} />
+      {/* borda de cima da moldura vem ANTES da foto: fica atrás do artista, que sai por ela */}
+      <svg style={{ position: "absolute", left: qx - 4, top: qy - 4 }} width={q + 8} height={12}>
+        <path d={`M 4 4 L ${q + 4} 4`} fill="none" stroke={cor} strokeWidth={8} strokeDasharray={per} strokeDashoffset={q * (1 - desenha)} />
+      </svg>
       {/* corpo dentro do quadrado (corta na base do quadrado), cabeça passa por cima da borda */}
       <div style={{ position: "absolute", left: 0, top: 0, width: W, height: qy + q, overflow: "hidden" }}>
         <Img src={staticFile(n.foto.src)} style={{ position: "absolute", left: fotoLeft, top: fotoTop, height: fotoH, width: fotoW, filter: "drop-shadow(0 14px 22px rgba(0,0,0,.55))" }} />
       </div>
-      {/* moldura: desenhada por traço; a borda de cima passa ATRÁS do artista (só as laterais e a base na frente) */}
+      {/* laterais e base da moldura na frente do artista */}
       <svg style={{ position: "absolute", left: qx - 4, top: qy - 4 }} width={q + 8} height={q + 8}>
         <path d={`M 4 4 L 4 ${q + 4} L ${q + 4} ${q + 4} L ${q + 4} 4`} fill="none" stroke={cor} strokeWidth={8} strokeDasharray={3 * q} strokeDashoffset={3 * q * (1 - desenha)} />
-      </svg>
-      <svg style={{ position: "absolute", left: qx - 4, top: qy - 4, zIndex: 0 }} width={q + 8} height={12}>
-        <path d={`M 4 4 L ${q + 4} 4`} fill="none" stroke={cor} strokeWidth={8} strokeDasharray={per} strokeDashoffset={q * (1 - desenha)} opacity={0.55} />
       </svg>
       <Textos n={n} h={h} d={d + 6} nome={nome} />
     </div>
@@ -194,7 +195,9 @@ export const FechadoStory: React.FC<P> = ({ noites, fechadas, titulo = "AGENDA A
         : p.ordem === 0 ? <FaixaSaindo key={p.n.data} n={p.n} top={p.top} h={p.h} d={18} />
         : <FaixaQuadrado key={p.n.data} n={p.n} top={p.top} h={p.h} d={18 + 40 * i} />,
       )}
-      <div style={{ position: "absolute", left: 0, right: 0, top: fim + 36, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 30, letterSpacing: "0.24em", color: OSSO, opacity: a.fade(110, 130) }}>TE VEJO NA ESQUINA</div>
+      <div style={{ position: "absolute", left: 0, right: 0, top: fim + 36, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 30, letterSpacing: "0.24em", color: OSSO, opacity: a.fade(110, 130) }}>
+        RESPONDA <span style={{ background: LIMA, color: PRETO, padding: "2px 14px", borderRadius: 8 }}>LISTA</span> PARA SE CADASTRAR
+      </div>
       <Vignette strength={0.45} />
       <Grain opacity={0.1} />
     </AbsoluteFill>
