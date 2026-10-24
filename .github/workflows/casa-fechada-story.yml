@@ -1,0 +1,58 @@
+# CASA FECHADA pelo celular (24/10/2026): story "AGENDA ATUALIZADA" renderizado na nuvem e mandado pro Rafa aprovar.
+# Disparo pelo Hermes (ferramenta casa_fechada, junto com o "executar" do qg):
+#   POST /repos/orafamartinelli/butiquim-flyers/dispatches  {"event_type":"casa_fechada_story","client_payload":{"data":"2026-10-23","responder_para":"5544984232574"}}
+# A publicação no Instagram é do qg/casa-fechada (acao publicar_story), depois do "publica o story".
+name: casa-fechada-story
+run-name: "Casa fechada · story ${{ github.event.client_payload.data }}"
+
+on:
+  repository_dispatch:
+    types: [casa_fechada_story]
+
+concurrency:
+  group: casa-fechada-story-${{ github.event.client_payload.data }}
+  cancel-in-progress: false
+
+jobs:
+  story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # mesmo cache do estudio-render (node_modules + Chrome do Remotion)
+      - name: cache node_modules (restaura)
+        id: nm
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-ffmpeg-v2
+
+      - name: npm ci + chrome do remotion
+        if: steps.nm.outputs.cache-hit != 'true'
+        run: |
+          npm ci --no-audit --no-fund
+          npx remotion browser ensure
+
+      - name: render + prévia pro Rafa
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+        run: node scripts/casa-fechada-story.mjs
+
+      - name: guarda o vídeo no run (7 dias)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: casa-fechada-${{ github.event.client_payload.data }}
+          path: out/avisos/casa-fechada-*.mp4
+          retention-days: 7
