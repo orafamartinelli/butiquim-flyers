@@ -1,0 +1,88 @@
+# REFAZ NOITES — atração trocou na planilha → refaz as NOSSAS peças da noite na nuvem e reagenda (scripts/refaz-noites.mjs).
+# Disparo: despertador (worker butiquim-reguas, 10h05 BRT, depois das campanhas Meta das 9h) ou manual.
+# Sem nada pendente o job para no 1º passo (~20 s, sem npm ci).
+# Ensaio manual: gh workflow run refaz-noites.yml -f datas=2026-11-06 -f ensaio=1
+name: refaz-noites
+run-name: "Refaz noites${{ inputs.datas && format(' · {0}', inputs.datas) || '' }}${{ inputs.ensaio == '1' && ' (ensaio)' || '' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      datas:
+        description: "Forçar datas (AAAA-MM-DD,...) — só com ensaio"
+        required: false
+      ensaio:
+        description: "1 = ensaio (renderiza e simula; não grava nada)"
+        required: false
+        default: "0"
+
+concurrency:
+  group: refaz-noites
+  cancel-in-progress: false
+
+jobs:
+  refaz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      ENSAIO: ${{ inputs.ensaio == '1' && '1' || '0' }}
+      DATAS: ${{ inputs.ensaio == '1' && inputs.datas || '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: tem noite pra refazer?
+        id: checa
+        run: node scripts/refaz-noites.mjs --checar
+
+      - name: cache node_modules (restaura)
+        if: steps.checa.outputs.tem == 'sim'
+        id: nm
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-ffmpeg-v2
+
+      - name: npm ci + chrome do remotion + ffmpeg
+        if: steps.checa.outputs.tem == 'sim' && steps.nm.outputs.cache-hit != 'true'
+        run: |
+          npm ci --no-audit --no-fund
+          npx remotion browser ensure
+          mkdir -p node_modules/.ffmpeg
+          curl -sL https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar -xJ -C node_modules/.ffmpeg --strip-components=1 --wildcards '*/ffmpeg'
+
+      - name: cache node_modules (salva)
+        if: steps.checa.outputs.tem == 'sim' && steps.nm.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-ffmpeg-v2
+
+      - name: refaz + reagenda + resumo pro Rafa
+        if: steps.checa.outputs.tem == 'sim'
+        env:
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+          GL: swangle
+          FFMPEG: node_modules/.ffmpeg/ffmpeg
+        run: node scripts/refaz-noites.mjs
+
+      - name: guarda as peças no run (7 dias)
+        if: always() && steps.checa.outputs.tem == 'sim'
+        uses: actions/upload-artifact@v4
+        with:
+          name: refaz-noites
+          path: |
+            out/final/*
+            out/agendas/*
+            out/vespera/*
+          retention-days: 7
+          if-no-files-found: ignore

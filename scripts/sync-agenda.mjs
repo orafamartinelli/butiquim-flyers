@@ -1,10 +1,11 @@
 // Puxa a agenda oficial (butiquim_social_posts, espelho da planilha) + o estilo de cada ARTISTA
 // (butiquim_social_artistas.estilo) e grava src/agenda.json, que as peças leem.
 // Uso: node scripts/sync-agenda.mjs 2026-10-01 2026-10-31
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
+import { credSupabase } from "./_cred.mjs";
 
 const [de = "2026-10-01", ate = "2026-10-31"] = process.argv.slice(2);
-const cred = JSON.parse(readFileSync("C:/Users/User/Documents/projetos/.credentials/supabase-new-api-keys.json", "utf8"));
+const cred = credSupabase();
 const H = { apikey: cred.secret_key, Authorization: `Bearer ${cred.secret_key}` };
 const get = async (q) => {
   const r = await fetch(`${cred.project_url}/rest/v1/${q}`, { headers: H });

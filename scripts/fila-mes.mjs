@@ -9,19 +9,33 @@
 // Agenda (terça): 12:00 Reels da agenda · 17:00 carrossel [agenda + feed de cada noite] · 17:20 story agenda + 1 story por noite
 // Todo post já nasce com datas_show (cancelar noite). Idempotente por campanha.
 // Uso: node scripts/fila-mes.mjs --mes 2026-12 (simula) · node scripts/fila-mes.mjs --mes 2026-12 --gravar
+//
+// MODO REFAZER (30/10/2026 — atração trocou na planilha; quem chama é scripts/refaz-noites.mjs na nuvem):
+//   node scripts/fila-mes.mjs --mes 2026-11 --refazer 2026-11-06,2026-11-07 --versao r3010a [--gravar]
+//   • sobe SÓ as peças das noites trocadas (e as agendas das semanas delas) com nome versionado
+//     (<chave>-feed-<versao>.jpg) — nome novo = o Instagram nunca pega a versão velha do cache;
+//   • gera os posts como sempre, mas fica só com os que mostram as datas trocadas (datas_show) e
+//     REAPROVEITA a linha que o leitor da agenda cancelou ("retirado ...: atração trocou") — mesma
+//     campanha + ordem → volta a 'pendente' com arquivo/legenda/@ novos. Post com horário vencido fica de fora.
 import { readFileSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
 import { MESES, noitesDoMes } from "./_rotacao.mjs";
+import { credSupabase, FFMPEG } from "./_cred.mjs";
 
 const GRAVAR = process.argv.includes("--gravar");
-const MES = process.argv[process.argv.indexOf("--mes") + 1];
+const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : null);
+const MES = arg("--mes");
 if (!/^\d{4}-\d{2}$/.test(MES || "")) throw new Error("informe --mes YYYY-MM");
+const REFAZER = (arg("--refazer") || "").split(",").filter(Boolean);
+const VERSAO = arg("--versao") || "";
+if (REFAZER.length && !/^[a-z0-9]+$/.test(VERSAO)) throw new Error("modo --refazer exige --versao (letras/números)");
 const ABREV = MESES[+MES.slice(5) - 1];
-const cred = JSON.parse(readFileSync("C:/Users/User/Documents/projetos/.credentials/supabase-new-api-keys.json", "utf8"));
+const cred = credSupabase();
 const URL = cred.project_url.replace(/\/$/, "");
 const H = { apikey: cred.secret_key, Authorization: `Bearer ${cred.secret_key}` };
 const PUB = `${URL}/storage/v1/object/public/butiquim-social/`;
-const FF = "C:/Users/User/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/bin/ffmpeg.exe";
+const FF = FFMPEG;
+const comVersao = (destino) => (VERSAO ? destino.replace(/(\.[a-z0-9]+)$/, `-${VERSAO}$1`) : destino);
 const log = (...a) => console.log(...a);
 const rest = async (path, opts = {}) => {
   const r = await fetch(`${URL}/rest/v1/${path}`, { ...opts, headers: { ...H, "Content-Type": "application/json", Prefer: "return=representation", ...(opts.headers || {}) } });
@@ -63,31 +77,43 @@ const info = (d) => {
 
 // ---------- arquivos ----------
 const F = {};
-for (const [, k, , ves] of NOITES) {
+// modo refazer: noite NÃO trocada aponta pro arquivo que já está no bucket (sem render, sem upload)
+const refazNoite = (d) => !REFAZER.length || REFAZER.includes(d);
+const sobeOuJa = (local, destino, d) => (refazNoite(d) ? sobe(local, comVersao(destino)) : PUB + destino);
+for (const [d, k, , ves] of NOITES) {
   F[k] = {
-    feedJpg: await sobe(jpg(`out/final/${k}-FEED.png`), `avulso/claude/${k}-feed.jpg`),
-    feedMp4: await sobe(`out/final/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`),
-    storyJpg: await sobe(jpg(`out/final/${k}-STORY.png`), `avulso/claude/${k}-story.jpg`),
-    broll: await sobe(`out/final/${k}-STORY-BROLL.mp4`, `avulso/claude/${k}-broll.mp4`),
+    feedJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/final/${k}-FEED.png`) : null, `avulso/claude/${k}-feed.jpg`, d),
+    feedMp4: await sobeOuJa(`out/final/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`, d),
+    storyJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/final/${k}-STORY.png`) : null, `avulso/claude/${k}-story.jpg`, d),
+    broll: await sobeOuJa(`out/final/${k}-STORY-BROLL.mp4`, `avulso/claude/${k}-broll.mp4`, d),
   };
   if (ves) Object.assign(F[k], {
-    vesMp4: await sobe(`out/vespera/${ves}-FEED.mp4`, `avulso/claude/${ves}-feed.mp4`),
-    vesStory: await sobe(jpg(`out/vespera/${ves}-STORY.png`), `avulso/claude/${ves}-story.jpg`),
-    vesBroll: await sobe(`out/vespera/${ves}-STORY-BROLL.mp4`, `avulso/claude/${ves}-broll.mp4`),
+    vesMp4: await sobeOuJa(`out/vespera/${ves}-FEED.mp4`, `avulso/claude/${ves}-feed.mp4`, d),
+    vesStory: await sobeOuJa(refazNoite(d) ? jpg(`out/vespera/${ves}-STORY.png`) : null, `avulso/claude/${ves}-story.jpg`, d),
+    vesBroll: await sobeOuJa(`out/vespera/${ves}-STORY-BROLL.mp4`, `avulso/claude/${ves}-broll.mp4`, d),
   });
 }
 const AG = {};
-for (const [, s] of AGENDAS) AG[s] = { feed: await sobe(`out/agendas/agenda-${s}-FEED.mp4`, `avulso/claude/ag-${s}-feed.mp4`), story: await sobe(`out/agendas/agenda-${s}-STORY.mp4`, `avulso/claude/ag-${s}-story.mp4`) };
+const dataDeChave = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
+for (const [, s, ks] of AGENDAS) {
+  // agenda da semana lista as 3 noites: se UMA trocou, a agenda inteira é refeita
+  const mexe = !REFAZER.length || ks.some((k) => REFAZER.includes(dataDeChave[k]));
+  AG[s] = mexe
+    ? { feed: await sobe(`out/agendas/agenda-${s}-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-feed.mp4`)), story: await sobe(`out/agendas/agenda-${s}-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-story.mp4`)) }
+    : { feed: PUB + `avulso/claude/ag-${s}-feed.mp4`, story: PUB + `avulso/claude/ag-${s}-story.mp4` };
+}
 
 // ---------- capa do carrossel da manhã ----------
 for (const [d, k] of NOITES) {
+  if (!refazNoite(d)) continue;
   const valor = F[k].feedJpg.replace(PUB, "");
   log(`config carrossel_capa_${d} = ${valor}`);
   if (GRAVAR) await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=representation" }, body: JSON.stringify({ chave: `carrossel_capa_${d}`, valor }) });
 }
 
 // ---------- posts ----------
-const existentes = new Set((await rest("butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)")).map((r) => r.campanha));
+// modo refazer: a campanha já existe (com as linhas canceladas) — não pula por campanha, decide linha a linha no fim
+const existentes = REFAZER.length ? new Set() : new Set((await rest("butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)")).map((r) => r.campanha));
 const novos = [];
 const add = (camp, lista) => { if (existentes.has(camp)) { log(`pula ${camp} (já na fila)`); return; } lista.forEach((p, i) => novos.push({ campanha: camp, ordem: i + 1, perfil: "obutiquim", legenda: "", ...p })); };
 
@@ -139,6 +165,46 @@ for (const [ter, s, ks] of AGENDAS) {
 }
 
 novos.sort((a, b) => a.publicar_em.localeCompare(b.publicar_em));
+
+if (REFAZER.length) {
+  // só o que mostra as noites trocadas e ainda vai acontecer
+  const agora = Date.now();
+  const alvo = novos.filter((n) => (n.datas_show || []).some((d) => REFAZER.includes(d)) && new Date(n.publicar_em).getTime() > agora + 5 * 60e3);
+  const camps = [...new Set(alvo.map((n) => n.campanha))];
+  const linhas = camps.length
+    ? await rest(`butiquim_social_avulso?select=id,campanha,ordem,status,erro,apagado_em&campanha=in.(${camps.map((c) => `"${c}"`).join(",")})`)
+    : [];
+  const resumo = { reativados: 0, inseridos: 0, jaPendentes: 0, ids: [] };
+  for (const n of alvo) {
+    const mesmas = linhas.filter((l) => l.campanha === n.campanha && l.ordem === n.ordem && !l.apagado_em);
+    const corpo = { publicar_em: n.publicar_em, formato: n.formato, video_url: n.video_url, itens_urls: n.itens_urls ?? null, legenda: n.legenda, marcados: n.marcados ?? null, thumb_offset_seg: n.thumb_offset_seg ?? null, datas_show: n.datas_show };
+    const pend = mesmas.find((l) => l.status === "pendente");
+    const canc = mesmas.find((l) => l.status === "cancelado" && /retirado .*atra[cç][aã]o trocou/i.test(l.erro || ""));
+    if (pend) {
+      // já pendente (ex.: rodada repetida) → só troca o conteúdo
+      log(`atualiza #${pend.id} ${n.campanha}/${n.ordem}`);
+      if (GRAVAR) await rest(`butiquim_social_avulso?id=eq.${pend.id}`, { method: "PATCH", body: JSON.stringify(corpo) });
+      resumo.jaPendentes++; resumo.ids.push(pend.id);
+    } else if (canc) {
+      log(`reativa #${canc.id} ${n.campanha}/${n.ordem} ${n.publicar_em.slice(0, 16)} ${n.video_url.split("/").pop()}`);
+      if (GRAVAR) await rest(`butiquim_social_avulso?id=eq.${canc.id}`, { method: "PATCH", body: JSON.stringify({ ...corpo, status: "pendente", erro: null, tentativas: 0, atualizado_em: new Date().toISOString() }) });
+      resumo.reativados++; resumo.ids.push(canc.id);
+    } else if (!mesmas.length) {
+      log(`insere ${n.campanha}/${n.ordem} ${n.publicar_em.slice(0, 16)}`);
+      if (GRAVAR) {
+        const [novo] = await rest("butiquim_social_avulso", { method: "POST", body: JSON.stringify({ campanha: n.campanha, ordem: n.ordem, perfil: n.perfil, ...corpo }) });
+        resumo.ids.push(novo?.id);
+      }
+      resumo.inseridos++;
+    } else {
+      log(`deixa ${n.campanha}/${n.ordem} (status ${mesmas.map((l) => l.status).join("/")})`);
+    }
+  }
+  log(`\nREFAZER ${REFAZER.join(",")}: ${resumo.reativados} reativado(s), ${resumo.inseridos} inserido(s), ${resumo.jaPendentes} atualizado(s)${GRAVAR ? "" : " (simulação)"}`);
+  console.log(`@@RESUMO ${JSON.stringify(resumo)}`);
+  process.exit(0);
+}
+
 for (const n of novos) log(`novo ${n.publicar_em.slice(0, 16).replace("T", " ")} ${n.formato.padEnd(8)} ${n.video_url.split("/").pop().padEnd(26)} ${n.marcados ? "@" + n.marcados : ""}`);
 const CHAVES = ["campanha", "ordem", "publicar_em", "formato", "video_url", "itens_urls", "legenda", "perfil", "thumb_offset_seg", "marcados", "datas_show"];
 const lote = novos.map((n) => Object.fromEntries(CHAVES.map((c) => [c, n[c] ?? null])));
