@@ -18,6 +18,7 @@
 //           não grava na fila nem no banco); as peças ficam no artefato do run e o resumo vai com [TESTE].
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
+import os from "os";
 import { credSupabase } from "./_cred.mjs";
 import { noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
 
@@ -153,7 +154,9 @@ if (prontos.length) {
   log(`bundle (GL=${GL}, versão ${VERSAO})`);
   npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-refaz", "--log=error"]);
   const still = (b, id, out, frame) => npx(["remotion", "still", b, id, out, `--frame=${frame}`, `--gl=${GL}`, "--log=error"]);
-  const video = (b, id, out) => npx(["remotion", "render", b, id, out, "--codec=h264", "--crf=18", `--gl=${GL}`, "--log=error"]);
+  // remotion.config.ts fixa concurrency 4 (PC); o runner tem 2 núcleos e o Remotion recusa acima disso
+  const NUCLEOS = Math.max(1, Math.min(4, os.cpus().length));
+  const video = (b, id, out) => npx(["remotion", "render", b, id, out, "--codec=h264", "--crf=18", `--gl=${GL}`, `--concurrency=${NUCLEOS}`, "--log=error"]);
 
   for (const p of planos) {
     for (const c of prontos.filter((x) => x.data.startsWith(p.M))) {
