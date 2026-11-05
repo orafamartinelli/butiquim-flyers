@@ -320,7 +320,8 @@ const Titulo: React.FC<{ x: number; y: number; s1: number; s2: number; t0: numbe
 };
 
 // fita lima colada: o nome da noite
-const Fita: React.FC<{ x: number; y: number; size: number; t0: number; rot?: number }> = ({ x, y, size, t0, rot = -3 }) => {
+// faixa com o nome da noite (era fixo "SAIDEIRA DA SEMANA" — só valia para domingo)
+const Fita: React.FC<{ x: number; y: number; size: number; t0: number; rot?: number; texto: string }> = ({ x, y, size, t0, rot = -3, texto }) => {
   const s = useSpr(t0, { damping: 15, stiffness: 150 });
   const d = serrilha(9, 8, 6);
   const esq = d.map(([p, v]) => `${v}px ${p}%`).join(", ");
@@ -328,7 +329,7 @@ const Fita: React.FC<{ x: number; y: number; size: number; t0: number; rot?: num
   return (
     <div style={{ position: "absolute", left: x, top: y, transform: `rotate(${rot}deg) scaleX(${s})`, transformOrigin: "left center", filter: "drop-shadow(0 6px 10px rgba(0,0,0,.45))" }}>
       <div style={{ background: `linear-gradient(180deg, ${LIMA_CLARO}, ${LIMA})`, clipPath: `polygon(${esq}, ${dir})`, padding: `${size * 0.16}px ${size * 0.7}px ${size * 0.18}px`, fontFamily: BARLOW, fontStyle: "italic", fontWeight: 900, fontSize: size, lineHeight: 1, letterSpacing: "0.06em", color: TINTA, whiteSpace: "nowrap" }}>
-        SAIDEIRA DA SEMANA
+        {texto}
       </div>
     </div>
   );
@@ -392,8 +393,8 @@ const Estilo: React.FC<{ n: Noite; x: number; y: number; size: number; t0: numbe
   );
 };
 
-// despertador de segunda sendo desligado
-const Despertador: React.FC<{ x: number; y: number; s: number; t0: number }> = ({ x, y, s, t0 }) => {
+// despertador do dia do feriado sendo desligado (dia = "SEGUNDA", "SEXTA"...)
+const Despertador: React.FC<{ x: number; y: number; s: number; t0: number; dia: string }> = ({ x, y, s, t0, dia }) => {
   const frame = useCurrentFrame();
   const e = useSpr(t0 - 14, { damping: 14 });
   const off = interpolate(frame, [t0, t0 + 7], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
@@ -411,7 +412,7 @@ const Despertador: React.FC<{ x: number; y: number; s: number; t0: number }> = (
         </g>
       </svg>
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <span style={{ fontFamily: BARLOW, fontWeight: 700, fontSize: s * 0.78, lineHeight: 1, letterSpacing: "0.08em", color: PAPEL, whiteSpace: "nowrap", opacity: 1 - off * 0.45, textDecoration: off > 0.5 ? "line-through" : "none", textDecorationColor: LIMA, textDecorationThickness: 2 }}>SEGUNDA · 07:00</span>
+        <span style={{ fontFamily: BARLOW, fontWeight: 700, fontSize: s * 0.78, lineHeight: 1, letterSpacing: "0.08em", color: PAPEL, whiteSpace: "nowrap", opacity: 1 - off * 0.45, textDecoration: off > 0.5 ? "line-through" : "none", textDecorationColor: LIMA, textDecorationThickness: 2 }}>{dia} · 07:00</span>
         <span style={{ fontFamily: BARLOW, fontWeight: 800, fontSize: s * 1.02, lineHeight: 1.1, letterSpacing: "0.03em", color: off > 0.5 ? LIMA : PAPEL, marginTop: 4, whiteSpace: "nowrap" }}>{off > 0.5 ? "AMANHÃ SEM DESPERTADOR" : "DESPERTADOR"}</span>
       </div>
       <div style={{ position: "relative", width: sw, height: sh, borderRadius: sh, background: off > 0.5 ? "#3A3B34" : LIMA, flex: "0 0 auto", marginLeft: s * 0.2 }}>
@@ -504,14 +505,19 @@ const VesperaFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt })
       <Folhinha n={n} fer={fer} p={L.pad} uid={fmt} />
       <Confete ox={L.pad.nx} oy={L.pad.ny + g.pTop + L.pad.ph * 0.4} t0={T.rasga} qtd={54} seed={11} h={h} />
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: "40% 70%" }}>
-        <Dupla n={n} w={L.dupla.w} left={L.dupla.left} top={L.dupla.top} t0={T.dupla} />
+        {/* foto larga (grupo): menor e mais baixa, pra não encostar na folhinha nem esconder o carimbo */}
+        {n.foto.ratio > 1.2 ? (
+          <Dupla n={n} w={fmt === "feed" ? 640 : 760} left={-10} top={fmt === "feed" ? 560 : 780} t0={T.dupla} />
+        ) : (
+          <Dupla n={n} w={L.dupla.w} left={L.dupla.left} top={L.dupla.top} t0={T.dupla} />
+        )}
       </AbsoluteFill>
       <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(10,11,7,0) ${L.grad[0]}px, rgba(10,11,7,.8) ${(L.grad[0] + L.grad[1]) / 2}px, rgba(10,11,7,.96) ${L.grad[1]}px)` }} />
       <Titulo {...L.titulo} t0={T.titulo} />
-      <Fita {...L.fita} t0={T.fita} />
+      <Fita {...L.fita} t0={T.fita} texto={n.noite.toUpperCase()} />
       <Nome n={n} {...L.nome} t0={T.nome} />
       <Lista n={n} {...L.lista} t0={T.lista} cta={L.cta} />
-      {L.alarme && <Despertador {...L.alarme} t0={T.alarme} />}
+      {L.alarme && <Despertador {...L.alarme} t0={T.alarme} dia={fer.semana.split("-")[0]} />}
       <PaginaVoando n={n} fer={fer} p={L.pad} alvo={L.card} />
       <Logo width={L.logo.w} top={L.logo.top} />
       <Estilo n={n} {...L.selo} t0={T.estilo} />
@@ -547,9 +553,9 @@ const VesperaBroll: React.FC<{ n: Noite }> = ({ n }) => {
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(10,11,7,0) 1240px, rgba(10,11,7,.78) 1360px, rgba(10,11,7,.96) 1470px)" }} />
       <Folhinha n={n} fer={fer} p={pad} uid="broll" deLado />
       <Confete ox={pad.nx} oy={pad.ny + g.pTop + pad.ph * 0.4} t0={T.rasga} qtd={40} seed={13} h={h} forca={0.8} />
-      <Fita x={36} y={1246} size={28} t0={T.fita} rot={-3} />
+      <Fita x={36} y={1246} size={28} t0={T.fita} rot={-3} texto={n.noite.toUpperCase()} />
       <Titulo x={40} y={1294} s1={92} s2={92} t0={T.titulo + 8} linhas={["VÉSPERA DE", "FERIADO"]} />
-      <Despertador x={648} y={1440} s={18} t0={T.alarme} />
+      <Despertador x={648} y={1440} s={18} t0={T.alarme} dia={fer.semana.split("-")[0]} />
       <Nome n={n} x={292} y={1512} size={44} t0={T.nome} />
       <Lista n={n} x={294} y={1566} w={760} size={22} t0={T.lista} cta />
       <PaginaVoando n={n} fer={fer} p={pad} alvo={card} />

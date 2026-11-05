@@ -20,7 +20,7 @@ import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } fr
 import { execFileSync } from "child_process";
 import os from "os";
 import { credSupabase } from "./_cred.mjs";
-import { noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
+import { ARTISTAS_SEM_VIDEO, noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
 
 const env = process.env;
 const CHECAR = process.argv.includes("--checar");
@@ -46,7 +46,7 @@ const zap = async (msg) => {
 
 const hojeBR = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
 const ddmm = (d) => `${d.slice(8)}/${d.slice(5, 7)}`;
-const DIA = (d) => ({ 5: "Sexta", 6: "Sábado", 0: "Domingo" })[new Date(`${d}T12:00:00Z`).getUTCDay()] || "";
+const DIA = (d) => ({ 4: "Quinta", 5: "Sexta", 6: "Sábado", 0: "Domingo" })[new Date(`${d}T12:00:00Z`).getUTCDay()] || "";
 const horaBR = (iso) => new Date(new Date(iso).getTime() - 3 * 3600e3).toISOString().slice(11, 16);
 const semAcento = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "");
 const norm = (s) => semAcento(s).toLowerCase().replace(/\([^)]*\)/g, "").replace(/&/g, "e").replace(/[^a-z0-9]+/g, "");
@@ -164,17 +164,21 @@ if (prontos.length) {
         for (const n of p.noites.filter((x) => x.data === c.data)) {
           const k = n.key;
           log(`render ${c.data} (${k})`);
-          still("build-refaz", `${k}-feed`, `out/final/${k}-FEED.png`, 150);
-          still("build-refaz", `${k}-story`, `out/final/${k}-STORY.png`, 150);
-          video("build-refaz", `${k}-feed`, `out/final/${k}-FEED.mp4`);
-          video("build-refaz", `${k}-broll`, `out/final/${k}-STORY-BROLL.mp4`);
+          // quinta só existe como Folhinha (bloco abaixo); artista sem vídeo próprio leva o story animado no lugar do B-roll
+          if (n.dia !== "quinta") {
+            still("build-refaz", `${k}-feed`, `out/final/${k}-FEED.png`, 150);
+            still("build-refaz", `${k}-story`, `out/final/${k}-STORY.png`, 150);
+            video("build-refaz", `${k}-feed`, `out/final/${k}-FEED.mp4`);
+            if (ARTISTAS_SEM_VIDEO.has(c.artista.slug)) video("build-refaz", `${k}-story`, `out/final/${k}-STORY.mp4`);
+            else video("build-refaz", `${k}-broll`, `out/final/${k}-STORY-BROLL.mp4`);
+          }
           if (n.vespera) {
             const v = n.vespera, E = "src/entries/vespera/index.ts";
             still(E, `${v}-feed`, `out/vespera/${v}-FEED.png`, 220);
             still(E, `${v}-story`, `out/vespera/${v}-STORY.png`, 220);
             video(E, `${v}-feed`, `out/vespera/${v}-FEED.mp4`);
             video(E, `${v}-story`, `out/vespera/${v}-STORY.mp4`);
-            video(E, `${v}-broll`, `out/vespera/${v}-STORY-BROLL.mp4`);
+            if (n.dia !== "quinta") video(E, `${v}-broll`, `out/vespera/${v}-STORY-BROLL.mp4`);
           }
         }
       } catch (e) {

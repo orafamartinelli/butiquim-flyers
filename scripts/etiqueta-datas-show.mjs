@@ -25,7 +25,7 @@ const AGENDA = Object.fromEntries(
 if (NOITE.vespera1) NOITE.vespera = NOITE.vespera1;
 // agendas automáticas (semanas ≥ 10, Root.tsx AGENDAS_AUTO): vêm da rotação, não do regex acima
 for (let m = 0; m < 18; m++) {
-  const d = new Date(Date.UTC(2026, 11 + m, 1));
+  const d = new Date(Date.UTC(2026, 10 + m, 1));
   for (const a of noitesDoMes(d.toISOString().slice(0, 7)).agendas) AGENDA[a.s] ??= a.datas;
 }
 

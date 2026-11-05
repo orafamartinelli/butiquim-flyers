@@ -2,6 +2,8 @@
 # Disparo: despertador (worker butiquim-reguas, 10h05 BRT, depois das campanhas Meta das 9h) ou manual.
 # Sem nada pendente o job para no 1º passo (~20 s, sem npm ci).
 # Ensaio manual: gh workflow run refaz-noites.yml -f datas=2026-11-06 -f ensaio=1
+# NOITES NOVAS (04/11/2026, scripts/noites-novas.mjs): noite que entra na planilha, inclusive quinta de véspera, vira peça e agendamento (sem disparo).
+# Ensaio: gh workflow run refaz-noites.yml -f novas=2026-12-05 -f ensaio=1
 name: refaz-noites
 run-name: "Refaz noites${{ inputs.datas && format(' · {0}', inputs.datas) || '' }}${{ inputs.ensaio == '1' && ' (ensaio)' || '' }}"
 
@@ -15,6 +17,12 @@ on:
         description: "1 = ensaio (renderiza e simula; não grava nada)"
         required: false
         default: "0"
+      novas:
+        description: "Noites novas a produzir (AAAA-MM-DD,...) — só com ensaio"
+        required: false
+
+permissions:
+  contents: write
 
 concurrency:
   group: refaz-noites
@@ -29,6 +37,7 @@ jobs:
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
       ENSAIO: ${{ inputs.ensaio == '1' && '1' || '0' }}
       DATAS: ${{ inputs.ensaio == '1' && inputs.datas || '' }}
+      NOVAS: ${{ inputs.ensaio == '1' && inputs.novas || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,8 +48,20 @@ jobs:
           node-version: 20
 
       - name: tem noite pra refazer?
-        id: checa
+        id: refaz
         run: node scripts/refaz-noites.mjs --checar
+
+      - name: tem noite nova na planilha?
+        id: novas
+        env:
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+        run: node scripts/noites-novas.mjs --checar
+
+      - name: junta as duas respostas
+        id: checa
+        run: echo "tem=${{ (steps.refaz.outputs.tem == 'sim' || steps.novas.outputs.tem == 'sim') && 'sim' || 'nao' }}" >> "$GITHUB_OUTPUT"
 
       - name: cache node_modules (restaura)
         if: steps.checa.outputs.tem == 'sim'
@@ -66,7 +87,7 @@ jobs:
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-ffmpeg-v2
 
       - name: refaz + reagenda + resumo pro Rafa
-        if: steps.checa.outputs.tem == 'sim'
+        if: steps.refaz.outputs.tem == 'sim'
         env:
           ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
@@ -74,6 +95,16 @@ jobs:
           GL: swangle
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/refaz-noites.mjs
+
+      - name: noites novas → peças + agendamento + resumo pro Rafa
+        if: always() && steps.novas.outputs.tem == 'sim'
+        env:
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+          GL: swangle
+          FFMPEG: node_modules/.ffmpeg/ffmpeg
+        run: node scripts/noites-novas.mjs
 
       - name: guarda as peças no run (7 dias)
         if: always() && steps.checa.outputs.tem == 'sim'

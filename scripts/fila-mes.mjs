@@ -17,9 +17,13 @@
 //   • gera os posts como sempre, mas fica só com os que mostram as datas trocadas (datas_show) e
 //     REAPROVEITA a linha que o leitor da agenda cancelou ("retirado ...: atração trocou") — mesma
 //     campanha + ordem → volta a 'pendente' com arquivo/legenda/@ novos. Post com horário vencido fica de fora.
+// MODO NOITES (04/11/2026 — noite nova na planilha): --noites 2026-11-19,2026-11-20 sobe e agenda SÓ essas noites e as agendas das semanas delas;
+//   post com horário vencido fica de fora; as outras noites não são reenviadas.
+// QUINTA de véspera (Rafa 04/11/2026): dia de abertura como os outros, sempre com a Folhinha e sem vídeo do artista.
+//   Na quarta: 17:00 story flyer + 20:30 story lista. Com a quinta aberta, as listas da sexta de qua/qui saem (a lista da vez é a da quinta).
 import { readFileSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
-import { MESES, noitesDoMes } from "./_rotacao.mjs";
+import { ARTISTAS_SEM_VIDEO, MESES, noitesDoMes } from "./_rotacao.mjs";
 import { credSupabase, FFMPEG } from "./_cred.mjs";
 
 const GRAVAR = process.argv.includes("--gravar");
@@ -28,6 +32,8 @@ const MES = arg("--mes");
 if (!/^\d{4}-\d{2}$/.test(MES || "")) throw new Error("informe --mes YYYY-MM");
 const REFAZER = (arg("--refazer") || "").split(",").filter(Boolean);
 const VERSAO = arg("--versao") || "";
+const SO_NOITES = (arg("--noites") || "").split(",").filter(Boolean);
+const ALVOS = REFAZER.length ? REFAZER : SO_NOITES;
 if (REFAZER.length && !/^[a-z0-9]+$/.test(VERSAO)) throw new Error("modo --refazer exige --versao (letras/números)");
 const ABREV = MESES[+MES.slice(5) - 1];
 const cred = credSupabase();
@@ -61,7 +67,7 @@ const AGENDAS = R.agendas.map((a) => [a.terca, a.s, a.keys]);
 for (const i of R.incompletas) log(`⚠️ semana ${i.semana} incompleta (tem: ${i.tem.join(", ")}) — agenda de terça NÃO entra até a planilha fechar`);
 log(`mês ${MES}: ${NOITES.length} noites (${NOITES.map(([d, k, v]) => `${d.slice(8)} ${k}=${v}`).join(", ")}) · agendas: ${AGENDAS.map((a) => a[1]).join(", ") || "nenhuma"}`);
 const dataDe = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
-const REGRA = { 5: { dia: "sexta", noite: "Sexta do Butica", ate: "00h", abre: "23h", nome: "Sexta" }, 6: { dia: "sabado", noite: "Sabadá do Butica", ate: "00h", abre: "23h", nome: "Sábado" }, 0: { dia: "domingo", noite: "Saideira da Semana", ate: "23h", abre: "22h", nome: "Domingo" } };
+const REGRA = { 4: { dia: "quinta", noite: "Butiquinta", ate: "00h", abre: "23h", nome: "Quinta" }, 5: { dia: "sexta", noite: "Sexta do Butica", ate: "00h", abre: "23h", nome: "Sexta" }, 6: { dia: "sabado", noite: "Sabadá do Butica", ate: "00h", abre: "23h", nome: "Sábado" }, 0: { dia: "domingo", noite: "Saideira da Semana", ate: "23h", abre: "22h", nome: "Domingo" } };
 const rodape = (r) => `📍 casa abre às ${r.abre} · #NãoTemErro · Te vejo na esquina!`;
 const regrasLista = (r) => `${r.noite}: lista feminina FREE e masculina R$ 20 até ${r.ate}. Depois da 1ª hora, desconto na portaria pra quem está na lista.`;
 const LISTA = (dia, v, fmt) => PUB + `avulso/claude/lista-${dia}-${v}-${fmt}.${v === "A" ? "jpg" : "mp4"}`;
@@ -78,14 +84,28 @@ const info = (d) => {
 // ---------- arquivos ----------
 const F = {};
 // modo refazer: noite NÃO trocada aponta pro arquivo que já está no bucket (sem render, sem upload)
-const refazNoite = (d) => !REFAZER.length || REFAZER.includes(d);
+const refazNoite = (d) => !ALVOS.length || ALVOS.includes(d);
+const ehQuinta = (d) => new Date(`${d}T12:00:00Z`).getUTCDay() === 4;
+const semVideo = (d) => ehQuinta(d) || ARTISTAS_SEM_VIDEO.has(agenda.find((x) => x.data === d)?.slug);
 const sobeOuJa = (local, destino, d) => (refazNoite(d) ? sobe(local, comVersao(destino)) : PUB + destino);
 for (const [d, k, , ves] of NOITES) {
+  if (ehQuinta(d)) {
+    // quinta só existe como Folhinha: as peças vêm de out/vespera
+    F[k] = {
+      feedJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/vespera/${k}-FEED.png`) : null, `avulso/claude/${k}-feed.jpg`, d),
+      feedMp4: await sobeOuJa(`out/vespera/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`, d),
+      storyJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/vespera/${k}-STORY.png`) : null, `avulso/claude/${k}-story.jpg`, d),
+      storyMp4: await sobeOuJa(`out/vespera/${k}-STORY.mp4`, `avulso/claude/${k}-story.mp4`, d),
+    };
+    continue;
+  }
   F[k] = {
     feedJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/final/${k}-FEED.png`) : null, `avulso/claude/${k}-feed.jpg`, d),
     feedMp4: await sobeOuJa(`out/final/${k}-FEED.mp4`, `avulso/claude/${k}-feed.mp4`, d),
     storyJpg: await sobeOuJa(refazNoite(d) ? jpg(`out/final/${k}-STORY.png`) : null, `avulso/claude/${k}-story.jpg`, d),
-    broll: await sobeOuJa(`out/final/${k}-STORY-BROLL.mp4`, `avulso/claude/${k}-broll.mp4`, d),
+    ...(semVideo(d)
+      ? { storyMp4: await sobeOuJa(`out/final/${k}-STORY.mp4`, `avulso/claude/${k}-story.mp4`, d) }
+      : { broll: await sobeOuJa(`out/final/${k}-STORY-BROLL.mp4`, `avulso/claude/${k}-broll.mp4`, d) }),
   };
   if (ves) Object.assign(F[k], {
     vesMp4: await sobeOuJa(`out/vespera/${ves}-FEED.mp4`, `avulso/claude/${ves}-feed.mp4`, d),
@@ -97,7 +117,7 @@ const AG = {};
 const dataDeChave = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
 for (const [, s, ks] of AGENDAS) {
   // agenda da semana lista as 3 noites: se UMA trocou, a agenda inteira é refeita
-  const mexe = !REFAZER.length || ks.some((k) => REFAZER.includes(dataDeChave[k]));
+  const mexe = !ALVOS.length || ks.some((k) => ALVOS.includes(dataDeChave[k]));
   AG[s] = mexe
     ? { feed: await sobe(`out/agendas/agenda-${s}-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-feed.mp4`)), story: await sobe(`out/agendas/agenda-${s}-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-story.mp4`)) }
     : { feed: PUB + `avulso/claude/ag-${s}-feed.mp4`, story: PUB + `avulso/claude/ag-${s}-story.mp4` };
@@ -118,31 +138,45 @@ const novos = [];
 const add = (camp, lista) => { if (existentes.has(camp)) { log(`pula ${camp} (já na fila)`); return; } lista.forEach((p, i) => novos.push({ campanha: camp, ordem: i + 1, perfil: "obutiquim", legenda: "", ...p })); };
 
 for (const [d, k, v, ves] of NOITES) {
+  if (SO_NOITES.length && !SO_NOITES.includes(d)) continue;
   const dow = new Date(`${d}T12:00:00Z`).getUTCDay();
   const r = REGRA[dow];
   const { nome, ig, est } = info(d);
   const quem = `${nome}${ig ? ` (@${ig})` : ""}`;
   const DS = [d];
+  // sem vídeo do artista: o story "vídeo" é o flyer animado
+  const storyVideo = F[k].broll || F[k].storyMp4;
   if (dow === 5) {
+    const quintaAberta = NOITES.some(([dd]) => dd === soma(d, -1));
     add(`extra-claude-${ABREV}-${soma(d, -2)}`, [
-      { publicar_em: q(soma(d, -2), "12:00"), formato: "STORIES", video_url: F[k].broll, marcados: ig, datas_show: DS },
-      { publicar_em: q(soma(d, -2), "20:30"), formato: "STORIES", video_url: LISTA("sexta", "A", "story"), datas_show: null },
+      { publicar_em: q(soma(d, -2), "12:00"), formato: "STORIES", video_url: storyVideo, marcados: ig, datas_show: DS },
+      ...(quintaAberta ? [] : [{ publicar_em: q(soma(d, -2), "20:30"), formato: "STORIES", video_url: LISTA("sexta", "A", "story"), datas_show: null }]),
     ]);
     add(`extra-claude-${ABREV}-${soma(d, -1)}`, [
       { publicar_em: q(soma(d, -1), "17:00"), formato: "STORIES", video_url: F[k].storyJpg, marcados: ig, datas_show: DS },
-      { publicar_em: q(soma(d, -1), "20:30"), formato: "STORIES", video_url: LISTA("sexta", "B", "story"), datas_show: null },
+      ...(quintaAberta ? [] : [{ publicar_em: q(soma(d, -1), "20:30"), formato: "STORIES", video_url: LISTA("sexta", "B", "story"), datas_show: null }]),
     ]);
   }
+  if (dow === 4) {
+    add(`extra-claude-${ABREV}-${soma(d, -1)}-quinta`, [
+      { publicar_em: q(soma(d, -1), "17:00"), formato: "STORIES", video_url: F[k].storyJpg, marcados: ig, datas_show: DS },
+      { publicar_em: q(soma(d, -1), "20:30"), formato: "STORIES", video_url: LISTA("quinta", "A", "story"), datas_show: null },
+    ]);
+  }
+  const folhinha = dow === 4 || ves;
+  const reelsDia = dow === 4 ? F[k].feedMp4 : ves ? F[k].vesMp4 : F[k].feedMp4;
+  const storyDia = dow === 4 ? F[k].storyJpg : ves ? F[k].vesStory : F[k].storyJpg;
+  const video16h = dow === 4 ? storyVideo : ves ? F[k].vesBroll : storyVideo;
   // lista 18h30/21h30: sexta = story B e feed A; sáb/dom = a variante que o montador NÃO usou às 17h30 (oposta à da semana)
   const outra = v === "A" || v === "C" ? "B" : "A";
   const vStory = dow === 5 ? "B" : outra, vFeed = dow === 5 ? "A" : outra;
-  add(`extra-claude-${ABREV}-${d}`, [
-    { publicar_em: q(d, "12:00"), formato: "REELS", video_url: ves ? F[k].vesMp4 : F[k].feedMp4, thumb_offset_seg: 3, datas_show: DS,
-      legenda: ves
+  add(`extra-claude-${ABREV}-${d}${dow === 4 ? "-quinta" : ""}`, [
+    { publicar_em: q(d, "12:00"), formato: "REELS", video_url: reelsDia, thumb_offset_seg: 3, datas_show: DS,
+      legenda: folhinha
         ? `🗓️ VÉSPERA DE FERIADO! Amanhã ninguém precisa de despertador ⏰❌\n\n🎤 HOJE tem ${quem} no palco d'O Butiquim. ${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}`
         : `🎤 HOJE tem ${quem} no palco d'O Butiquim!\n\n${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}` },
-    { publicar_em: q(d, "13:30"), formato: "STORIES", video_url: ves ? F[k].vesStory : F[k].storyJpg, marcados: ig, datas_show: DS },
-    { publicar_em: q(d, "16:00"), formato: "STORIES", video_url: ves ? F[k].vesBroll : F[k].broll, marcados: ig, datas_show: DS },
+    { publicar_em: q(d, "13:30"), formato: "STORIES", video_url: storyDia, marcados: ig, datas_show: DS },
+    { publicar_em: q(d, "16:00"), formato: "STORIES", video_url: video16h, marcados: ig, datas_show: DS },
     { publicar_em: q(d, "16:30"), formato: "REELS", video_url: LISTA(r.dia, "B", "feed"), thumb_offset_seg: 3, datas_show: null,
       legenda: `💬 Comenta LISTA aqui embaixo que a gente te manda o link da lista no direct! 📲\n\n${regrasLista(r)}\n\n${rodape(r)}` },
     { publicar_em: q(d, "18:30"), formato: "STORIES", video_url: LISTA(r.dia, vStory, "story"), datas_show: null },
@@ -152,6 +186,7 @@ for (const [d, k, v, ves] of NOITES) {
 }
 
 for (const [ter, s, ks] of AGENDAS) {
+  if (SO_NOITES.length && !ks.some((k) => SO_NOITES.includes(dataDeChave[k]))) continue;
   const DS = ks.map((k) => dataDe[k]);
   const linhas = ks.map((k) => { const d = dataDe[k]; const { nome, ig, est } = info(d); return `🎤 ${REGRA[new Date(`${d}T12:00:00Z`).getUTCDay()].nome} (${d.slice(8)}/${d.slice(5, 7)}): ${nome}${ig ? ` (@${ig})` : ""} · ${est}`; });
   const legenda = `🗓️ A SEMANA NA ESQUINA! Quem sobe no palco do Butica:\n\n${linhas.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`;
@@ -205,6 +240,8 @@ if (REFAZER.length) {
   process.exit(0);
 }
 
+// modo noites: horário vencido não entra
+if (SO_NOITES.length) { const limite = Date.now() + 5 * 60e3; for (let i = novos.length - 1; i >= 0; i--) if (new Date(novos[i].publicar_em).getTime() <= limite) { log(`fora (horário vencido): ${novos[i].campanha}/${novos[i].ordem}`); novos.splice(i, 1); } }
 for (const n of novos) log(`novo ${n.publicar_em.slice(0, 16).replace("T", " ")} ${n.formato.padEnd(8)} ${n.video_url.split("/").pop().padEnd(26)} ${n.marcados ? "@" + n.marcados : ""}`);
 const CHAVES = ["campanha", "ordem", "publicar_em", "formato", "video_url", "itens_urls", "legenda", "perfil", "thumb_offset_seg", "marcados", "datas_show"];
 const lote = novos.map((n) => Object.fromEntries(CHAVES.map((c) => [c, n[c] ?? null])));

@@ -11,7 +11,7 @@ const LIMA = "#C8D200";
 const PRETO = "#0B0B09";
 const OSSO = "#F2F0E6";
 // cada noite carrega a cor da sua identidade
-const COR: Record<Noite["key"], string> = { sexta: LIMA, sabado: "#FF2E93", domingo: "#F29A2E" };
+const COR: Record<Noite["key"], string> = { quinta: "#3FC8F2", sexta: LIMA, sabado: "#FF2E93", domingo: "#F29A2E" };
 
 export const AGENDA_DUR = 300;
 const segDe = (qtd: number) => Math.floor(AGENDA_DUR / qtd); // quadros de cada artista no vídeo
@@ -28,7 +28,7 @@ const useAnim = (parado: boolean, qtd = 3) => {
   // peso do destaque do artista i (0..1): acende quando o som dele entra
   const vez = (i: number) => {
     if (parado) return 0;
-    const ini = i === 0 ? 62 : i * SEG;
+    const ini = i === 0 ? Math.min(62, SEG - 30) : i * SEG; // 4 noites = 75 quadros cada: o 1º acende antes
     const fim = i === qtd - 1 ? 99999 : (i + 1) * SEG;
     return interpolate(frame, [ini - 6, ini + 8, fim - 6, fim + 8], [0, 1, 1, 0], clamp);
   };
@@ -73,7 +73,10 @@ const diasTexto = (ns: Noite[]) => {
 };
 // posições dos recortes (ordem de desenho: pontas primeiro, o do meio por último, na frente)
 const posicoes = (qtd: number, larg: number) =>
-  qtd === 3
+  qtd === 4
+    ? // semana com véspera na quinta: pontas atrás e mais baixas, as duas do meio na frente
+      [{ i: 0, cx: 540 - larg * 1.12, dy: 40, k: 0.9 }, { i: 3, cx: 540 + larg * 1.12, dy: 40, k: 0.9 }, { i: 1, cx: 540 - larg * 0.4, dy: 0, k: 1 }, { i: 2, cx: 540 + larg * 0.4, dy: 0, k: 1 }]
+    : qtd === 3
     ? [{ i: 0, cx: 540 - larg, dy: 30, k: 1 }, { i: 2, cx: 540 + larg, dy: 30, k: 1 }, { i: 1, cx: 540, dy: 0, k: 1.04 }]
     : [{ i: 0, cx: 540 - larg * 0.52, dy: 0, k: 1 }, { i: 1, cx: 540 + larg * 0.52, dy: 0, k: 1 }];
 const Vespera: React.FC<{ n: Noite; size: number; cor: string }> = ({ n, size, cor }) => {
@@ -186,6 +189,7 @@ export const AgendaV1: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
 export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) => {
   const a = useAnim(parado, noites.length);
   const feed = fmt === "feed";
+  const q4 = noites.length === 4; // semana com véspera na quinta
   const { w, h } = feed ? { w: 1080, h: 1350 } : { w: 1080, h: 1920 };
   const T = feed ? 0 : 190;
   const fotoH = feed ? 640 : 820;
@@ -211,31 +215,48 @@ export const AgendaV2: React.FC<P> = ({ noites, fmt, periodo, parado = false }) 
         <span style={{ display: "inline-block", fontFamily: YELLOWTAIL, fontSize: feed ? 150 : 170, color: LIMA, filter: "drop-shadow(0 4px 0 rgba(0,0,0,.55))", clipPath: `inset(-30% ${(1 - semana) * 100}% -30% -5%)`, paddingRight: 12 }}>Semana</span>
       </div>
       {/* grupo sobreposto: pontas atrás, centro na frente */}
-      {posicoes(noites.length, 270).map((p, ordem) => {
+      {q4 &&
+        // 4 noites: os de pé (fotos altas) atrás nas pontas; os grupos largos na frente, lado a lado, SEM se sobrepor (nada na frente do rosto)
+        (() => {
+          const altos = noites.map((n, i) => ({ n, i })).filter(({ n }) => n.foto.ratio < 1);
+          const largos = noites.map((n, i) => ({ n, i })).filter(({ n }) => n.foto.ratio >= 1);
+          const pontas = [110, 970];
+          const frente = largos.length === 1 ? [540] : [330, 760];
+          const itens = [
+            ...altos.map(({ n, i }, j) => ({ n, i, cx: pontas[j % 2], h: fotoH * 0.85, top: topoCentro })),
+            ...largos.map(({ n, i }, j) => { const w = feed ? 410 : 430; return { n, i, cx: frente[j], h: w / n.foto.ratio, top: topoCentro + (feed ? 130 : 170) }; }),
+          ];
+          return itens.map(({ n, i, cx, h, top }, ordem) => {
+            const sx = art(i, 18 + ordem * 6);
+            return <Foto key={n.data} n={n} h={h} cx={cx} top={top + sx.dy} fade={0.72} filter={`drop-shadow(0 22px 36px rgba(0,0,0,.65)) ${sx.filter}`} style={{ opacity: sx.op, transform: sx.transform, transformOrigin: sx.transformOrigin }} />;
+          });
+        })()}
+      {!q4 && posicoes(noites.length, 270).map((p, ordem) => {
         const n = noites[p.i];
-        const lateral = noites.length === 3 && p.i !== 1;
-        const alvo = lateral ? fotoH * 0.92 : fotoH;
-        const h = Math.min(alvo, 600 / n.foto.ratio);
+        const quatro = noites.length === 4;
+        const lateral = (noites.length === 3 && p.i !== 1) || (quatro && p.dy > 0);
+        const alvo = lateral ? fotoH * (quatro ? 0.86 : 0.92) : fotoH;
+        const h = Math.min(alvo, (quatro ? 470 : 600) / n.foto.ratio);
         const sx = art(p.i, 18 + ordem * 6);
         return <Foto key={n.data} n={n} h={h} cx={p.cx} top={(lateral ? topoPontas : topoCentro) + sx.dy} fade={0.72} filter={`drop-shadow(0 22px 36px rgba(0,0,0,.65)) ${sx.filter}`} style={{ opacity: sx.op, transform: sx.transform, transformOrigin: sx.transformOrigin }} />;
       })}
       <AbsoluteFill style={{ background: `linear-gradient(180deg, rgba(10,16,4,0) ${feed ? 58 : 58}%, rgba(10,16,4,.96) ${feed ? 68 : 69}%)` }} />
       <div style={{ position: "absolute", left: 0, right: 0, top: colY - 70, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 800, fontSize: 24, letterSpacing: "0.34em", color: OSSO, opacity: a.fade(48, 62) }}>{periodo.includes("/") ? periodo : `${periodo} ● ${noites[0].mesExtenso}`}</div>
-      <div style={{ position: "absolute", left: 50, right: 50, top: colY, display: "flex", gap: 24 }}>
+      <div style={{ position: "absolute", left: q4 ? 36 : 50, right: q4 ? 36 : 50, top: colY, display: "flex", gap: q4 ? 18 : 24 }}>
         {noites.map((n, i) => {
           const s = a.spr(52 + i * 6, { damping: 15 });
           const pv = a.vez(i);
           return (
-            <div key={n.data} style={{ flex: 1, borderTop: `6px solid ${COR[n.key]}`, paddingTop: 16, transform: `translateY(${(1 - s) * 90 - pv * 8}px)`, opacity: Math.min(1, s * 1.6), boxShadow: `0 -${pv * 16}px ${pv * 22}px -${pv * 8}px ${COR[n.key]}` }}>
-              <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 86, lineHeight: 0.85, color: OSSO }}>{diaMes(n)}</div>
-              <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 20, letterSpacing: "0.2em", color: COR[n.key], marginTop: 6 }}>
+            <div key={n.data} style={{ flex: 1, minWidth: 0, borderTop: `6px solid ${COR[n.key]}`, paddingTop: 16, transform: `translateY(${(1 - s) * 90 - pv * 8}px)`, opacity: Math.min(1, s * 1.6), boxShadow: `0 -${pv * 16}px ${pv * 22}px -${pv * 8}px ${COR[n.key]}` }}>
+              <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: q4 ? 70 : 86, lineHeight: 0.85, color: OSSO }}>{diaMes(n)}</div>
+              <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: q4 ? 17 : 20, letterSpacing: q4 ? "0.14em" : "0.2em", color: COR[n.key], marginTop: 6 }}>
                 {n.diaSemana} ● {n.hora}
               </div>
-              <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: nome(n).length > 12 ? 30 : 36, lineHeight: 1.05, color: OSSO, marginTop: 10, minHeight: 76 }}>{nome(n)}</div>
+              <div style={{ fontFamily: ARCHIVO, fontWeight: 900, fontSize: q4 ? (nome(n).length > 12 ? 24 : 30) : nome(n).length > 12 ? 30 : 36, lineHeight: 1.05, color: OSSO, marginTop: 10, minHeight: q4 ? 76 : 76 }}>{nome(n)}</div>
               <div style={{ marginTop: 10 }}>
-                <Estilo n={n} size={17} />
+                <Estilo n={n} size={q4 ? 13 : 17} />
               </div>
-              <Vespera n={n} size={15} cor={COR[n.key]} />
+              <Vespera n={n} size={q4 ? 13 : 15} cor={COR[n.key]} />
             </div>
           );
         })}

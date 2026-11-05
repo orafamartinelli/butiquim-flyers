@@ -13,6 +13,7 @@ const NOITES_VESPERA: [string, Noite][] = [
   ["vespera", NOITES.vespera1],
   ["vespera2", NOITES.vespera2],
   ["vespera3", NOITES.vespera3],
+  ["vespera4", NOITES.vespera4], // quinta 19/11, véspera da Consciência Negra (Encontro do Free)
 ];
 
 const Trilha: React.FC<{ n: Noite; dur: number }> = ({ n, dur }) => (

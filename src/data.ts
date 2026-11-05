@@ -3,7 +3,8 @@
 // - estilo = do ARTISTA (butiquim_social_artistas.estilo), não da noite: se o artista troca de dia, o selo acompanha
 import agenda from "./agenda.json";
 
-export type DiaKey = "sexta" | "sabado" | "domingo";
+// quinta só existe em véspera de feriado (ex.: 19/11/2026, véspera da Consciência Negra)
+export type DiaKey = "quinta" | "sexta" | "sabado" | "domingo";
 
 export type Noite = {
   key: DiaKey;
@@ -32,6 +33,7 @@ const OBS = "Após a 1ª hora, desconto na portaria para quem estiver na lista";
 
 // regras de cada dia da semana (getUTCDay: 5 sexta, 6 sábado, 0 domingo)
 const DIAS: Record<number, Pick<Noite, "key" | "noite" | "diaSemana" | "hora" | "lista">> = {
+  4: { key: "quinta", noite: "Butiquinta", diaSemana: "QUINTA", hora: "23H", lista: ["LISTA FEM. FREE ATÉ 00H", "LISTA MASC. R$ 20 ATÉ 00H"] },
   5: { key: "sexta", noite: "Sexta do Butica", diaSemana: "SEXTA", hora: "23H", lista: ["LISTA FEM. FREE ATÉ 00H", "LISTA MASC. R$ 20 ATÉ 00H"] },
   6: { key: "sabado", noite: "Sabadá do Butica", diaSemana: "SÁBADO", hora: "23H", lista: ["LISTA FEM. FREE ATÉ 00H", "LISTA MASC. R$ 20 ATÉ 00H"] },
   0: { key: "domingo", noite: "Saideira da Semana", diaSemana: "DOMINGO", hora: "22H", lista: ["LISTA FEM. FREE ATÉ 23H", "LISTA MASC. R$ 20 ATÉ 23H"] },
@@ -77,6 +79,11 @@ const ARTISTAS: Record<string, { nome: string; foto: Noite["foto"]; clip: string
   // domingos 18 e 25/10 (entraram na planilha depois do lote de 26/09): foto do PSD do Saideira de 30/09
   "allister-ferraz": { nome: "ALISTER FERRAZ", foto: { src: "fotos/allister-ferraz.png", ratio: 0.475 }, clip: "broll/alister.mp4", clipTop: -180 },
   "joao-mauricio": { nome: "JOÃO MAURÍCIO", foto: { src: "fotos/joao-mauricio.png", ratio: 0.7063 }, clip: "broll/joao.mp4" },
+  // 19 e 20/11 (entraram na planilha em 03/11, sem PSD): recorte da arte do designer (imgly local) + clipe montado
+  // Encontro do Free = 8 músicos de bandas da casa; clipe = Rilex + Papo 10 + Pagode 44 (bandas de 4 deles)
+  "butiquinta-encontro-do-free": { nome: "ENCONTRO DO FREE", foto: { src: "fotos/encontro-do-free.png", ratio: 1.33 }, clip: "broll/encontro-free.mp4" },
+  // sem vídeo de show da dupla: clipe = foto do flyer com zoom lento + som do flyer animado do designer
+  "gaelzinho-everton-cabeca-k": { nome: "GAELZINHO & EWERTON KBÇA", foto: { src: "fotos/gaelzinho-e-ewerton.png", ratio: 1.5994 }, clip: "broll/gaelzinho-ewerton.mp4" },
   "deixa-clarear": { nome: "DEIXA CLAREAR", foto: { src: "fotos/deixa-clarear.png", ratio: 0.7136 }, clip: "broll/deixaclarear.mp4", logo: { src: "logos/deixa-clarear.png", ratio: 8.0493 } },
 };
 
@@ -91,7 +98,7 @@ export const noiteDe = (data: string): Noite => {
   if (!a.estilo) throw new Error(`${a.nome} sem estilo em butiquim_social_artistas`);
   const d = new Date(`${data}T12:00:00Z`);
   const regra = DIAS[d.getUTCDay()];
-  if (!regra) throw new Error(`${data} não é sexta, sábado ou domingo`);
+  if (!regra) throw new Error(`${data} não é quinta (véspera), sexta, sábado ou domingo`);
   return {
     ...regra,
     data,
@@ -140,6 +147,9 @@ export const NOITES = {
   sabado7: noiteDe("2026-11-14"),
   vespera3: noiteDe("2026-11-14"), // sábado 14, véspera da Proclamação da República (dom 15)
   domingo7: noiteDe("2026-11-15"), // Victor preencheu depois de 14/10 (João Maurício); produzido 19/10
+  // semana 8: quinta 19 (véspera da Consciência Negra, "Encontro do Free" → Folhinha) e sexta 20 entraram em 03/11
+  vespera4: noiteDe("2026-11-19"),
+  sexta8: noiteDe("2026-11-20"),
   sabado8: noiteDe("2026-11-21"),
   domingo8: noiteDe("2026-11-22"),
   sexta9: noiteDe("2026-11-27"),

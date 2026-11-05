@@ -11,7 +11,7 @@ import { Noite } from "../data";
 const PRETO = "#0B0B09";
 const OSSO = "#F2F0E6";
 const LIMA = "#C8D200";
-const COR: Record<Noite["key"], string> = { sexta: LIMA, sabado: "#FF2E93", domingo: "#F29A2E" };
+const COR: Record<Noite["key"], string> = { quinta: "#3FC8F2", sexta: LIMA, sabado: "#FF2E93", domingo: "#F29A2E" };
 export const FECHADO_DUR = 300;
 
 type P = { noites: Noite[]; fechadas: string[]; titulo?: string };

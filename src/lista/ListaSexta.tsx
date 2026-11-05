@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext, useContext } from "react";
 import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { ARCHIVO, BARLOW, BIG } from "../fonts";
 import { Grain, Logo, Vignette, clamp, useSpr } from "../shared/fx";
@@ -16,7 +16,13 @@ export type FmtLista = "feed" | "story";
 export const LISTA_B_DUR = 240;
 
 const REGRA = regraDia("sexta");
-const NOITE = REGRA.noite.toUpperCase(); // "SEXTA DO BUTICA"
+// a quinta (só abre em véspera) usa as mesmas artes e os mesmos valores, muda só o nome da noite
+export type DiaLista = "sexta" | "quinta";
+const ROTULOS: Record<DiaLista, { titulo: string; tag: string; noite: string }> = {
+  sexta: { titulo: "SEXTA", tag: "DO BUTICA", noite: REGRA.noite.toUpperCase() }, // "SEXTA DO BUTICA"
+  quinta: { titulo: "QUINTA", tag: "BUTIQUINTA", noite: "BUTIQUINTA" },
+};
+const Rot = createContext(ROTULOS.sexta);
 const HORA = REGRA.hora; // "23H"
 
 // "LISTA FEM. FREE ATÉ 00H" → { quem: "FEMININO", valor: "FREE", ate: "00H" }
@@ -134,20 +140,23 @@ const FundoA: React.FC<{ cx: number; cy: number }> = ({ cx, cy }) => (
 );
 
 // "SEXTA" + tag "DO BUTICA" + cartão "A PARTIR DAS 23H"
-const TituloA: React.FC<{ L: LA }> = ({ L }) => (
+const TituloA: React.FC<{ L: LA }> = ({ L }) => {
+  const R = useContext(Rot);
+  return (
   <>
     <div style={{ position: "absolute", top: L.titTop, left: 0, right: 0, textAlign: "center", fontFamily: BIG, fontWeight: 900, fontSize: L.titSize, lineHeight: 0.78, color: OSSO, letterSpacing: "-0.01em", textShadow: "0 10px 40px rgba(0,0,0,.5)" }}>
-      SEXTA
+      {R.titulo}
     </div>
     <div style={{ position: "absolute", left: L.tagX, top: L.tagY, transform: "rotate(-6deg)", background: LIMA, color: PRETO, fontFamily: ARCHIVO, fontWeight: 900, fontStyle: "italic", fontSize: L.tagSize, padding: "6px 18px 8px", letterSpacing: "0.02em", boxShadow: "0 12px 30px rgba(0,0,0,.5)" }}>
-      DO BUTICA
+      {R.tag}
     </div>
     <div style={{ position: "absolute", left: L.cardX, top: L.cardY, transform: `rotate(5deg) scale(${L.cardSize})`, transformOrigin: "left top", background: OSSO, color: PRETO, borderRadius: 12, padding: "8px 18px 10px", textAlign: "center", boxShadow: "0 16px 30px rgba(0,0,0,.55)", border: `4px solid ${PRETO}` }}>
       <div style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: 17, letterSpacing: "0.14em" }}>A PARTIR DAS</div>
       <div style={{ fontFamily: BIG, fontWeight: 900, fontSize: 84, lineHeight: 0.88 }}>{HORA}</div>
     </div>
   </>
-);
+  );
+};
 
 const Parafuso: React.FC<{ side: "left" | "right"; size: number }> = ({ side, size }) => (
   <div style={{ position: "absolute", top: "50%", [side]: size * 1.35, width: size, height: size, marginTop: -size / 2, borderRadius: size / 2, background: "radial-gradient(circle at 35% 35%, #fff 0 20%, #8d8f7a 60%, #3c3d33 100%)", boxShadow: "inset 0 0 0 1px rgba(0,0,0,.4)" }} />
@@ -220,11 +229,12 @@ const FaixaSlogan: React.FC<{ y: number; h: number; size: number }> = ({ y, h, s
   </div>
 );
 
-export const ListaSextaA: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
+export const ListaSextaA: React.FC<{ fmt: FmtLista; dia?: DiaLista }> = ({ fmt, dia = "sexta" }) => {
   const L = LAYOUT_A[fmt];
   const H = fmt === "feed" ? 1350 : 1920;
   const cta = CTA[fmt];
   return (
+    <Rot.Provider value={ROTULOS[dia]}>
     <AbsoluteFill style={{ overflow: "hidden", background: PRETO }}>
       <FundoA cx={L.ringCx} cy={L.ringCy} />
       <RingPx width={1080} height={H} look="lima" flat cx={L.ringCx} cy={L.ringCy} ringH={L.ringH} rotY={0.24} rotX={-0.03} envIntensity={0.9} />
@@ -251,6 +261,7 @@ export const ListaSextaA: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
       <Grain opacity={0.14} />
       <Vignette strength={0.45} />
     </AbsoluteFill>
+    </Rot.Provider>
   );
 };
 
@@ -397,12 +408,13 @@ const Relogio: React.FC<{ right: number; top: number; size: number; vira: number
 // selo "SEXTA DO BUTICA" no canto (mesma pegada do selo de estilo da identidade B)
 const SeloNoite: React.FC<{ x: number; y: number; size: number; delay: number }> = ({ x, y, size, delay }) => {
   const s = useSpr(delay, { damping: 12 });
+  const R = useContext(Rot);
   return (
     <div style={{ position: "absolute", left: x, top: y, transform: `translateY(${(1 - s) * -80}px)`, opacity: Math.min(1, s * 3), display: "flex", alignItems: "center", gap: 10, background: AMARELO, color: PAINEL, borderRadius: 6, padding: "7px 16px 8px 10px", boxShadow: "0 8px 20px rgba(0,0,0,.5)" }}>
       <Ico i="notas" size={size * 1.25} color={PAINEL} stroke={2.2} />
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <span style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: size * 1.25, lineHeight: 1, letterSpacing: "0.08em" }}>SEXTA</span>
-        <span style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: size * 0.6, lineHeight: 1.15, opacity: 0.8, marginTop: 2, letterSpacing: "0.06em" }}>DO BUTICA</span>
+        <span style={{ fontFamily: BARLOW, fontWeight: 900, fontSize: size * 1.25, lineHeight: 1, letterSpacing: "0.08em" }}>{R.titulo}</span>
+        <span style={{ fontFamily: ARCHIVO, fontWeight: 800, fontSize: size * 0.6, lineHeight: 1.15, opacity: 0.8, marginTop: 2, letterSpacing: "0.06em" }}>{R.tag}</span>
       </div>
     </div>
   );
@@ -502,6 +514,7 @@ const T = {
 
 const Painel: React.FC<{ L: LB; verbo: string }> = ({ L, verbo }) => {
   const frame = useCurrentFrame();
+  const NOITE = useContext(Rot).noite;
   const s = useSpr(T.painel, { damping: 17, stiffness: 90 });
   const inner = L.pw - 52;
   // quando o LISTA é enviado, o painel "confirma": pulso de luz nas plaquetas
@@ -708,6 +721,7 @@ const Estouro: React.FC<{ cx: number; cy: number; raio: number }> = ({ cx, cy, r
 // cartão de embarque: horário, observação e o slogan no canhoto
 const Bilhete: React.FC<{ L: LB }> = ({ L }) => {
   const s = useSpr(T.bilhete, { damping: 16 });
+  const NOITE = useContext(Rot).noite;
   const size = L.biSize;
   return (
     <div style={{ position: "absolute", left: L.px, top: L.biY, width: L.pw, height: L.biH, transform: `translateY(${(1 - s) * 80}px)`, opacity: s, display: "flex", borderRadius: 14, overflow: "hidden", boxShadow: "0 16px 30px rgba(0,0,0,.5)" }}>
@@ -738,6 +752,7 @@ const Bilhete: React.FC<{ L: LB }> = ({ L }) => {
 // letreiro de LED correndo
 const LetreiroLED: React.FC<{ y: number; h: number; size: number; cta: string }> = ({ y, h, size, cta }) => {
   const frame = useCurrentFrame();
+  const NOITE = useContext(Rot).noite;
   const o = interpolate(frame, [20, 34], [0, 1], clamp);
   const texto = `${NOITE}  ●  ${cta} “LISTA”  ●  RECEBA O LINK NO DIRECT  ●  A PARTIR DAS ${HORA}  ●  TE VEJO NA ESQUINA  ●  `;
   return (
@@ -750,7 +765,7 @@ const LetreiroLED: React.FC<{ y: number; h: number; size: number; cta: string }>
   );
 };
 
-export const ListaSextaB: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
+export const ListaSextaB: React.FC<{ fmt: FmtLista; dia?: DiaLista }> = ({ fmt, dia = "sexta" }) => {
   const L = LAYOUT_B[fmt];
   const frame = useCurrentFrame();
   const story = fmt === "story";
@@ -765,6 +780,7 @@ export const ListaSextaB: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
     ? [origem, [origem[0] + 30, origem[1] - 380], [destino[0] + 620, destino[1] - 520], destino]
     : [origem, [origem[0] + 40, origem[1] - 200], [destino[0] + 180, destino[1] - 340], destino];
   return (
+    <Rot.Provider value={ROTULOS[dia]}>
     <AbsoluteFill style={{ overflow: "hidden", background: "#0c0d0e" }}>
       <AbsoluteFill style={{ opacity: fundo }}>
         <Terminal />
@@ -785,5 +801,6 @@ export const ListaSextaB: React.FC<{ fmt: FmtLista }> = ({ fmt }) => {
       <Grain opacity={0.1} />
       <Vignette strength={0.42} />
     </AbsoluteFill>
+    </Rot.Provider>
   );
 };

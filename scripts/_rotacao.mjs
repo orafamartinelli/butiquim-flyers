@@ -7,7 +7,7 @@ import { readFileSync } from "fs";
 const SEMANA1 = Date.UTC(2026, 8, 28); // segunda 28/09/2026
 const utc = (data) => Date.UTC(+data.slice(0, 4), +data.slice(5, 7) - 1, +data.slice(8, 10));
 export const semanaDe = (data) => Math.floor((utc(data) - SEMANA1) / (7 * 86400e3)) + 1;
-export const diaDe = (data) => ({ 5: "sexta", 6: "sabado", 0: "domingo" })[new Date(utc(data)).getUTCDay()];
+export const diaDe = (data) => ({ 4: "quinta", 5: "sexta", 6: "sabado", 0: "domingo" })[new Date(utc(data)).getUTCDay()];
 export const identidadeDe = (data) => {
   const s = semanaDe(data);
   if (s <= 9) return s % 2 ? "A" : "B";
@@ -17,6 +17,8 @@ export const agendaVersao = (s) => ["V1", "V2", "V3"][(s - 1) % 3];
 export const chaveDe = (data) => { const s = semanaDe(data); return s === 1 ? diaDe(data) : `${diaDe(data)}${s}`; };
 // terça da agenda da semana s (semana começa na segunda)
 export const tercaDe = (s) => new Date(SEMANA1 + ((s - 1) * 7 + 1) * 86400e3).toISOString().slice(0, 10);
+// artistas sem nenhum vídeo próprio (projeto pontual, Rafa 04/11/2026): o story "vídeo do artista" vira o story animado do flyer
+export const ARTISTAS_SEM_VIDEO = new Set(["butiquinta-encontro-do-free", "gaelzinho-everton-cabeca-k"]);
 export const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
 // noites cadastradas em src/data.ts (chave → data), inclusive vésperas
@@ -28,7 +30,8 @@ export const noitesDoMes = (mes) => {
   const todas = noitesDataTs();
   const sextaDaSemana = (s) => new Date(SEMANA1 + ((s - 1) * 7 + 4) * 86400e3).toISOString().slice(0, 7);
   const noites = Object.entries(todas)
-    .filter(([k]) => !k.startsWith("vespera"))
+    // véspera em quinta é noite própria (só existe como Folhinha); nos outros dias a véspera é um extra da noite
+    .filter(([k, d]) => !k.startsWith("vespera") || diaDe(d) === "quinta")
     .filter(([, d]) => sextaDaSemana(semanaDe(d)) === mes)
     .map(([k, d]) => ({ key: k, data: d, semana: semanaDe(d), dia: diaDe(d), id: identidadeDe(d), vespera: Object.keys(todas).find((v) => v.startsWith("vespera") && todas[v] === d) || null }))
     .sort((a, b) => a.data.localeCompare(b.data));

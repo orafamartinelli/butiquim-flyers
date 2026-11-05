@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-10-22T16:19:15.308Z",
+  "gerado_em": "2026-11-04T12:44:47.625Z",
   "de": "2026-10-01",
   "ate": "2027-01-31",
   "noites": [
@@ -164,6 +164,22 @@
       "estilo_inferido": false
     },
     {
+      "data": "2026-11-19",
+      "atracao": "BUTIQUINTA: ENCONTRO DO FREE",
+      "slug": "butiquinta-encontro-do-free",
+      "nome": "ENCONTRO DO FREE",
+      "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-20",
+      "atracao": "GAELZINHO + EVERTON CABEÇA k)",
+      "slug": "gaelzinho-everton-cabeca-k",
+      "nome": "GAELZINHO & EWERTON KBÇA",
+      "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
       "data": "2026-11-21",
       "atracao": "JUNINHO CARI",
       "slug": "juninho-cari",
@@ -201,6 +217,14 @@
       "slug": "ricardo-ribeiro",
       "nome": "Ricardo Ribeiro",
       "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-05",
+      "atracao": "JUNTOU DEU SAMBA",
+      "slug": "juntou-deu-samba",
+      "nome": "Juntou Deu Samba",
+      "estilo": "PAGODE",
       "estilo_inferido": false
     },
     {

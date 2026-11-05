@@ -14,6 +14,7 @@ import { SabadoC } from "./ids/SabadoC";
 import { DomingoC } from "./ids/DomingoC";
 import { SextaD } from "./ids/SextaD";
 import { SabadoD } from "./ids/SabadoD";
+import { Vespera } from "./ids/Vespera";
 import { TesteO } from "./Teste";
 import { AGENDA_DUR, AgendaV1, AgendaV2, AgendaV3, TrilhaAgenda } from "./agenda/AgendaSemana";
 import { FECHADO_DUR, FechadoStory, TrilhaFechado } from "./avisos/FechadoStory";
@@ -43,6 +44,7 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   domingo6: DomingoB,
   sabado7: Sabado,
   domingo7: Domingo,
+  sexta8: SextaB,
   sabado8: SabadoB,
   domingo8: DomingoB,
   sexta9: Sexta,
@@ -50,16 +52,19 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
 };
 // da semana 10 (dez/2026) em diante a identidade vem da rotação (Rafa 22/10: "rotação de todas as IDs daqui em diante")
 const POR_ID: Record<DiaKey, Record<Identidade, Id>> = {
+  // quinta só abre em véspera de feriado → sempre a Folhinha
+  quinta: { A: Vespera, B: Vespera, C: Vespera, D: Vespera },
   sexta: { A: Sexta, B: SextaB, C: SextaC, D: SextaD },
   sabado: { A: Sabado, B: SabadoB, C: SabadoC, D: SabadoD },
   domingo: { A: Domingo, B: DomingoB, C: DomingoC, D: DomingoC },
 };
 const compDe = (k: NoiteKey): Id => IDS[k] ?? POR_ID[NOITES[k].key][identidadeDe(NOITES[k].data)];
 const CHAVES_NOITE = (Object.keys(NOITES) as NoiteKey[]).filter((k) => !k.startsWith("vespera"));
-// agendas automáticas: semanas ≥ 10 com sex, sáb e dom cadastrados (regra do Rafa: só semana completa)
+// agendas automáticas: semanas ≥ 7 com sex, sáb e dom cadastrados (quinta de véspera entra junto) (regra do Rafa: só semana completa)
 const AGENDAS_AUTO = (() => {
   const porSemana: Record<number, NoiteKey[]> = {};
-  for (const k of CHAVES_NOITE) { const s = semanaDe(NOITES[k].data); if (s >= 10) (porSemana[s] ??= []).push(k); }
+  const comQuinta = (Object.keys(NOITES) as NoiteKey[]).filter((k) => !k.startsWith("vespera") || NOITES[k].key === "quinta");
+  for (const k of comQuinta) { const s = semanaDe(NOITES[k].data); if (s >= 7) (porSemana[s] ??= []).push(k); }
   const V = { V1: AgendaV1, V2: AgendaV2, V3: AgendaV3 };
   return Object.entries(porSemana)
     .filter(([, ks]) => (["sexta", "sabado", "domingo"] as DiaKey[]).every((d) => ks.some((k) => NOITES[k].key === d)))
@@ -138,9 +143,7 @@ export const RemotionRoot: React.FC = () => (
         ["s5", AgendaV2, "30/10 A 01/11", [NOITES.sexta5, NOITES.sabado5, NOITES.domingo5]],
         // novembro (terças 03, 10, 17, 24) — rodízio V3 → V1 → V2 → V3
         ["s6", AgendaV3, "06 A 08", [NOITES.sexta6, NOITES.sabado6, NOITES.domingo6]],
-        // s7 (terça 10/11, semana 13–15): pendente — sáb 14 e dom 15 preenchidos, falta a sexta 13. Entra quando o Victor fechar o 13
-        ["s8", AgendaV2, "21 E 22", [NOITES.sabado8, NOITES.domingo8]],
-        ["s9", AgendaV3, "27 E 28", [NOITES.sexta9, NOITES.sabado9]],
+        // da s7 em diante vêm de AGENDAS_AUTO (s8 = 19 A 22, V2, com a quinta de véspera)
         ...AGENDAS_AUTO,
       ] as const
     ).flatMap(([s, C, periodo, ns]) =>

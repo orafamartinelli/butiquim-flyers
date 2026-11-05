@@ -14,6 +14,7 @@ npx remotion bundle src/index.ts --out-dir=$B --log=error || { echo "FALHOU bund
 r() { local out=${@: -1}; npx remotion render "$@" --codec=h264 --crf=18 --log=error && echo "OK $out" || echo "FALHOU $out"; }
 mkdir -p out/final out/agendas out/vespera
 for k in $NOITES; do
+  case $k in vespera*) continue;; esac # quinta de véspera: só as peças da Folhinha (bloco abaixo)
   for f in feed story; do F=$(echo $f | tr a-z A-Z)
     npx remotion still $B $k-$f out/final/$k-$F.png --frame=150 --log=error && echo "OK $k-$F.png" || echo "FALHOU $k-$F.png"
   done
