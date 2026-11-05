@@ -110,12 +110,15 @@ const Terminal: React.FC = () => (
   </>
 );
 
-const Painel: React.FC<{ n: Noite; x: number; y: number; w: number; cell: number; start: number; compacto?: boolean }> = ({ n, x, y, w, cell, start, compacto }) => {
+// noite temática (ex.: 20/11 "Especial Clássicos"): o tema entra no lugar do DESTINO e o repertório no lugar do STATUS
+export type TemaNoite = { titulo: string; repertorio: string };
+const Painel: React.FC<{ n: Noite; x: number; y: number; w: number; cell: number; start: number; compacto?: boolean; tema?: TemaNoite }> = ({ n, x, y, w, cell, start, compacto, tema }) => {
   const s = useSpr(start - 8, { damping: 18 });
   const nome = n.artista.replace("&", "E");
   // nome da atração ocupa a largura toda do painel (plaquetas crescem ou encolhem conforme o tamanho do nome)
   const unidades = nome.split("").reduce((t, c) => t + (c === " " ? 0.45 : 1), 0);
   const wNome = Math.min(cell * 1.05, (w - 52 - 4 * (nome.length - 1)) / unidades);
+  const wRep = tema ? Math.min(cell * 0.4, (w - 52 - 3 * (tema.repertorio.length - 1)) / tema.repertorio.split("").reduce((t, c) => t + (c === " " ? 0.45 : 1), 0)) : 0;
   return (
     <div style={{ position: "absolute", left: x, top: y, width: w, transform: `translateY(${(1 - s) * 60}px)`, opacity: s, background: PAINEL, borderRadius: 14, padding: "22px 26px 24px", boxShadow: "0 30px 60px rgba(0,0,0,.6), inset 0 0 0 2px #26292c" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #26292c", paddingBottom: 12, marginBottom: 16 }}>
@@ -137,11 +140,17 @@ const Painel: React.FC<{ n: Noite; x: number; y: number; w: number; cell: number
       {!compacto && (
         <div style={{ display: "flex", gap: 40, marginTop: 22, alignItems: "flex-end" }}>
           <div>
-            <Rotulo t="DESTINO" size={cell * 0.28} />
-            <Flaps text="ESQUINA DE VIDRO" start={start + 22} w={cell * 0.4} h={cell * 0.58} gap={3} seed={4} />
+            <Rotulo t={tema ? "TEMA DA NOITE" : "DESTINO"} size={cell * 0.28} />
+            <Flaps text={tema ? tema.titulo : "ESQUINA DE VIDRO"} start={start + 22} w={cell * (tema ? 0.5 : 0.4)} h={cell * (tema ? 0.72 : 0.58)} gap={3} seed={4} color={tema ? AMARELO : undefined} />
           </div>
         </div>
       )}
+      {tema ? (
+        <div style={{ marginTop: 22 }}>
+          <Rotulo t="UMA NOITE COM SUCESSOS DE" size={cell * 0.28} />
+          <Flaps text={tema.repertorio} start={start + 36} w={wRep} h={wRep / 0.72} gap={3} seed={5} color={LIMA} />
+        </div>
+      ) : (
       <div style={{ display: "flex", gap: 40, marginTop: 22, alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
           <Rotulo t="STATUS" size={cell * 0.28} />
@@ -156,6 +165,7 @@ const Painel: React.FC<{ n: Noite; x: number; y: number; w: number; cell: number
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
@@ -217,7 +227,7 @@ const Banda: React.FC<{ n: Noite; w: number; h: number; cx: number; bottom: numb
   );
 };
 
-export const SextaB: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
+export const SextaB: React.FC<{ n: Noite; fmt: Formato; tema?: TemaNoite }> = ({ n, fmt, tema }) => {
   if (fmt === "broll") return <SextaBBroll n={n} />;
   const { w, h } = DIM[fmt];
   const feed = fmt === "feed";
@@ -232,7 +242,7 @@ export const SextaB: React.FC<{ n: Noite; fmt: Formato }> = ({ n, fmt }) => {
       <Logo width={feed ? 210 : 240} top={feed ? 34 : 214} />
       <Estilo n={n} x={feed ? 28 : 46} y={feed ? 22 : 200} delay={20} size={feed ? 25 : 29} />
       <Relogio x={feed ? 34 : 50} y={feed ? 20 : 198} size={feed ? 52 : 58} hora={n.hora} />
-      <Painel n={n} x={40} y={feed ? 662 : 990} w={1000} cell={feed ? 70 : 84} start={18} />
+      <Painel n={n} x={40} y={feed ? 662 : 990} w={1000} cell={feed ? 70 : 84} start={18} tema={tema} />
       <Bilhete n={n} x={40} y={feed ? 1232 : 1640} w={1000} delay={56} size={feed ? 24 : 26} cta={!feed} />
       <Grain opacity={0.1} />
       <Vignette strength={0.45} />

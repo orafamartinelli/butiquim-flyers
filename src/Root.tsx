@@ -22,6 +22,8 @@ import { FECHADO_DUR, FechadoStory, TrilhaFechado } from "./avisos/FechadoStory"
 type Id = React.FC<{ n: Noite; fmt: Formato }>;
 
 // cada noite com a identidade que vai usar (A = 1º fds, B = 2º fds)
+// noite temática (Rafa escolheu 04/11): 20/11 com "Especial Clássicos" no painel
+const Sexta8Tema: Id = (p) => <SextaB {...p} tema={{ titulo: "ESPECIAL CLÁSSICOS", repertorio: "ZEZÉ & LUCIANO + BRUNO & MARRONE" }} />;
 const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta: Sexta,
   sabado: Sabado,
@@ -44,7 +46,7 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   domingo6: DomingoB,
   sabado7: Sabado,
   domingo7: Domingo,
-  sexta8: SextaB,
+  sexta8: Sexta8Tema,
   sabado8: SabadoB,
   domingo8: DomingoB,
   sexta9: Sexta,
@@ -75,6 +77,12 @@ const AGENDAS_AUTO = (() => {
       return [`s${s}`, V[agendaVersao(+s)], periodo, ns] as const;
     });
 })();
+// sem designer (dez/2026, Rafa 04/11): a agenda de segunda é a nossa versão A; a de terça continua sendo a B
+const V_ORDEM = [AgendaV1, AgendaV2, AgendaV3];
+const AGENDAS_SEG = AGENDAS_AUTO.filter(([, , , ns]) => ns[0].data >= "2026-12-01").map(([s, , periodo, ns]) => {
+  const n = +s.slice(1);
+  return [`${s}-seg`, V_ORDEM[n % 3], periodo, ns] as const; // agendaVersao(n) usa (n - 1) % 3; n % 3 é a seguinte
+});
 
 const DUR: Record<Formato, number> = { feed: 240, story: 240, broll: 300 };
 
@@ -145,6 +153,7 @@ export const RemotionRoot: React.FC = () => (
         ["s6", AgendaV3, "06 A 08", [NOITES.sexta6, NOITES.sabado6, NOITES.domingo6]],
         // da s7 em diante vêm de AGENDAS_AUTO (s8 = 19 A 22, V2, com a quinta de véspera)
         ...AGENDAS_AUTO,
+        ...AGENDAS_SEG,
       ] as const
     ).flatMap(([s, C, periodo, ns]) =>
       (["feed", "story"] as const).flatMap((fmt) => {

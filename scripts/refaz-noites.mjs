@@ -190,6 +190,10 @@ if (prontos.length) {
         log(`render agenda ${g.s}`);
         video("build-refaz", `agenda-${g.s}-feed-video`, `out/agendas/agenda-${g.s}-FEED.mp4`);
         video("build-refaz", `agenda-${g.s}-story-video`, `out/agendas/agenda-${g.s}-STORY.mp4`);
+        if (g.seg) {
+          video("build-refaz", `agenda-${g.s}-seg-feed-video`, `out/agendas/agenda-${g.s}-seg-FEED.mp4`);
+          video("build-refaz", `agenda-${g.s}-seg-story-video`, `out/agendas/agenda-${g.s}-seg-STORY.mp4`);
+        }
       } catch (e) {
         for (const c of prontos.filter((x) => g.datas.includes(x.data) && !x.resultado)) c.resultado = { status: "erro", texto: `render da agenda da semana falhou: ${String(e.message).slice(0, 140)}` };
       }
@@ -230,7 +234,7 @@ for (const c of casos) {
   const peças = {
     ok: `✅ Nossas peças: ${c.resultado.texto}`,
     sem_posts: `➖ Nossas peças: ${c.resultado?.texto}`,
-    falta_material: `⚠️ Nossas peças: NÃO refiz — ${c.resultado?.texto}. Me manda a foto (PSD do designer) e o vídeo do artista que eu cadastro.`,
+    falta_material: `⚠️ Nossas peças: NÃO refiz — ${c.resultado?.texto}. Me manda a foto (PNG serve) e o vídeo do artista que eu cadastro.`,
     erro: `❌ Nossas peças: deu erro (${c.resultado?.texto}). Tento de novo amanhã às 10h.`,
   }[st] || "⏳ Nossas peças: ainda processando";
   const meta = c.pago_pausado_em

@@ -6,7 +6,7 @@
 // O que faz (workflow refaz-noites.yml, despertador 10h05):
 //   1. acha na planilha (butiquim_social_posts) as noites dos próximos 70 dias que ainda não estão em src/data.ts;
 //   2. confere o material: artista no catálogo (foto + vídeo em src/data.ts) e estilo no cadastro; quinta precisa de feriado no dia seguinte.
-//      Faltou? avisa o Rafa UMA vez por noite+artista (foto vem do PSD do designer: trabalho humano) e tenta de novo no dia seguinte;
+//      Faltou? avisa o Rafa UMA vez por noite+artista (foto em PNG: trabalho humano) e tenta de novo no dia seguinte;
 //   3. acrescenta a noite em src/data.ts (e a Folhinha, se for véspera), renderiza a noite e a agenda da semana;
 //   4. fila-mes.mjs --noites: sobe as peças e agenda os posts (quinta = logística de abertura, sem vídeo do artista);
 //   5. grava o código de volta no repositório e manda o resumo ao Rafa.
@@ -89,7 +89,7 @@ for (const f of faltam) {
     f.atracao,
     "",
     `⚠️ Nossas peças ainda não saíram: ${f.problemas.join("; ")}.`,
-    "Me manda a foto (PSD do designer ou a arte) e o vídeo, se houver, que eu cadastro. Assim que estiver no catálogo, o robô produz e agenda sozinho.",
+    "Me manda a foto do artista (PNG serve; se vier com fundo, eu recorto) e o vídeo, se houver, que eu cadastro. Assim que estiver no catálogo, o robô produz e agenda sozinho.",
   ].join("\n"));
   if (!ENSAIO) await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ chave, valor: f.slug }) });
 }
@@ -217,6 +217,10 @@ for (const M of [...new Set(prontas.map((n) => n.mes))]) {
       log(`render agenda ${g.s}`);
       video("build-novas", `agenda-${g.s}-feed-video`, `out/agendas/agenda-${g.s}-FEED.mp4`);
       video("build-novas", `agenda-${g.s}-story-video`, `out/agendas/agenda-${g.s}-STORY.mp4`);
+      if (g.seg) {
+        video("build-novas", `agenda-${g.s}-seg-feed-video`, `out/agendas/agenda-${g.s}-seg-FEED.mp4`);
+        video("build-novas", `agenda-${g.s}-seg-story-video`, `out/agendas/agenda-${g.s}-seg-STORY.mp4`);
+      }
     }
     const args = ["scripts/fila-mes.mjs", "--mes", M, "--noites", alvo.join(",")];
     if (!ENSAIO) args.push("--gravar");

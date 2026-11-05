@@ -19,6 +19,8 @@ export const chaveDe = (data) => { const s = semanaDe(data); return s === 1 ? di
 export const tercaDe = (s) => new Date(SEMANA1 + ((s - 1) * 7 + 1) * 86400e3).toISOString().slice(0, 10);
 // artistas sem nenhum vídeo próprio (projeto pontual, Rafa 04/11/2026): o story "vídeo do artista" vira o story animado do flyer
 export const ARTISTAS_SEM_VIDEO = new Set(["butiquinta-encontro-do-free", "gaelzinho-everton-cabeca-k"]);
+// sem designer: de dezembro em diante a agenda de segunda é a nossa versão A (composição agenda-sN-seg-*)
+export const SEM_DESIGNER_DESDE = "2026-12-01";
 export const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
 // noites cadastradas em src/data.ts (chave → data), inclusive vésperas
@@ -40,7 +42,7 @@ export const noitesDoMes = (mes) => {
   for (const n of noites) (porSemana[n.semana] ??= []).push(n);
   const agendas = Object.entries(porSemana)
     .filter(([, ns]) => ["sexta", "sabado", "domingo"].every((d) => ns.some((n) => n.dia === d)))
-    .map(([s, ns]) => ({ s: `s${s}`, semana: +s, terca: tercaDe(+s), versao: agendaVersao(+s), keys: ns.map((n) => n.key), datas: ns.map((n) => n.data) }));
+    .map(([s, ns]) => ({ s: `s${s}`, semana: +s, terca: tercaDe(+s), versao: agendaVersao(+s), keys: ns.map((n) => n.key), datas: ns.map((n) => n.data), seg: ns[0].data >= SEM_DESIGNER_DESDE ? new Date(utc(tercaDe(+s)) - 86400e3).toISOString().slice(0, 10) : null }));
   const incompletas = Object.entries(porSemana).filter(([s]) => !agendas.some((a) => a.semana === +s)).map(([s, ns]) => ({ semana: +s, tem: ns.map((n) => n.dia) }));
   return { noites, agendas, incompletas };
 };

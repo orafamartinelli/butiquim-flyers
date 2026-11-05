@@ -63,7 +63,7 @@ const soma = (d, n) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.ge
 // noites: data, chave, identidade (rotação), véspera (Folhinha) — e agendas das semanas completas
 const R = noitesDoMes(MES);
 const NOITES = R.noites.map((n) => [n.data, n.key, n.id, n.vespera || undefined]);
-const AGENDAS = R.agendas.map((a) => [a.terca, a.s, a.keys]);
+const AGENDAS = R.agendas.map((a) => [a.terca, a.s, a.keys, a.seg]);
 for (const i of R.incompletas) log(`⚠️ semana ${i.semana} incompleta (tem: ${i.tem.join(", ")}) — agenda de terça NÃO entra até a planilha fechar`);
 log(`mês ${MES}: ${NOITES.length} noites (${NOITES.map(([d, k, v]) => `${d.slice(8)} ${k}=${v}`).join(", ")}) · agendas: ${AGENDAS.map((a) => a[1]).join(", ") || "nenhuma"}`);
 const dataDe = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
@@ -115,12 +115,16 @@ for (const [d, k, , ves] of NOITES) {
 }
 const AG = {};
 const dataDeChave = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
-for (const [, s, ks] of AGENDAS) {
+for (const [, s, ks, seg] of AGENDAS) {
   // agenda da semana lista as 3 noites: se UMA trocou, a agenda inteira é refeita
   const mexe = !ALVOS.length || ks.some((k) => ALVOS.includes(dataDeChave[k]));
   AG[s] = mexe
     ? { feed: await sobe(`out/agendas/agenda-${s}-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-feed.mp4`)), story: await sobe(`out/agendas/agenda-${s}-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-story.mp4`)) }
     : { feed: PUB + `avulso/claude/ag-${s}-feed.mp4`, story: PUB + `avulso/claude/ag-${s}-story.mp4` };
+  if (seg) {
+    AG[s].segFeed = mexe ? await sobe(`out/agendas/agenda-${s}-seg-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-seg-feed.mp4`)) : PUB + `avulso/claude/ag-${s}-seg-feed.mp4`;
+    AG[s].segStory = mexe ? await sobe(`out/agendas/agenda-${s}-seg-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-seg-story.mp4`)) : PUB + `avulso/claude/ag-${s}-seg-story.mp4`;
+  }
 }
 
 // ---------- capa do carrossel da manhã ----------
@@ -133,7 +137,7 @@ for (const [d, k] of NOITES) {
 
 // ---------- posts ----------
 // modo refazer: a campanha já existe (com as linhas canceladas) — não pula por campanha, decide linha a linha no fim
-const existentes = REFAZER.length ? new Set() : new Set((await rest("butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)")).map((r) => r.campanha));
+const existentes = REFAZER.length ? new Set() : new Set((await rest(`butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)&limit=5000`)).map((r) => r.campanha));
 const novos = [];
 const add = (camp, lista) => { if (existentes.has(camp)) { log(`pula ${camp} (já na fila)`); return; } lista.forEach((p, i) => novos.push({ campanha: camp, ordem: i + 1, perfil: "obutiquim", legenda: "", ...p })); };
 
@@ -185,12 +189,21 @@ for (const [d, k, v, ves] of NOITES) {
   ]);
 }
 
-for (const [ter, s, ks] of AGENDAS) {
+const mapa = Object.fromEntries((await rest("butiquim_social_config?select=chave,valor&chave=in.(arte_mapa_feed,arte_mapa_story)")).map((c) => [c.chave, c.valor]));
+for (const [ter, s, ks, seg] of AGENDAS) {
   if (SO_NOITES.length && !ks.some((k) => SO_NOITES.includes(dataDeChave[k]))) continue;
   const DS = ks.map((k) => dataDe[k]);
   const linhas = ks.map((k) => { const d = dataDe[k]; const { nome, ig, est } = info(d); return `🎤 ${REGRA[new Date(`${d}T12:00:00Z`).getUTCDay()].nome} (${d.slice(8)}/${d.slice(5, 7)}): ${nome}${ig ? ` (@${ig})` : ""} · ${est}`; });
   const legenda = `🗓️ A SEMANA NA ESQUINA! Quem sobe no palco do Butica:\n\n${linhas.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`;
   const igs = ks.map((k) => info(dataDe[k]).ig).filter(Boolean);
+  // segunda sem designer: agenda versão A (carrossel 17h + story 17h20, com o mapinha da casa como a da esteira)
+  if (seg) {
+    add(`agenda-claude-seg-${seg}`, [
+      { publicar_em: q(seg, "17:00"), formato: "CAROUSEL", video_url: AG[s].segFeed, itens_urls: JSON.stringify([AG[s].segFeed, ...ks.map((k) => F[k].feedJpg), ...(mapa.arte_mapa_feed ? [PUB + mapa.arte_mapa_feed] : [])].slice(0, 10)), legenda: `📅 CHEGOU A AGENDA DA SEMANA!\n\n${linhas.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`, datas_show: DS },
+      { publicar_em: q(seg, "17:20"), formato: "STORIES", video_url: AG[s].segStory, marcados: igs.join(",") || null, datas_show: DS },
+      ...(mapa.arte_mapa_story ? [{ publicar_em: q(seg, "17:26"), formato: "STORIES", video_url: PUB + mapa.arte_mapa_story, datas_show: null }] : []),
+    ]);
+  }
   add(`extra-claude-${ABREV}-${ter}`, [{ publicar_em: q(ter, "12:00"), formato: "REELS", video_url: AG[s].feed, thumb_offset_seg: 4, legenda, datas_show: DS }]);
   add(`agenda-claude-feed-${ter}`, [{ publicar_em: q(ter, "17:00"), formato: "CAROUSEL", video_url: AG[s].feed, itens_urls: JSON.stringify([AG[s].feed, ...ks.map((k) => F[k].feedMp4)]), legenda, datas_show: DS }]);
   add(`agenda-claude-story-${ter}`, [
