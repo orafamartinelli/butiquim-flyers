@@ -35,7 +35,10 @@ for (const slug of SLUGS) {
   novas.push([par("c", "mp4"), par("a", "mp4"), par("b", "mp4"), par("est", "jpg")]);
 }
 // com várias promos no mesmo dia: todas no motion 3, depois todas no motion 1...
-const rodizio = novas[0].flatMap((_, i) => novas.map((n) => n[i]));
+// --gira N: gira a lista para o 1º item (motion 3) cair na posição N, que é a do próximo dia de show montado pela esteira
+const plano = novas[0].flatMap((_, i) => novas.map((n) => n[i]));
+const gira = +(arg("--gira") || 0);
+const rodizio = plano.map((_, i) => plano[(i - gira + plano.length * 2) % plano.length]);
 
 const [{ valor }] = await (await fetch(`${URL}/rest/v1/butiquim_social_config?select=valor&chave=eq.fila_semana`, { headers: H })).json();
 const cfg = JSON.parse(valor);
