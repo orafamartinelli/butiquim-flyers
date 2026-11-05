@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-11-04T12:44:47.625Z",
-  "de": "2026-10-01",
-  "ate": "2027-01-31",
+  "gerado_em": "2026-11-05T12:31:09.173Z",
+  "de": "2026-10-02",
+  "ate": "2026-12-27",
   "noites": [
     {
       "data": "2026-10-02",
@@ -225,6 +225,14 @@
       "slug": "juntou-deu-samba",
       "nome": "Juntou Deu Samba",
       "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-12-06",
+      "atracao": "JOÃO MAURÍCIO",
+      "slug": "joao-mauricio",
+      "nome": "João Maurício",
+      "estilo": "SERTANEJO",
       "estilo_inferido": false
     },
     {
