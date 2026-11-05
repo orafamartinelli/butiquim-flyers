@@ -20,9 +20,30 @@ export type DadosPromo = {
   validade: string; // "VÁLIDO ATÉ 00H30"
   garrafa: string; // arquivo em public/
   duas?: boolean; // duas garrafas = promo "em dobro"
+  fator?: number; // largura da imagem em relação ao padrão (imagem aparada ≠ Smirnoff, que tem folga em volta)
+  dy?: number; // deslocamento do topo, em frações da largura padrão
+  dist?: number; // afastamento quando são duas
+  lata?: string; // latas dos dois lados
+  fundoB?: string; // texto gigante em contorno do efeito B
+  semLegal?: boolean; // promo sem o aviso "não guardamos"
 };
 
 export const SMIRNOFF_DOBRO: DadosPromo = { noite: "SABADÁ DO BUTICA", chamada: "GARRAFA DE SMIRNOFF", destaque: "EM DOBRO", validade: "VÁLIDO ATÉ 00H30", garrafa: "promos/smirnoff.png", duas: true };
+// textos e valores: os das artes do designer em uso até nov/2026
+export const APEROL_DOBRO: DadosPromo = { noite: "SEXTA DO BUTICA", chamada: "APEROL SPRITZ", destaque: "EM DOBRO", validade: "DAS 23H ATÉ 1H", garrafa: "promos/aperol.png", duas: true, fator: 0.8, dy: 0.14, dist: 0.33, semLegal: true };
+export const SMIRNOFF_SEXTA: DadosPromo = { noite: "SEXTA DO BUTICA", chamada: "SMIRNOFF + 5 RED BULL", destaque: "R$ 119,90", validade: "VÁLIDO ATÉ 01H", garrafa: "promos/smirnoff.png", lata: "promos/redbull.png", fundoB: "+5" };
+export const REDLABEL_SEXTA: DadosPromo = { noite: "SEXTA DO BUTICA", chamada: "RED LABEL + 5 RED BULL", destaque: "R$ 189,90", validade: "VÁLIDO ATÉ 01H", garrafa: "promos/redlabel.png", fator: 0.38, dy: 0.07, lata: "promos/redbull.png", fundoB: "+5" };
+export const SMIRNOFF_DOMINGO: DadosPromo = { noite: "SAIDEIRA DA SEMANA", chamada: "COMBO DE SMIRNOFF", destaque: "R$ 119,90", validade: "ATÉ ÀS 00H", garrafa: "promos/smirnoff.png", lata: "promos/redbull.png", fundoB: "$" };
+
+// latas dos dois lados da garrafa, atrás dela
+export const Latas: React.FC<{ src: string; gW: number; top: number; abre: number; entra: number }> = ({ src, gW, top, abre, entra }) => (
+  <>
+    {[-1, 1].map((lado) => {
+      const w = gW * 0.27;
+      return <Img key={lado} src={staticFile(src)} style={{ position: "absolute", width: w, left: 540 + lado * gW * 0.31 * abre - w / 2, top: top + gW * 0.72 + (1 - entra) * 500, transform: `rotate(${lado * 9 * abre}deg)`, filter: "drop-shadow(0 20px 28px rgba(0,0,0,.6))", opacity: Math.min(1, entra * 2) }} />;
+    })}
+  </>
+);
 
 type L = { H: number; logoTop: number; logoW: number; tagY: number; gW: number; gTop: number; ringY: number; ringH: number; chamadaY: number; chamadaT: number; destaqueY: number; destaqueT: number; pilulaY: number; legalY: number };
 const LAY: Record<FmtPromo, L> = {
@@ -54,7 +75,7 @@ const Rodape: React.FC<{ L: L; d: DadosPromo; o?: number }> = ({ L, d, o = 1 }) 
     <div style={{ position: "absolute", top: L.pilulaY, left: 0, right: 0, display: "flex", justifyContent: "center", opacity: o }}>
       <div style={{ background: OSSO, color: PRETO, borderRadius: 40, padding: "9px 34px 11px", fontFamily: ARCHIVO, fontWeight: 900, fontSize: 40, letterSpacing: "0.04em" }}>{d.validade}</div>
     </div>
-    <div style={{ position: "absolute", top: L.legalY, left: 0, right: 0, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 600, fontSize: 25, color: OSSO, opacity: 0.75 * o }}>Não guardamos bebidas promocionais</div>
+    {!d.semLegal && <div style={{ position: "absolute", top: L.legalY, left: 0, right: 0, textAlign: "center", fontFamily: ARCHIVO, fontWeight: 600, fontSize: 25, color: OSSO, opacity: 0.75 * o }}>Não guardamos bebidas promocionais</div>}
   </>
 );
 
@@ -135,19 +156,22 @@ export const Promo: React.FC<{ d: DadosPromo; fmt: FmtPromo; efeito: Efeito }> =
   // B: uma garrafa no centro se divide em duas ("em dobro"), com clarão
   const abre = efeito === "B" ? interpolate(frame, [48, 66], [0, 1], { ...clamp, easing: Easing.out(Easing.back(1.5)) }) : 1;
   const clarao = efeito === "B" ? interpolate(frame, [48, 52, 66], [0, 0.75, 0], clamp) : 0;
-  const dist = (d.duas ? L.gW * 0.27 : 0) * abre;
+  const dist = (d.duas ? L.gW * (d.dist ?? 0.27) : 0) * abre;
+  const gW = L.gW * (d.fator ?? 1);
+  const gTop = L.gTop + L.gW * (d.dy ?? 0);
   const paralaxe = efeito === "B" ? Math.sin(frame / 40) * 14 : 0;
   return (
     <AbsoluteFill style={{ overflow: "hidden", background: PRETO }}>
       <Fundo L={L} />
       {/* camada de trás: 2X gigante em contorno */}
       {efeito === "B" && (
-        <div style={{ position: "absolute", top: L.ringY - 330 + paralaxe, left: 0, right: 0, textAlign: "center", fontFamily: BIG, fontWeight: 900, fontSize: 700, lineHeight: 0.9, color: "transparent", WebkitTextStroke: "3px rgba(200,210,0,.45)", opacity: abre, transform: `scale(${0.8 + abre * 0.2})` }}>2X</div>
+        <div style={{ position: "absolute", top: L.ringY - 330 + paralaxe, left: 0, right: 0, textAlign: "center", fontFamily: BIG, fontWeight: 900, fontSize: 700, lineHeight: 0.9, color: "transparent", WebkitTextStroke: "3px rgba(200,210,0,.45)", opacity: abre, transform: `scale(${0.8 + abre * 0.2})` }}>{d.fundoB ?? "2X"}</div>
       )}
       <AbsoluteFill style={{ transform: `scale(${push})`, transformOrigin: `50% ${L.ringY}px` }}>
         {efeito !== "B" && <RingPx width={1080} height={L.H} look="lima" flat cx={540} cy={L.ringY} ringH={L.ringH * (parado ? 1 : 0.6 + entra * 0.4)} rotY={parado ? 0.28 : 0.28 + Math.sin(frame / 30) * 0.12} envIntensity={0.9} />}
-        {d.duas && <Garrafa src={d.garrafa} w={L.gW} cx={540 - dist} top={L.gTop + (1 - entra) * 500 + flutua} rot={-6 * abre} style={{ opacity: Math.min(1, entra * 2) }} />}
-        <Garrafa src={d.garrafa} w={L.gW} cx={540 + dist} top={L.gTop + (1 - (efeito === "A" ? entra2 : entra)) * 500 - flutua} rot={6 * abre} style={{ opacity: Math.min(1, (efeito === "A" ? entra2 : entra) * 2) }} />
+        {d.lata && <Latas src={d.lata} gW={L.gW} top={L.gTop} abre={abre} entra={entra2} />}
+        {d.duas && <Garrafa src={d.garrafa} w={gW} cx={540 - dist} top={gTop + (1 - entra) * 500 + flutua} rot={-6 * abre} style={{ opacity: Math.min(1, entra * 2) }} />}
+        <Garrafa src={d.garrafa} w={gW} cx={540 + dist} top={gTop + (1 - (efeito === "A" ? entra2 : entra)) * 500 - flutua} rot={d.duas ? 6 * abre : 0} style={{ opacity: Math.min(1, (efeito === "A" ? entra2 : entra) * 2) }} />
       </AbsoluteFill>
       {clarao > 0 && <AbsoluteFill style={{ background: LIMA, opacity: clarao }} />}
       {/* base escura para o texto */}
