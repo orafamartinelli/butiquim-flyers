@@ -8,10 +8,14 @@ const grupos = [
   { titulo: "Quinta 19/11: Encontro do Free (Folhinha, véspera da Consciência Negra)", base: "out/vespera/vespera4", nome: "19-11-vespera", lista: "vespera" },
   { titulo: "Sexta 20/11: Gaelzinho & Ewerton KBÇA (identidade B, Partidas)", base: "out/final/sexta8", nome: "20-11-sexta8", lista: "noite" },
   { titulo: "Agenda da semana (terça 17/11): 19 a 22, quatro noites", base: "out/agendas/agenda-s8", nome: "agenda-19-a-22", lista: "agenda" },
+  { titulo: "Lista da quinta (nova: as mesmas artes da sexta, com o nome da noite)", base: "out/listas/lista-quinta", nome: "lista-quinta", lista: "lista" },
+  { titulo: "Promo de 19/11 (arte do designer, já estava na pasta)", base: "out/listas/vespera4-combo", nome: "combo-19-11", lista: "combo" },
 ];
 const L = {
-  vespera: [["FEED.png", "Feed (imagem)"], ["FEED.mp4", "Feed em vídeo / Reels"], ["STORY.png", "Story"], ["STORY.mp4", "Story em vídeo"], ["STORY-BROLL.mp4", "Story com vídeo (Rilex, Papo 10, Pagode 44)"]],
-  noite: [["FEED.png", "Feed (imagem)"], ["FEED.mp4", "Feed em vídeo / Reels"], ["STORY.png", "Story"], ["STORY-BROLL.mp4", "Story com vídeo (sem vídeo de show: foto em movimento)"]],
+  lista: [["A-feed.png", "Feed estático"], ["A-story.png", "Story estático"], ["B-feed.mp4", "Reels Comenta LISTA"], ["B-story.mp4", "Story em vídeo"]],
+  combo: [["feed.jpg", "Feed"], ["story.jpg", "Story"]],
+  vespera: [["FEED.png", "Feed (imagem)"], ["FEED.mp4", "Feed em vídeo / Reels"], ["STORY.png", "Story"], ["STORY.mp4", "Story em vídeo"]],
+  noite: [["FEED.png", "Feed (imagem)"], ["FEED.mp4", "Feed em vídeo / Reels"], ["STORY.png", "Story"], ["STORY.mp4", "Story em vídeo"]],
   agenda: [["FEED.png", "Feed (imagem)"], ["FEED.mp4", "Feed em vídeo"], ["STORY.png", "Story"], ["STORY.mp4", "Story em vídeo"]],
 };
 const secoes = grupos.map((g) => {
@@ -29,6 +33,6 @@ writeFileSync(`${DEST}/previa.html`, `<!doctype html><html lang="pt-BR"><meta ch
 h2{font-size:17px;margin:30px 0 12px;color:#d4f53c}.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
 figure{margin:0}img,video{width:100%;border-radius:8px;background:#222}figcaption{font-size:13px;color:#aaa;margin-top:4px}</style>
 <h1>Semana da véspera: 19 a 22/11</h1>
-<p>Nossas peças de quinta 19 e sexta 20, mais a agenda da semana refeita com as 4 noites. Nada foi agendado ainda: só entra na fila depois do seu OK.</p>
+<p>Nossas peças de quinta 19 e sexta 20, mais a agenda da semana refeita com as 4 noites. Tudo isso já está agendado, junto com as artes de lista da quinta e o combo do designer.</p>
 ${secoes}</html>`);
 console.log("prévia:", `${DEST}/previa.html`);

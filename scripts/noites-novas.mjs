@@ -154,9 +154,6 @@ const still = (b, id, out, frame) => npx(["remotion", "still", b, id, out, ...(f
 const video = (b, id, out) => npx(["remotion", "render", b, id, out, "--codec=h264", "--crf=18", `--gl=${GL}`, `--concurrency=${NUCLEOS}`, "--log=error"]);
 for (const pasta of ["out/final", "out/agendas", "out/vespera", "public/broll"]) mkdirSync(pasta, { recursive: true });
 
-log(`bundle (GL=${GL})`);
-npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-novas", "--log=error"]);
-
 const baixaClipes = async (datasClipe) => {
   const precisa = new Set();
   for (const d of datasClipe) {
@@ -173,15 +170,29 @@ const baixaClipes = async (datasClipe) => {
   }
 };
 
-const fila = await rest("butiquim_social_avulso?select=campanha,status&campanha=like.agenda-claude-feed-*&status=eq.pendente");
+// os vídeos precisam estar em public/ ANTES do bundle: o pacote copia a pasta na hora em que é criado
 for (const M of [...new Set(prontas.map((n) => n.mes))]) {
   const grupo = prontas.filter((n) => n.mes === M);
   try {
     const R = noitesDoMes(M);
     const alvo = grupo.map((n) => n.data);
+    await baixaClipes([...alvo, ...R.agendas.filter((g) => g.datas.some((d) => alvo.includes(d))).flatMap((g) => g.datas)]);
+  } catch (e) {
+    for (const n of grupo) n.resultado = { ok: false, erro: String(e.message).slice(0, 200) };
+  }
+}
+log(`bundle (GL=${GL})`);
+npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-novas", "--log=error"]);
+
+const fila = await rest("butiquim_social_avulso?select=campanha,status&campanha=like.agenda-claude-feed-*&status=eq.pendente");
+for (const M of [...new Set(prontas.map((n) => n.mes))]) {
+  const grupo = prontas.filter((n) => n.mes === M);
+  if (grupo[0].resultado) continue; // faltou vídeo: já marcado como erro
+  try {
+    const R = noitesDoMes(M);
+    const alvo = grupo.map((n) => n.data);
     const noites = R.noites.filter((n) => alvo.includes(n.data));
     const agendas = R.agendas.filter((g) => g.datas.some((d) => alvo.includes(d)));
-    await baixaClipes([...alvo, ...agendas.flatMap((g) => g.datas)]);
     const E = "src/entries/vespera/index.ts";
     for (const n of noites) {
       const k = n.key;
