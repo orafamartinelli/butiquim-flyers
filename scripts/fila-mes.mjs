@@ -25,6 +25,7 @@ import { readFileSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
 import { ARTISTAS_SEM_VIDEO, MESES, noitesDoMes } from "./_rotacao.mjs";
 import { credSupabase, FFMPEG } from "./_cred.mjs";
+import { sobeCapa } from "./_capa.mjs";
 
 const GRAVAR = process.argv.includes("--gravar");
 const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : null);
@@ -58,6 +59,8 @@ const sobe = async (local, destino) => {
   if (GRAVAR) {
     const r = await fetch(`${URL}/storage/v1/object/butiquim-social/${destino}`, { method: "POST", headers: { ...H, "Content-Type": destino.endsWith(".mp4") ? "video/mp4" : "image/jpeg", "x-upsert": "true" }, body: readFileSync(local) });
     if (!r.ok) throw new Error(`upload ${destino}: ${r.status} ${await r.text()}`);
+    // vídeo de feed pode abrir carrossel → capa (último quadro) ao lado, que o publicador põe na frente
+    if (/-feed[^/]*\.mp4$/i.test(destino)) await sobeCapa({ url: URL, secret: cred.secret_key, local, rel: destino });
   }
   return PUB + destino;
 };
@@ -280,7 +283,6 @@ if (REFAZER.length || SO_AGENDAS.length) {
     }
   }
   log(`\n${SO_AGENDAS.length ? `AGENDAS ${SO_AGENDAS.join(",")}` : `REFAZER ${REFAZER.join(",")}`}: ${resumo.reativados} reativado(s), ${resumo.inseridos} inserido(s), ${resumo.jaPendentes} atualizado(s)${GRAVAR ? "" : " (simulação)"}`);
-  if (GRAVAR && alvo.some((n) => n.formato === "CAROUSEL")) log(execFileSync("node", ["scripts/capas-carrossel.mjs", "--gravar"], { encoding: "utf8" }));
   console.log(`@@RESUMO ${JSON.stringify(resumo)}`);
   process.exit(0);
 }
@@ -291,6 +293,4 @@ for (const n of novos) log(`novo ${n.publicar_em.slice(0, 16).replace("T", " ")}
 const CHAVES = ["campanha", "ordem", "publicar_em", "formato", "video_url", "itens_urls", "legenda", "perfil", "thumb_offset_seg", "marcados", "datas_show"];
 const lote = novos.map((n) => Object.fromEntries(CHAVES.map((c) => [c, n[c] ?? null])));
 if (GRAVAR && lote.length) await rest("butiquim_social_avulso", { method: "POST", body: JSON.stringify(lote) });
-// carrossel que começa com vídeo ganha capa (último quadro) na hora — o robô de hora em hora é a rede de segurança
-if (GRAVAR && lote.some((n) => n.formato === "CAROUSEL")) log(execFileSync("node", ["scripts/capas-carrossel.mjs", "--gravar"], { encoding: "utf8" }));
 log(GRAVAR ? `\nGRAVADO: ${novos.length} posts.` : `\n(simulação: ${novos.length} posts — rode com --gravar)`);

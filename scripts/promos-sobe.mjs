@@ -5,6 +5,7 @@
 import { readFileSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
 import { credSupabase, FFMPEG } from "./_cred.mjs";
+import { sobeCapa } from "./_capa.mjs";
 const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : null);
 const GRAVAR = process.argv.includes("--gravar");
 const TROCAR = process.argv.includes("--trocar-fila");
@@ -21,6 +22,8 @@ const sobe = async (local, destino) => {
   if (!GRAVAR) return;
   const r = await fetch(`${URL}/storage/v1/object/butiquim-social/${destino}`, { method: "POST", headers: { ...H, "Content-Type": destino.endsWith(".mp4") ? "video/mp4" : "image/jpeg", "x-upsert": "true" }, body: readFileSync(local) });
   if (!r.ok) throw new Error(`${destino}: ${r.status} ${await r.text()}`);
+  // promo em vídeo abre carrossel da esteira → capa (último quadro) ao lado; o publicador põe na frente
+  if (/-feed[^/]*\.mp4$/i.test(destino)) await sobeCapa({ url: URL, secret: cred.secret_key, local, rel: destino });
 };
 const novas = [];
 for (const slug of SLUGS) {
