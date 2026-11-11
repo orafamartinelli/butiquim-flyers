@@ -143,7 +143,8 @@ for (const [d, k] of NOITES) {
 
 // ---------- posts ----------
 // modo refazer: a campanha já existe (com as linhas canceladas) — não pula por campanha, decide linha a linha no fim
-const existentes = REFAZER.length ? new Set() : new Set((await rest(`butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)&limit=5000`)).map((r) => r.campanha));
+// modo agendas: também decide linha a linha (agenda segurada/pendente é atualizada, não duplicada)
+const existentes = REFAZER.length || SO_AGENDAS.length ? new Set() : new Set((await rest(`butiquim_social_avulso?select=campanha&or=(campanha.like.extra-claude-${ABREV}-*,campanha.like.agenda-claude-*-${MES}-*)&limit=5000`)).map((r) => r.campanha));
 const novos = [];
 const add = (camp, lista) => { if (existentes.has(camp)) { log(`pula ${camp} (já na fila)`); return; } lista.forEach((p, i) => novos.push({ campanha: camp, ordem: i + 1, perfil: "obutiquim", legenda: "", ...p })); };
 
@@ -244,10 +245,10 @@ if (SO_AGENDAS.length) {
 
 novos.sort((a, b) => a.publicar_em.localeCompare(b.publicar_em));
 
-if (REFAZER.length) {
-  // só o que mostra as noites trocadas e ainda vai acontecer
+if (REFAZER.length || SO_AGENDAS.length) {
+  // só o que mostra as noites trocadas e ainda vai acontecer (modo agendas: tudo que foi montado, já com horário novo)
   const agora = Date.now();
-  const alvo = novos.filter((n) => (n.datas_show || []).some((d) => REFAZER.includes(d)) && new Date(n.publicar_em).getTime() > agora + 5 * 60e3);
+  const alvo = SO_AGENDAS.length ? novos : novos.filter((n) => (n.datas_show || []).some((d) => REFAZER.includes(d)) && new Date(n.publicar_em).getTime() > agora + 5 * 60e3);
   const camps = [...new Set(alvo.map((n) => n.campanha))];
   const linhas = camps.length
     ? await rest(`butiquim_social_avulso?select=id,campanha,ordem,status,erro,apagado_em&campanha=in.(${camps.map((c) => `"${c}"`).join(",")})`)
@@ -261,7 +262,7 @@ if (REFAZER.length) {
     if (pend) {
       // já pendente (ex.: rodada repetida) → só troca o conteúdo
       log(`atualiza #${pend.id} ${n.campanha}/${n.ordem}`);
-      if (GRAVAR) await rest(`butiquim_social_avulso?id=eq.${pend.id}`, { method: "PATCH", body: JSON.stringify(corpo) });
+      if (GRAVAR) await rest(`butiquim_social_avulso?id=eq.${pend.id}`, { method: "PATCH", body: JSON.stringify({ ...corpo, erro: null }) });
       resumo.jaPendentes++; resumo.ids.push(pend.id);
     } else if (canc) {
       log(`reativa #${canc.id} ${n.campanha}/${n.ordem} ${n.publicar_em.slice(0, 16)} ${n.video_url.split("/").pop()}`);
@@ -278,7 +279,7 @@ if (REFAZER.length) {
       log(`deixa ${n.campanha}/${n.ordem} (status ${mesmas.map((l) => l.status).join("/")})`);
     }
   }
-  log(`\nREFAZER ${REFAZER.join(",")}: ${resumo.reativados} reativado(s), ${resumo.inseridos} inserido(s), ${resumo.jaPendentes} atualizado(s)${GRAVAR ? "" : " (simulação)"}`);
+  log(`\n${SO_AGENDAS.length ? `AGENDAS ${SO_AGENDAS.join(",")}` : `REFAZER ${REFAZER.join(",")}`}: ${resumo.reativados} reativado(s), ${resumo.inseridos} inserido(s), ${resumo.jaPendentes} atualizado(s)${GRAVAR ? "" : " (simulação)"}`);
   console.log(`@@RESUMO ${JSON.stringify(resumo)}`);
   process.exit(0);
 }

@@ -144,6 +144,7 @@ export const NOITES = {
   sexta6: noiteDe("2026-11-06"),
   sabado6: noiteDe("2026-11-07"),
   domingo6: noiteDe("2026-11-08"),
+  sexta7: noiteDe("2026-11-13"), // Grupo Rilex: planilha vazia até 11/11 (designer já tinha a arte); preenchida a pedido do Rafa
   sabado7: noiteDe("2026-11-14"),
   vespera3: noiteDe("2026-11-14"), // sábado 14, véspera da Proclamação da República (dom 15)
   domingo7: noiteDe("2026-11-15"), // Victor preencheu depois de 14/10 (João Maurício); produzido 19/10

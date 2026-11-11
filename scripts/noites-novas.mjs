@@ -286,8 +286,9 @@ for (const a of agendasFaltando) {
     if (!ENSAIO) args.push("--gravar");
     const saida = execFileSync("node", args, { encoding: "utf8", maxBuffer: 1 << 26 });
     log(saida);
-    const horarios = [...saida.matchAll(/^novo (\S+ \S+) (\S+)/gm)].map((m) => `${m[2] === "CAROUSEL" ? "carrossel" : m[2] === "STORIES" ? "story" : "Reels"} ${ddmm(m[1].slice(0, 10))} ${m[1].slice(11)}`);
-    a.resultado = { ok: true, horarios };
+    const qtd = (saida.match(/^(insere|atualiza|reativa) /gm) || []).length;
+    const atrasada = /atrasada → agora/.test(saida);
+    a.resultado = { ok: true, horarios: [`${qtd} posts (carrossel, stories e Reels)${atrasada ? " — a terça já tinha passado, então sai agora" : ` a partir da terça ${ddmm(a.terca)} 17h`}`] };
   } catch (e) {
     a.resultado = { ok: false, erro: String(e.stderr || e.message).slice(0, 200) };
   }

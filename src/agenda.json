@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-11-05T12:31:09.173Z",
-  "de": "2026-10-02",
-  "ate": "2026-12-27",
+  "gerado_em": "2026-11-11T13:54:12.764Z",
+  "de": "2026-10-01",
+  "ate": "2026-12-31",
   "noites": [
     {
       "data": "2026-10-02",
@@ -145,6 +145,14 @@
       "slug": "biannchi-e-cristiano",
       "nome": "Biannchi & Cristiano",
       "estilo": "SERTANEJO",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-13",
+      "atracao": "GRUPO RILEX",
+      "slug": "grupo-rilex",
+      "nome": "Grupo Rilex",
+      "estilo": "PAGODE",
       "estilo_inferido": false
     },
     {

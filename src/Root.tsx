@@ -44,6 +44,7 @@ const IDS: Partial<Record<NoiteKey, Id>> = {
   sexta6: SextaB,
   sabado6: SabadoB,
   domingo6: DomingoB,
+  sexta7: Sexta,
   sabado7: Sabado,
   domingo7: Domingo,
   sexta8: Sexta8Tema,

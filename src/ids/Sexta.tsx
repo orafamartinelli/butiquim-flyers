@@ -186,13 +186,15 @@ const SextaFlyer: React.FC<{ n: Noite; fmt: "feed" | "story" }> = ({ n, fmt }) =
   const r = useRingMotion();
   const art = useSpr(12, { damping: 15 });
   const push = interpolate(frame, [0, 240], [1, 1.035], clamp);
+  // foto de grupo larga (Grupo Rilex, 11/11/2026): as cabeças ficam na altura da faixa "DO BUTICA" → desce a foto
+  const desce = n.foto.ratio > 1.3 ? 90 : 0;
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
       <Fundo cx={L.ringCx} cy={L.ringCy} />
       <AbsoluteFill style={{ transform: `scale(${push})` }}>
         <RingPx width={w} height={h} look="lima" flat cx={L.ringCx} cy={L.ringCy} ringH={L.ringH * r.grow} rotY={r.rotY} rotX={r.rotX} envIntensity={0.9} />
         <Titulo size={L.titleSize} top={L.titleTop} delay={6} />
-        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(L.artH, 1040 / n.foto.ratio)} cx={L.artCx} top={L.artTop + (1 - art) * 220} fadeFrom={0.62} filter="drop-shadow(0 30px 50px rgba(0,0,0,.55)) contrast(1.04)" style={{ opacity: art }} />
+        <Cutout src={n.foto.src} ratio={n.foto.ratio} height={Math.min(L.artH, 1040 / n.foto.ratio)} cx={L.artCx} top={L.artTop + desce + (1 - art) * 220} fadeFrom={0.62} filter="drop-shadow(0 30px 50px rgba(0,0,0,.55)) contrast(1.04)" style={{ opacity: art }} />
       </AbsoluteFill>
       <Tag x={L.tagX} y={L.tagY} size={L.tagSize} delay={26} />
       <Logo width={L.logoW} top={L.logoTop} />
