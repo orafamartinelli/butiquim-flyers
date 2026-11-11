@@ -17,12 +17,13 @@ const MARCA = "capa-no-inicio";
 const infoDe = (local) => { try { execFileSync(FFMPEG, ["-hide_banner", "-i", local], { stdio: "pipe" }); } catch (e) { return String(e.stderr || ""); } return ""; };
 export const jaTemCapa = (local) => infoDe(local).includes(MARCA);
 
-export const comCapaNoInicio = (local) => {
+// capaSeg: segundo do quadro escolhido para capa (padrão = último quadro, a arte completa)
+export const comCapaNoInicio = (local, { capaSeg = null } = {}) => {
   const info = infoDe(local);
   if (info.includes(MARCA)) return local; // já processado: não empilha
   const saida = local.replace(/\.mp4$/i, ".capa.mp4");
   const png = local.replace(/\.mp4$/i, ".ultimo.png");
-  execFileSync(FFMPEG, ["-v", "error", "-y", "-sseof", "-0.1", "-i", local, "-frames:v", "1", png]);
+  execFileSync(FFMPEG, ["-v", "error", "-y", ...(capaSeg == null ? ["-sseof", "-0.1"] : ["-ss", String(capaSeg)]), "-i", local, "-frames:v", "1", png]);
   const fps = +(info.match(/(\d+(?:\.\d+)?) fps/) || [])[1] || 30;
   const temAudio = /Audio:/.test(info);
   const dur = (QUADROS / fps).toFixed(4);
