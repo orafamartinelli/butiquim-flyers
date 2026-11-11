@@ -25,7 +25,7 @@ import { readFileSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
 import { ARTISTAS_SEM_VIDEO, MESES, noitesDoMes } from "./_rotacao.mjs";
 import { credSupabase, FFMPEG } from "./_cred.mjs";
-import { sobeCapa } from "./_capa.mjs";
+import { comCapaNoInicio, ehVideoDeFeed } from "./_capa.mjs";
 
 const GRAVAR = process.argv.includes("--gravar");
 const arg = (n) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : null);
@@ -57,10 +57,10 @@ const jpg = (png) => { const j = png.replace(/\.png$/i, ".jpg"); execFileSync(FF
 const sobe = async (local, destino) => {
   if (!existsSync(local)) throw new Error(`falta ${local} (render terminou?)`);
   if (GRAVAR) {
-    const r = await fetch(`${URL}/storage/v1/object/butiquim-social/${destino}`, { method: "POST", headers: { ...H, "Content-Type": destino.endsWith(".mp4") ? "video/mp4" : "image/jpeg", "x-upsert": "true" }, body: readFileSync(local) });
+    // vídeo de feed vira miniatura no Instagram → sobe já abrindo com a arte completa (scripts/_capa.mjs)
+    const arquivo = ehVideoDeFeed(destino) ? comCapaNoInicio(local) : local;
+    const r = await fetch(`${URL}/storage/v1/object/butiquim-social/${destino}`, { method: "POST", headers: { ...H, "Content-Type": destino.endsWith(".mp4") ? "video/mp4" : "image/jpeg", "x-upsert": "true" }, body: readFileSync(arquivo) });
     if (!r.ok) throw new Error(`upload ${destino}: ${r.status} ${await r.text()}`);
-    // vídeo de feed pode abrir carrossel → capa (último quadro) ao lado, que o publicador põe na frente
-    if (/-feed[^/]*\.mp4$/i.test(destino)) await sobeCapa({ url: URL, secret: cred.secret_key, local, rel: destino });
   }
   return PUB + destino;
 };
