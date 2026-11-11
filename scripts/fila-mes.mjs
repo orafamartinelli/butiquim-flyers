@@ -64,7 +64,9 @@ const sobe = async (local, destino) => {
   }
   return PUB + destino;
 };
-const q = (d, hhmm) => `${d}T${hhmm}:00-03:00`;
+// capa do Reels = 1º quadro: todo vídeo de feed sobe já abrindo com a arte completa (scripts/_capa.mjs, 11/11/2026)
+const CAPA_SEG = 0;
+const q = (d, hhmm) =>`${d}T${hhmm}:00-03:00`;
 const soma = (d, n) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 
 // noites: data, chave, identidade (rotação), véspera (Folhinha) — e agendas das semanas completas
@@ -186,13 +188,13 @@ for (const [d, k, v, ves] of NOITES) {
   const outra = v === "A" || v === "C" ? "B" : "A";
   const vStory = dow === 5 ? "B" : outra, vFeed = dow === 5 ? "A" : outra;
   add(`extra-claude-${ABREV}-${d}${dow === 4 ? "-quinta" : ""}`, [
-    { publicar_em: q(d, "12:00"), formato: "REELS", video_url: reelsDia, thumb_offset_seg: 3, datas_show: DS,
+    { publicar_em: q(d, "12:00"), formato: "REELS", video_url: reelsDia, thumb_offset_seg: CAPA_SEG, datas_show: DS,
       legenda: folhinha
         ? `🗓️ VÉSPERA DE FERIADO! Amanhã ninguém precisa de despertador ⏰❌\n\n🎤 HOJE tem ${quem} no palco d'O Butiquim. ${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}`
         : `🎤 HOJE tem ${quem} no palco d'O Butiquim!\n\n${est} + SpotiFunk a noite toda. 🍻\n\n📲 Nome na lista: link na bio ou chama no direct.\n${rodape(r)}` },
     { publicar_em: q(d, "13:30"), formato: "STORIES", video_url: storyDia, marcados: ig, datas_show: DS },
     { publicar_em: q(d, "16:00"), formato: "STORIES", video_url: video16h, marcados: ig, datas_show: DS },
-    { publicar_em: q(d, "16:30"), formato: "REELS", video_url: LISTA(r.dia, "B", "feed"), thumb_offset_seg: 3, datas_show: null,
+    { publicar_em: q(d, "16:30"), formato: "REELS", video_url: LISTA(r.dia, "B", "feed"), thumb_offset_seg: CAPA_SEG, datas_show: null,
       legenda: `💬 Comenta LISTA aqui embaixo que a gente te manda o link da lista no direct! 📲\n\n${regrasLista(r)}\n\n${rodape(r)}` },
     { publicar_em: q(d, "18:30"), formato: "STORIES", video_url: LISTA(r.dia, vStory, "story"), datas_show: null },
     { publicar_em: q(d, "21:30"), formato: "CAROUSEL", video_url: LISTA(r.dia, vFeed, "feed"), itens_urls: JSON.stringify([LISTA(r.dia, vFeed, "feed"), F[k].feedJpg]), datas_show: DS,
@@ -215,7 +217,7 @@ for (const [ter, s, ks, seg] of AGENDAS) {
       ...(mapa.arte_mapa_story ? [{ publicar_em: q(seg, "17:26"), formato: "STORIES", video_url: PUB + mapa.arte_mapa_story, datas_show: null }] : []),
     ]);
   }
-  add(`extra-claude-${ABREV}-${ter}`, [{ publicar_em: q(ter, "12:00"), formato: "REELS", video_url: AG[s].feed, thumb_offset_seg: 4, legenda, datas_show: DS }]);
+  add(`extra-claude-${ABREV}-${ter}`, [{ publicar_em: q(ter, "12:00"), formato: "REELS", video_url: AG[s].feed, thumb_offset_seg: CAPA_SEG, legenda, datas_show: DS }]);
   add(`agenda-claude-feed-${ter}`, [{ publicar_em: q(ter, "17:00"), formato: "CAROUSEL", video_url: AG[s].feed, itens_urls: JSON.stringify([AG[s].feed, ...ks.map((k) => F[k].feedMp4)]), legenda, datas_show: DS }]);
   add(`agenda-claude-story-${ter}`, [
     { publicar_em: q(ter, "17:20"), formato: "STORIES", video_url: AG[s].story, marcados: igs.join(",") || null, datas_show: DS },
