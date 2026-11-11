@@ -260,10 +260,20 @@ for (const M of [...new Set(prontas.map((n) => n.mes))]) {
     const saida = execFileSync("node", args, { encoding: "utf8", maxBuffer: 1 << 26 });
     log(saida);
     const qtd = +(saida.match(/(?:GRAVADO|simulação): (\d+) posts/) || [])[1] || 0;
+    // agenda da semana JÁ na fila sem essa noite (11/11/2026, Rafa: "segue sozinho, sem avisar"):
+    // refaz o vídeo com nome novo e ATUALIZA os posts pendentes da agenda (terça vencida → sai na hora)
+    const atualizadas = new Set();
+    for (const g of agendas) {
+      if (!fila.some((c) => c.campanha === `agenda-claude-feed-${g.terca}`)) continue;
+      const a2 = ["scripts/fila-mes.mjs", "--mes", M, "--agendas", g.s, "--versao", `n${hojeBR.replace(/-/g, "").slice(2)}`];
+      if (!ENSAIO) a2.push("--gravar");
+      log(execFileSync("node", a2, { encoding: "utf8", maxBuffer: 1 << 26 }));
+      atualizadas.add(g.s);
+    }
     for (const n of grupo) {
       const semana = agendas.find((g) => g.datas.includes(n.data));
-      const agendaAntiga = semana && fila.some((c) => c.campanha === `agenda-claude-feed-${semana.terca}`);
-      n.resultado = { ok: true, posts: qtd, agenda: semana ? `✅ Agenda da semana refeita com essa noite (terça ${ddmm(semana.terca)})` : "➖ Agenda da semana: só sai com sex, sáb e dom preenchidos", agendaAntiga };
+      const agendaAntiga = semana && fila.some((c) => c.campanha === `agenda-claude-feed-${semana.terca}`) && !atualizadas.has(semana.s);
+      n.resultado = { ok: true, posts: qtd, agenda: semana ? `✅ Agenda da semana ${atualizadas.has(semana.s) ? "atualizada" : "refeita"} com essa noite (terça ${ddmm(semana.terca)})` : "➖ Agenda da semana: entra a partir do domingo antes da terça, com as noites que tiver", agendaAntiga };
     }
   } catch (e) {
     for (const n of grupo) n.resultado = { ok: false, erro: String(e.stderr || e.message).slice(0, 200) };
