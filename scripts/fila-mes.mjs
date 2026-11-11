@@ -280,6 +280,7 @@ if (REFAZER.length || SO_AGENDAS.length) {
     }
   }
   log(`\n${SO_AGENDAS.length ? `AGENDAS ${SO_AGENDAS.join(",")}` : `REFAZER ${REFAZER.join(",")}`}: ${resumo.reativados} reativado(s), ${resumo.inseridos} inserido(s), ${resumo.jaPendentes} atualizado(s)${GRAVAR ? "" : " (simulação)"}`);
+  if (GRAVAR && alvo.some((n) => n.formato === "CAROUSEL")) log(execFileSync("node", ["scripts/capas-carrossel.mjs", "--gravar"], { encoding: "utf8" }));
   console.log(`@@RESUMO ${JSON.stringify(resumo)}`);
   process.exit(0);
 }
@@ -290,4 +291,6 @@ for (const n of novos) log(`novo ${n.publicar_em.slice(0, 16).replace("T", " ")}
 const CHAVES = ["campanha", "ordem", "publicar_em", "formato", "video_url", "itens_urls", "legenda", "perfil", "thumb_offset_seg", "marcados", "datas_show"];
 const lote = novos.map((n) => Object.fromEntries(CHAVES.map((c) => [c, n[c] ?? null])));
 if (GRAVAR && lote.length) await rest("butiquim_social_avulso", { method: "POST", body: JSON.stringify(lote) });
+// carrossel que começa com vídeo ganha capa (último quadro) na hora — o robô de hora em hora é a rede de segurança
+if (GRAVAR && lote.some((n) => n.formato === "CAROUSEL")) log(execFileSync("node", ["scripts/capas-carrossel.mjs", "--gravar"], { encoding: "utf8" }));
 log(GRAVAR ? `\nGRAVADO: ${novos.length} posts.` : `\n(simulação: ${novos.length} posts — rode com --gravar)`);
