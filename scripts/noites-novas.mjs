@@ -18,7 +18,7 @@ import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } fr
 import { execFileSync } from "child_process";
 import os from "os";
 import { credSupabase } from "./_cred.mjs";
-import { ARTISTAS_SEM_VIDEO, chaveDe, noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
+import { ARTISTAS_SEM_VIDEO, PRAZO_AGENDA_DIAS, chaveDe, noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
 
 const env = process.env;
 const CHECAR = process.argv.includes("--checar");
@@ -94,13 +94,43 @@ for (const f of faltam) {
   if (!ENSAIO) await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ chave, valor: f.slug }) });
 }
 
+// ---------- 2b. AGENDA DA SEMANA que devia estar na fila e não está (11/11/2026) ----------
+// Caso real: a sexta 13/11 ficou vazia na planilha → a regra antiga ("só semana completa") nunca liberou a agenda
+// de 13–15/11 e ninguém foi avisado. Agora: do domingo anterior à terça (PRAZO_AGENDA_DIAS) até a última noite,
+// semana com 2+ noites e sem agenda na fila → o robô produz e agenda (se a terça já passou, sai na hora).
+// Semana com 1 noite só no prazo → avisa o Rafa uma vez (não há agenda de 1 noite).
+const camposFila = await rest("butiquim_social_avulso?select=campanha&campanha=like.agenda-claude-feed-*&limit=5000");
+const naFila = new Set(camposFila.map((c) => c.campanha));
+const mesesAg = [...new Set([soma(hojeBR, -7), hojeBR, soma(hojeBR, 9)].map((d) => d.slice(0, 7)))];
+const datasProntas = new Set(prontas.map((n) => n.data));
+const agendasFaltando = [];
+const avisosAg = await rest("butiquim_social_config?select=chave&chave=like.agenda_aviso_*");
+for (const M of mesesAg) {
+  const R = noitesDoMes(M, hojeBR);
+  for (const a of R.agendas) {
+    const ultima = a.datas[a.datas.length - 1];
+    if (hojeBR < soma(a.terca, -PRAZO_AGENDA_DIAS) || hojeBR > ultima) continue; // fora da janela da agenda
+    if (naFila.has(`agenda-claude-feed-${a.terca}`)) continue;
+    if (a.datas.some((d) => datasProntas.has(d))) continue; // a noite nova da semana já leva a agenda junto
+    if (!agendasFaltando.some((x) => x.s === a.s)) agendasFaltando.push({ ...a, mes: M });
+  }
+  for (const i of R.incompletas) {
+    if (hojeBR < i.prazo || hojeBR > i.terca || i.tem.length !== 1) continue;
+    const chave = `agenda_aviso_${i.terca}`;
+    if (!ENSAIO && avisosAg.some((x) => x.chave === chave)) continue;
+    await zap([`🗓️ *Agenda da semana (terça ${ddmm(i.terca)}) NÃO vai sair*`, "", `A planilha só tem 1 noite nessa semana (${i.tem.join(", ")}). Agenda de uma noite só não é produzida — o flyer da noite segue normal.`, "Se entrar outra noite na planilha, o robô monta a agenda sozinho no dia seguinte às 10h."].join("\n"));
+    if (!ENSAIO) await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ chave, valor: i.tem.join(",") }) });
+  }
+}
+log(`agendas faltando na fila: ${agendasFaltando.map((a) => `${a.s} (terça ${a.terca}: ${a.datas.join(", ")})`).join(" · ") || "nenhuma"}`);
+
 if (CHECAR) {
-  const tem = prontas.length ? "sim" : "nao";
+  const tem = prontas.length || agendasFaltando.length ? "sim" : "nao";
   if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `tem=${tem}\n`);
   log(`tem=${tem}`);
   process.exit(0);
 }
-if (!prontas.length) { log("nada a produzir"); process.exit(0); }
+if (!prontas.length && !agendasFaltando.length) { log("nada a produzir"); process.exit(0); }
 
 // ---------- 3. código: noite em src/data.ts, Folhinha na entrada da véspera ----------
 let ts = readFileSync("src/data.ts", "utf8");
@@ -181,6 +211,9 @@ for (const M of [...new Set(prontas.map((n) => n.mes))]) {
     for (const n of grupo) n.resultado = { ok: false, erro: String(e.message).slice(0, 200) };
   }
 }
+for (const a of agendasFaltando) {
+  try { await baixaClipes(a.datas); } catch (e) { a.resultado = { ok: false, erro: String(e.message).slice(0, 200) }; }
+}
 log(`bundle (GL=${GL})`);
 npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-novas", "--log=error"]);
 
@@ -237,6 +270,39 @@ for (const M of [...new Set(prontas.map((n) => n.mes))]) {
   }
 }
 
+// ---------- 4b. agendas que faltavam na fila ----------
+for (const a of agendasFaltando) {
+  if (a.resultado) continue; // faltou vídeo
+  try {
+    log(`render agenda ${a.s} (terça ${a.terca}${a.incompleta ? ", semana incompleta" : ""})`);
+    video("build-novas", `agenda-${a.s}-feed-video`, `out/agendas/agenda-${a.s}-FEED.mp4`);
+    video("build-novas", `agenda-${a.s}-story-video`, `out/agendas/agenda-${a.s}-STORY.mp4`);
+    const segAinda = a.seg && hojeBR <= a.seg;
+    if (segAinda) {
+      video("build-novas", `agenda-${a.s}-seg-feed-video`, `out/agendas/agenda-${a.s}-seg-FEED.mp4`);
+      video("build-novas", `agenda-${a.s}-seg-story-video`, `out/agendas/agenda-${a.s}-seg-STORY.mp4`);
+    }
+    const args = ["scripts/fila-mes.mjs", "--mes", a.mes, "--agendas", a.s];
+    if (!ENSAIO) args.push("--gravar");
+    const saida = execFileSync("node", args, { encoding: "utf8", maxBuffer: 1 << 26 });
+    log(saida);
+    const horarios = [...saida.matchAll(/^novo (\S+ \S+) (\S+)/gm)].map((m) => `${m[2] === "CAROUSEL" ? "carrossel" : m[2] === "STORIES" ? "story" : "Reels"} ${ddmm(m[1].slice(0, 10))} ${m[1].slice(11)}`);
+    a.resultado = { ok: true, horarios };
+  } catch (e) {
+    a.resultado = { ok: false, erro: String(e.stderr || e.message).slice(0, 200) };
+  }
+}
+for (const a of agendasFaltando) {
+  const r = a.resultado;
+  await zap([
+    `🗓️ *Agenda da semana (${a.datas.map(ddmm).join(", ")})*`,
+    "",
+    r.ok
+      ? `✅ Estava faltando na fila e já foi produzida e agendada${a.incompleta ? " — semana incompleta na planilha, saiu com as noites que existem" : ""}:\n${r.horarios.join("\n")}`
+      : `❌ Estava faltando na fila e deu erro ao produzir (${r.erro}). Tento de novo amanhã às 10h — se for terça, me chama.`,
+  ].join("\n"));
+}
+
 // ---------- 5. noite que falhou sai do código e tenta de novo amanhã; o resto volta pro repositório ----------
 const falhas = prontas.filter((n) => !n.resultado?.ok);
 if (falhas.length && !ENSAIO) {
@@ -272,4 +338,5 @@ for (const n of prontas) {
   await zap(msg);
 }
 log(`FIM — ${prontas.map((n) => `${n.data}: ${n.resultado?.ok ? "ok" : "erro"}`).join(" · ")}`);
-process.exit(falhas.length ? 1 : 0);
+log(`agendas: ${agendasFaltando.map((a) => `${a.s}: ${a.resultado?.ok ? "ok" : "erro"}`).join(" · ") || "nenhuma"}`);
+process.exit(falhas.length || agendasFaltando.some((a) => !a.resultado?.ok) ? 1 : 0);

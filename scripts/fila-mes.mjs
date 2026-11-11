@@ -33,7 +33,11 @@ if (!/^\d{4}-\d{2}$/.test(MES || "")) throw new Error("informe --mes YYYY-MM");
 const REFAZER = (arg("--refazer") || "").split(",").filter(Boolean);
 const VERSAO = arg("--versao") || "";
 const SO_NOITES = (arg("--noites") || "").split(",").filter(Boolean);
-const ALVOS = REFAZER.length ? REFAZER : SO_NOITES;
+// MODO AGENDAS (11/11/2026): --agendas s7,s9 sobe e agenda SÓ a agenda dessas semanas (as peças das noites já estão no bucket).
+// Se a terça já passou (semana que fechou atrasada), a agenda sai NA HORA: carrossel em ~10 min, stories 20 min depois,
+// Reels da agenda 3h depois; a versão de segunda (sem designer) que venceu fica de fora.
+const SO_AGENDAS = (arg("--agendas") || "").split(",").filter(Boolean);
+const ALVOS = REFAZER.length ? REFAZER : SO_AGENDAS.length ? ["__nenhuma__"] : SO_NOITES;
 if (REFAZER.length && !/^[a-z0-9]+$/.test(VERSAO)) throw new Error("modo --refazer exige --versao (letras/números)");
 const ABREV = MESES[+MES.slice(5) - 1];
 const cred = credSupabase();
@@ -63,8 +67,10 @@ const soma = (d, n) => { const x = new Date(`${d}T12:00:00Z`); x.setUTCDate(x.ge
 // noites: data, chave, identidade (rotação), véspera (Folhinha) — e agendas das semanas completas
 const R = noitesDoMes(MES);
 const NOITES = R.noites.map((n) => [n.data, n.key, n.id, n.vespera || undefined]);
-const AGENDAS = R.agendas.map((a) => [a.terca, a.s, a.keys, a.seg]);
-for (const i of R.incompletas) log(`⚠️ semana ${i.semana} incompleta (tem: ${i.tem.join(", ")}) — agenda de terça NÃO entra até a planilha fechar`);
+const AGENDAS = R.agendas.filter((a) => !SO_AGENDAS.length || SO_AGENDAS.includes(a.s)).map((a) => [a.terca, a.s, a.keys, a.seg]);
+for (const s of SO_AGENDAS) if (!AGENDAS.some((a) => a[1] === s)) throw new Error(`agenda ${s} não está liberada (semana incompleta antes do prazo, ou com menos de 2 noites)`);
+for (const a of R.agendas.filter((a) => a.incompleta)) log(`⚠️ semana ${a.semana} incompleta (${a.datas.join(", ")}) — prazo vencido, a agenda sai com o que tem`);
+for (const i of R.incompletas) log(`⚠️ semana ${i.semana} incompleta (tem: ${i.tem.join(", ")}) — agenda de terça espera a planilha até ${i.prazo}`);
 log(`mês ${MES}: ${NOITES.length} noites (${NOITES.map(([d, k, v]) => `${d.slice(8)} ${k}=${v}`).join(", ")}) · agendas: ${AGENDAS.map((a) => a[1]).join(", ") || "nenhuma"}`);
 const dataDe = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
 const REGRA = { 4: { dia: "quinta", noite: "Butiquinta", ate: "00h", abre: "23h", nome: "Quinta" }, 5: { dia: "sexta", noite: "Sexta do Butica", ate: "00h", abre: "23h", nome: "Sexta" }, 6: { dia: "sabado", noite: "Sabadá do Butica", ate: "00h", abre: "23h", nome: "Sábado" }, 0: { dia: "domingo", noite: "Saideira da Semana", ate: "23h", abre: "22h", nome: "Domingo" } };
@@ -117,11 +123,11 @@ const AG = {};
 const dataDeChave = Object.fromEntries(NOITES.map(([d, k]) => [k, d]));
 for (const [, s, ks, seg] of AGENDAS) {
   // agenda da semana lista as 3 noites: se UMA trocou, a agenda inteira é refeita
-  const mexe = !ALVOS.length || ks.some((k) => ALVOS.includes(dataDeChave[k]));
+  const mexe = !ALVOS.length || SO_AGENDAS.length > 0 || ks.some((k) => ALVOS.includes(dataDeChave[k]));
   AG[s] = mexe
     ? { feed: await sobe(`out/agendas/agenda-${s}-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-feed.mp4`)), story: await sobe(`out/agendas/agenda-${s}-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-story.mp4`)) }
     : { feed: PUB + `avulso/claude/ag-${s}-feed.mp4`, story: PUB + `avulso/claude/ag-${s}-story.mp4` };
-  if (seg) {
+  if (seg && !(SO_AGENDAS.length && seg < new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10))) {
     AG[s].segFeed = mexe ? await sobe(`out/agendas/agenda-${s}-seg-FEED.mp4`, comVersao(`avulso/claude/ag-${s}-seg-feed.mp4`)) : PUB + `avulso/claude/ag-${s}-seg-feed.mp4`;
     AG[s].segStory = mexe ? await sobe(`out/agendas/agenda-${s}-seg-STORY.mp4`, comVersao(`avulso/claude/ag-${s}-seg-story.mp4`)) : PUB + `avulso/claude/ag-${s}-seg-story.mp4`;
   }
@@ -142,6 +148,7 @@ const novos = [];
 const add = (camp, lista) => { if (existentes.has(camp)) { log(`pula ${camp} (já na fila)`); return; } lista.forEach((p, i) => novos.push({ campanha: camp, ordem: i + 1, perfil: "obutiquim", legenda: "", ...p })); };
 
 for (const [d, k, v, ves] of NOITES) {
+  if (SO_AGENDAS.length) break;
   if (SO_NOITES.length && !SO_NOITES.includes(d)) continue;
   const dow = new Date(`${d}T12:00:00Z`).getUTCDay();
   const r = REGRA[dow];
@@ -197,7 +204,7 @@ for (const [ter, s, ks, seg] of AGENDAS) {
   const legenda = `🗓️ A SEMANA NA ESQUINA! Quem sobe no palco do Butica:\n\n${linhas.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`;
   const igs = ks.map((k) => info(dataDe[k]).ig).filter(Boolean);
   // segunda sem designer: agenda versão A (carrossel 17h + story 17h20, com o mapinha da casa como a da esteira)
-  if (seg) {
+  if (seg && AG[s].segFeed) {
     add(`agenda-claude-seg-${seg}`, [
       { publicar_em: q(seg, "17:00"), formato: "CAROUSEL", video_url: AG[s].segFeed, itens_urls: JSON.stringify([AG[s].segFeed, ...ks.map((k) => F[k].feedJpg), ...(mapa.arte_mapa_feed ? [PUB + mapa.arte_mapa_feed] : [])].slice(0, 10)), legenda: `📅 CHEGOU A AGENDA DA SEMANA!\n\n${linhas.join("\n")}\n\n📲 Nome na lista e reserva: link na bio.\n\n📍 O Butiquim · Maringá\n#NãoTemErro · Te vejo na esquina!`, datas_show: DS },
       { publicar_em: q(seg, "17:20"), formato: "STORIES", video_url: AG[s].segStory, marcados: igs.join(",") || null, datas_show: DS },
@@ -210,6 +217,29 @@ for (const [ter, s, ks, seg] of AGENDAS) {
     { publicar_em: q(ter, "17:20"), formato: "STORIES", video_url: AG[s].story, marcados: igs.join(",") || null, datas_show: DS },
     ...ks.map((k, i) => ({ publicar_em: q(ter, `17:${String(26 + i * 6).padStart(2, "0")}`), formato: "STORIES", video_url: F[k].storyJpg, marcados: info(dataDe[k]).ig, datas_show: [dataDe[k]] })),
   ]);
+}
+
+if (SO_AGENDAS.length) {
+  // agenda atrasada: solta agora em vez de cair num horário que já passou
+  const agora = Date.now(), limite = agora + 5 * 60e3;
+  const base = Math.ceil((agora + 10 * 60e3) / (5 * 60e3)) * 5 * 60e3;
+  const iso = (ms) => new Date(ms - 3 * 3600e3).toISOString().slice(0, 19) + "-03:00";
+  for (let i = novos.length - 1; i >= 0; i--) {
+    const n = novos[i];
+    if (new Date(n.publicar_em).getTime() > limite) continue;
+    if (n.campanha.startsWith("agenda-claude-seg-")) { log(`fora (segunda vencida): ${n.campanha}/${n.ordem}`); novos.splice(i, 1); continue; }
+    const desloc = n.campanha.startsWith("agenda-claude-feed-") ? 0
+      : n.campanha.startsWith("agenda-claude-story-") ? (20 + (n.ordem - 1) * 6) * 60e3
+      : 180 * 60e3; // Reels da agenda
+    log(`atrasada → agora: ${n.campanha}/${n.ordem} ${n.publicar_em.slice(0, 16)} → ${iso(base + desloc).slice(0, 16)}`);
+    n.publicar_em = iso(base + desloc);
+  }
+  // as peças das noites vêm do bucket: confere que cada arquivo existe antes de agendar
+  for (const n of novos) for (const u of [n.video_url, ...(n.itens_urls ? JSON.parse(n.itens_urls) : [])]) {
+    if (!GRAVAR && u.includes("/avulso/claude/ag-")) continue; // a agenda nova só sobe com --gravar
+    const r = await fetch(u, { method: "HEAD" });
+    if (!r.ok) throw new Error(`arquivo não está no bucket (HTTP ${r.status}): ${u}`);
+  }
 }
 
 novos.sort((a, b) => a.publicar_em.localeCompare(b.publicar_em));

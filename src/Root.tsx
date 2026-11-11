@@ -69,7 +69,8 @@ const AGENDAS_AUTO = (() => {
   for (const k of comQuinta) { const s = semanaDe(NOITES[k].data); if (s >= 7) (porSemana[s] ??= []).push(k); }
   const V = { V1: AgendaV1, V2: AgendaV2, V3: AgendaV3 };
   return Object.entries(porSemana)
-    .filter(([, ks]) => (["sexta", "sabado", "domingo"] as DiaKey[]).every((d) => ks.some((k) => NOITES[k].key === d)))
+    // 11/11/2026: semana incompleta também ganha a composição (2+ noites) — quem decide se ela entra na fila é scripts/_rotacao.mjs
+    .filter(([, ks]) => ks.length >= 2 || (["sexta", "sabado", "domingo"] as DiaKey[]).every((d) => ks.some((k) => NOITES[k].key === d)))
     .map(([s, ks]) => {
       const ns = ks.map((k) => NOITES[k]).sort((a, b) => a.data.localeCompare(b.data));
       const a = ns[0], z = ns[ns.length - 1];
