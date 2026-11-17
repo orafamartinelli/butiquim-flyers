@@ -31,7 +31,9 @@ concurrency:
 jobs:
   refaz:
     runs-on: ubuntu-latest
-    timeout-minutes: 170
+    # 16/11/2026: era 170 e ficou 5 dias batendo nele (850 min). Agora cada peça tem cronômetro de 20 min
+    # (scripts/_render.mjs), as prontas ficam em cache e cada noite tem no máximo 2 rodadas.
+    timeout-minutes: 150
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
@@ -86,6 +88,14 @@ jobs:
           path: node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-remotion-ffmpeg-v2
 
+      - name: peças prontas de rodada anterior (restaura)
+        if: steps.checa.outputs.tem == 'sim'
+        uses: actions/cache/restore@v4
+        with:
+          path: out
+          key: refaz-out-${{ github.run_id }}
+          restore-keys: refaz-out-
+
       - name: refaz + reagenda + resumo pro Rafa
         if: steps.refaz.outputs.tem == 'sim'
         env:
@@ -105,6 +115,21 @@ jobs:
           GL: swangle
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/noites-novas.mjs
+
+      - name: peças prontas (salva p/ a próxima rodada só fazer o que falta)
+        if: always() && steps.checa.outputs.tem == 'sim'
+        uses: actions/cache/save@v4
+        with:
+          path: out
+          key: refaz-out-${{ github.run_id }}
+
+      - name: avisa o Rafa se a rodada caiu
+        if: (failure() || cancelled()) && steps.checa.outputs.tem == 'sim'
+        env:
+          ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
+          ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
+          ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
+        run: node scripts/avisa-falha.mjs ${{ job.status }}
 
       - name: guarda as peças no run (7 dias)
         if: always() && steps.checa.outputs.tem == 'sim'

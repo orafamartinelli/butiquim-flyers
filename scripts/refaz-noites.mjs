@@ -21,6 +21,12 @@ import { execFileSync } from "child_process";
 import os from "os";
 import { credSupabase } from "./_cred.mjs";
 import { ARTISTAS_SEM_VIDEO, noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
+import { criaRender } from "./_render.mjs";
+
+// Defesa (16/11/2026): no máximo MAX_TENTATIVAS rodadas por noite. Depois disso a noite fica "desistiu" e o
+// Rafa recebe aviso — nunca mais tentar calado todo dia (12–16/11 queimou 850 min do GitHub no 19/12).
+// INCLUIR_PARADAS=1 (rodada manual no PC) pega também as noites "desistiu".
+const MAX_TENTATIVAS = 2;
 
 const env = process.env;
 const CHECAR = process.argv.includes("--checar");
@@ -57,13 +63,14 @@ if (env.DATAS) {
   const ds = env.DATAS.split(",").map((s) => s.trim()).filter(Boolean);
   linhas = ds.map((d, i) => ({ id: -1 - i, data: d, antes: "(ensaio)", depois: "(ensaio)", posts_retirados: 1, pago_pausado_em: null, refazer_status: null, resumo_enviado_em: null }));
 } else {
-  linhas = await rest(`butiquim_social_noites_refazer?select=id,data,antes,depois,posts_retirados,pago_pausado_em,refazer_status,resumo_enviado_em,criado_em&refeito_em=is.null&data=gte.${hojeBR}&order=id`);
+  const filtro = env.INCLUIR_PARADAS === "1" ? "" : "&or=(refazer_status.is.null,refazer_status.neq.desistiu)";
+  linhas = await rest(`butiquim_social_noites_refazer?select=id,data,antes,depois,posts_retirados,pago_pausado_em,refazer_status,refazer_tentativas,resumo_enviado_em,criado_em&refeito_em=is.null&data=gte.${hojeBR}${filtro}&order=id`);
 }
 // uma decisão por data (a troca mais recente vale; as anteriores da mesma data fecham junto)
 const porData = new Map();
 for (const l of linhas) {
   const ja = porData.get(l.data);
-  porData.set(l.data, { ...l, ids: [...(ja?.ids || []), l.id], antesOriginal: ja?.antesOriginal ?? l.antes });
+  porData.set(l.data, { ...l, ids: [...(ja?.ids || []), l.id], antesOriginal: ja?.antesOriginal ?? l.antes, tentativas: Math.max(ja?.tentativas || 0, l.refazer_tentativas || 0) });
 }
 const casos = [...porData.values()];
 const fazer = casos.filter((c) => c.posts_retirados > 0 && (c.depois || "").trim());
@@ -115,8 +122,14 @@ for (const c of fazer) {
   if (problemas.length) {
     c.resultado = { status: "falta_material", texto: problemas.join("; ") };
     await marca(c, { refazer_status: "falta_material", refazer_obs: c.resultado.texto });
+  } else if (c.tentativas >= MAX_TENTATIVAS && env.INCLUIR_PARADAS !== "1") {
+    c.resultado = { status: "desistiu", texto: `já tentei ${c.tentativas}× na nuvem e não fechou — parei para não gastar minutos do GitHub` };
+    await marca(c, { refazer_status: "desistiu", refazer_obs: c.resultado.texto });
   } else {
     c.artista = a; prontos.push(c);
+    // conta a tentativa ANTES de renderizar: se a rodada for derrubada no meio, ela já ficou contada
+    c.tentativas = (c.tentativas || 0) + 1;
+    await marca(c, { refazer_tentativas: c.tentativas });
   }
 }
 
@@ -152,33 +165,36 @@ if (prontos.length) {
   }
 
   log(`bundle (GL=${GL}, versão ${VERSAO})`);
-  npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-refaz", "--log=error"]);
-  const still = (b, id, out, frame) => npx(["remotion", "still", b, id, out, `--frame=${frame}`, `--gl=${GL}`, "--log=error"]);
-  // remotion.config.ts fixa concurrency 4 (PC); o runner tem 2 núcleos e o Remotion recusa acima disso
-  const NUCLEOS = Math.max(1, Math.min(4, os.cpus().length));
-  const video = (b, id, out) => npx(["remotion", "render", b, id, out, "--codec=h264", "--crf=18", `--gl=${GL}`, `--concurrency=${NUCLEOS}`, "--log=error"]);
+  const R = criaRender({ GL, log });
+  R.bundle("src/index.ts", "build-refaz");
+  // assinatura da peça = artista(s) + versão do código: peça de rodada anterior só é reaproveitada se nada mudou
+  let SHA = env.GITHUB_SHA || "";
+  if (!SHA) try { SHA = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(); } catch {}
+  const slugDe = (d) => agenda.find((x) => x.data === d)?.slug || "?";
+  const still = (b, id, out, frame, sig) => R.still(b, id, out, frame, sig);
+  const video = (b, id, out, sig) => R.video(b, id, out, sig);
 
   for (const p of planos) {
     for (const c of prontos.filter((x) => x.data.startsWith(p.M))) {
       try {
         for (const n of p.noites.filter((x) => x.data === c.data)) {
-          const k = n.key;
+          const k = n.key, S = `${c.data}|${c.artista.slug}|${SHA}`;
           log(`render ${c.data} (${k})`);
           // quinta só existe como Folhinha (bloco abaixo); artista sem vídeo próprio leva o story animado no lugar do B-roll
           if (n.dia !== "quinta") {
-            still("build-refaz", `${k}-feed`, `out/final/${k}-FEED.png`, 150);
-            still("build-refaz", `${k}-story`, `out/final/${k}-STORY.png`, 150);
-            video("build-refaz", `${k}-feed`, `out/final/${k}-FEED.mp4`);
-            if (ARTISTAS_SEM_VIDEO.has(c.artista.slug)) video("build-refaz", `${k}-story`, `out/final/${k}-STORY.mp4`);
-            else video("build-refaz", `${k}-broll`, `out/final/${k}-STORY-BROLL.mp4`);
+            still("build-refaz", `${k}-feed`, `out/final/${k}-FEED.png`, 150, S);
+            still("build-refaz", `${k}-story`, `out/final/${k}-STORY.png`, 150, S);
+            video("build-refaz", `${k}-feed`, `out/final/${k}-FEED.mp4`, S);
+            if (ARTISTAS_SEM_VIDEO.has(c.artista.slug)) video("build-refaz", `${k}-story`, `out/final/${k}-STORY.mp4`, S);
+            else video("build-refaz", `${k}-broll`, `out/final/${k}-STORY-BROLL.mp4`, S);
           }
           if (n.vespera) {
             const v = n.vespera, E = "src/entries/vespera/index.ts";
-            still(E, `${v}-feed`, `out/vespera/${v}-FEED.png`, 220);
-            still(E, `${v}-story`, `out/vespera/${v}-STORY.png`, 220);
-            video(E, `${v}-feed`, `out/vespera/${v}-FEED.mp4`);
-            video(E, `${v}-story`, `out/vespera/${v}-STORY.mp4`);
-            if (n.dia !== "quinta") video(E, `${v}-broll`, `out/vespera/${v}-STORY-BROLL.mp4`);
+            still(E, `${v}-feed`, `out/vespera/${v}-FEED.png`, 220, S);
+            still(E, `${v}-story`, `out/vespera/${v}-STORY.png`, 220, S);
+            video(E, `${v}-feed`, `out/vespera/${v}-FEED.mp4`, S);
+            video(E, `${v}-story`, `out/vespera/${v}-STORY.mp4`, S);
+            if (n.dia !== "quinta") video(E, `${v}-broll`, `out/vespera/${v}-STORY-BROLL.mp4`, S);
           }
         }
       } catch (e) {
@@ -188,11 +204,12 @@ if (prontos.length) {
     for (const g of p.agendas) {
       try {
         log(`render agenda ${g.s}`);
-        video("build-refaz", `agenda-${g.s}-feed-video`, `out/agendas/agenda-${g.s}-FEED.mp4`);
-        video("build-refaz", `agenda-${g.s}-story-video`, `out/agendas/agenda-${g.s}-STORY.mp4`);
+        const S = `${g.datas.map((d) => `${d}=${slugDe(d)}`).join(",")}|${SHA}`;
+        video("build-refaz", `agenda-${g.s}-feed-video`, `out/agendas/agenda-${g.s}-FEED.mp4`, S);
+        video("build-refaz", `agenda-${g.s}-story-video`, `out/agendas/agenda-${g.s}-STORY.mp4`, S);
         if (g.seg) {
-          video("build-refaz", `agenda-${g.s}-seg-feed-video`, `out/agendas/agenda-${g.s}-seg-FEED.mp4`);
-          video("build-refaz", `agenda-${g.s}-seg-story-video`, `out/agendas/agenda-${g.s}-seg-STORY.mp4`);
+          video("build-refaz", `agenda-${g.s}-seg-feed-video`, `out/agendas/agenda-${g.s}-seg-FEED.mp4`, S);
+          video("build-refaz", `agenda-${g.s}-seg-story-video`, `out/agendas/agenda-${g.s}-seg-STORY.mp4`, S);
         }
       } catch (e) {
         for (const c of prontos.filter((x) => g.datas.includes(x.data) && !x.resultado)) c.resultado = { status: "erro", texto: `render da agenda da semana falhou: ${String(e.message).slice(0, 140)}` };
@@ -235,7 +252,10 @@ for (const c of casos) {
     ok: `✅ Nossas peças: ${c.resultado.texto}`,
     sem_posts: `➖ Nossas peças: ${c.resultado?.texto}`,
     falta_material: `⚠️ Nossas peças: NÃO refiz — ${c.resultado?.texto}. Me manda a foto (PNG serve) e o vídeo do artista que eu cadastro.`,
-    erro: `❌ Nossas peças: deu erro (${c.resultado?.texto}). Tento de novo amanhã às 10h.`,
+    erro: c.tentativas >= MAX_TENTATIVAS
+      ? `❌ Nossas peças: deu erro (${c.resultado?.texto}). Já foram ${c.tentativas} tentativas na nuvem: NÃO vou tentar de novo sozinho — o Claude refaz no PC.`
+      : `❌ Nossas peças: deu erro (${c.resultado?.texto}). Tento de novo amanhã às 10h (última tentativa automática).`,
+    desistiu: `🛑 Nossas peças: ${c.resultado?.texto}. Precisa refazer no PC (peça ao Claude: "refaz o ${ddmm(c.data)} no PC"). Os posts dessa noite seguem FORA da fila, nada sai errado.`,
   }[st] || "⏳ Nossas peças: ainda processando";
   const meta = c.pago_pausado_em
     ? `✅ Meta Ads: pausei os anúncios de ${antes} às ${horaBR(c.pago_pausado_em)}; a arte nova sobe sozinha quando o Leonardo entregar`

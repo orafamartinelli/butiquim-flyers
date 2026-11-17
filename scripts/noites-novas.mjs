@@ -16,6 +16,7 @@
 // Ensaio: ENSAIO=1 NOVAS=2026-12-05 → renderiza e simula a fila; não grava na fila, no banco nem no repositório; resumo vai com [TESTE].
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from "fs";
 import { execFileSync } from "child_process";
+import { criaRender } from "./_render.mjs";
 import os from "os";
 import { credSupabase } from "./_cred.mjs";
 import { ARTISTAS_SEM_VIDEO, PRAZO_AGENDA_DIAS, chaveDe, noitesDataTs, noitesDoMes } from "./_rotacao.mjs";
@@ -124,6 +125,32 @@ for (const M of mesesAg) {
 }
 log(`agendas faltando na fila: ${agendasFaltando.map((a) => `${a.s} (terça ${a.terca}: ${a.datas.join(", ")})`).join(" · ") || "nenhuma"}`);
 
+// ---------- 2c. LIMITE DE TENTATIVAS (16/11/2026) ----------
+// O refaz-noites tentou o mesmo 19/12 cinco dias seguidos, calado, e queimou 850 min do GitHub. Aqui vale a mesma
+// regra: cada noite/agenda tem no máximo MAX_TENTATIVAS rodadas na nuvem (contadas ANTES de renderizar, então rodada
+// derrubada no meio também conta). Esgotou → avisa o Rafa 1× e para; quem refaz é o Claude no PC.
+const MAX_TENTATIVAS = 2;
+const tentRows = ENSAIO ? [] : await rest("butiquim_social_config?select=chave,valor&chave=like.robo_tentativa_*");
+const tentDe = (chave) => +(tentRows.find((r) => r.chave === chave)?.valor || 0);
+const chaveNoite = (n) => `robo_tentativa_noite_${n.data}_${n.slug}`;
+const chaveAgenda = (a) => `robo_tentativa_agenda_${a.terca}`;
+const esgotadas = [
+  ...prontas.filter((n) => tentDe(chaveNoite(n)) >= MAX_TENTATIVAS).map((n) => ({ chave: chaveNoite(n), txt: `${DIA[dow(n.data)]} ${ddmm(n.data)} (${n.atracao})` })),
+  ...agendasFaltando.filter((a) => tentDe(chaveAgenda(a)) >= MAX_TENTATIVAS).map((a) => ({ chave: chaveAgenda(a), txt: `agenda da terça ${ddmm(a.terca)}` })),
+];
+if (esgotadas.length) {
+  for (const e of esgotadas) {
+    const avisada = `${e.chave}_avisado`;
+    if (tentRows.some((r) => r.chave === avisada)) continue;
+    await zap(`🛑 *Robô de noites novas parou: ${e.txt}*\n\nJá tentei ${MAX_TENTATIVAS}× na nuvem e não fechou. Parei para não gastar minutos do GitHub. Peça ao Claude: "produz ${e.txt} no PC".`);
+    if (!ENSAIO) await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ chave: avisada, valor: hojeBR }) });
+  }
+  const fora = new Set(esgotadas.map((e) => e.chave));
+  for (let i = prontas.length - 1; i >= 0; i--) if (fora.has(chaveNoite(prontas[i]))) prontas.splice(i, 1);
+  for (let i = agendasFaltando.length - 1; i >= 0; i--) if (fora.has(chaveAgenda(agendasFaltando[i]))) agendasFaltando.splice(i, 1);
+  log(`tentativas esgotadas (fora desta rodada): ${esgotadas.map((e) => e.txt).join(" · ")}`);
+}
+
 if (CHECAR) {
   const tem = prontas.length || agendasFaltando.length ? "sim" : "nao";
   if (env.GITHUB_OUTPUT) appendFileSync(env.GITHUB_OUTPUT, `tem=${tem}\n`);
@@ -131,6 +158,9 @@ if (CHECAR) {
   process.exit(0);
 }
 if (!prontas.length && !agendasFaltando.length) { log("nada a produzir"); process.exit(0); }
+if (!ENSAIO) for (const chave of [...prontas.map(chaveNoite), ...agendasFaltando.map(chaveAgenda)]) {
+  await rest("butiquim_social_config?on_conflict=chave", { method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ chave, valor: String(tentDe(chave) + 1) }) });
+}
 
 // ---------- 3. código: noite em src/data.ts, Folhinha na entrada da véspera ----------
 let ts = readFileSync("src/data.ts", "utf8");
@@ -178,10 +208,10 @@ for (const n of prontas) n.mes = mesDe(n.data);
 
 // ---------- 4. render + fila ----------
 const GL = env.GL || (process.platform === "linux" ? "swangle" : "angle");
-const npx = (args) => execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", args, { stdio: "inherit", shell: process.platform === "win32" });
-const NUCLEOS = Math.max(1, Math.min(4, os.cpus().length));
-const still = (b, id, out, frame) => npx(["remotion", "still", b, id, out, ...(frame ? [`--frame=${frame}`] : []), `--gl=${GL}`, "--log=error"]);
-const video = (b, id, out) => npx(["remotion", "render", b, id, out, "--codec=h264", "--crf=18", `--gl=${GL}`, `--concurrency=${NUCLEOS}`, "--log=error"]);
+// render defensivo (16/11/2026): cronômetro por peça + 1 nova tentativa — ver scripts/_render.mjs
+const RD = criaRender({ GL, log });
+const still = (b, id, out, frame) => RD.still(b, id, out, frame);
+const video = (b, id, out) => RD.video(b, id, out);
 for (const pasta of ["out/final", "out/agendas", "out/vespera", "public/broll"]) mkdirSync(pasta, { recursive: true });
 
 const baixaClipes = async (datasClipe) => {
@@ -215,7 +245,7 @@ for (const a of agendasFaltando) {
   try { await baixaClipes(a.datas); } catch (e) { a.resultado = { ok: false, erro: String(e.message).slice(0, 200) }; }
 }
 log(`bundle (GL=${GL})`);
-npx(["remotion", "bundle", "src/index.ts", "--out-dir=build-novas", "--log=error"]);
+RD.bundle("src/index.ts", "build-novas");
 
 const fila = await rest("butiquim_social_avulso?select=campanha,status&campanha=like.agenda-claude-feed-*&status=eq.pendente");
 for (const M of [...new Set(prontas.map((n) => n.mes))]) {
