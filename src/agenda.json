@@ -1,7 +1,7 @@
 {
-  "gerado_em": "2026-11-11T13:54:12.764Z",
-  "de": "2026-10-01",
-  "ate": "2026-12-31",
+  "gerado_em": "2026-11-17T00:20:20.430Z",
+  "de": "2026-10-02",
+  "ate": "2026-12-27",
   "noites": [
     {
       "data": "2026-10-02",
@@ -277,9 +277,9 @@
     },
     {
       "data": "2026-12-19",
-      "atracao": "JUNINHO CARI",
-      "slug": "juninho-cari",
-      "nome": "Juninho Cari",
+      "atracao": "CQSAMBA",
+      "slug": "cqsamba",
+      "nome": "CQSamba",
       "estilo": "PAGODE",
       "estilo_inferido": false
     },
