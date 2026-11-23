@@ -41,7 +41,7 @@ const log = (...a) => console.log(...a);
 const rest = async (p, opts = {}) => {
   const r = await fetch(`${URL}/rest/v1/${p}`, { ...opts, headers: { ...H, "Content-Type": "application/json", Prefer: "return=representation", ...(opts.headers || {}) } });
   if (!r.ok) throw new Error(`${p.split("?")[0]} → ${r.status} ${(await r.text()).slice(0, 200)}`);
-  return r.status === 204 ? null : r.json();
+  { const t = await r.text(); return t ? JSON.parse(t) : null; }
 };
 const zap = async (msg) => {
   if (!env.ZAPI_INSTANCE_ID) { log(`[sem Z-API] ${msg}`); return; }

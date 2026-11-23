@@ -19,7 +19,7 @@ const log = (...a) => console.log(...a);
 const rest = async (path, opts = {}) => {
   const r = await fetch(`${URL}/rest/v1/${path}`, { ...opts, headers: { ...H, "Content-Type": "application/json", Prefer: "return=representation", ...(opts.headers || {}) } });
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
-  return r.status === 204 ? null : r.json();
+  { const t = await r.text(); return t ? JSON.parse(t) : null; }
 };
 const jpg = (png) => {
   const j = png.replace(/\.png$/i, ".jpg");
