@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-11-17T00:20:20.430Z",
+  "gerado_em": "2026-11-24T15:09:27.635Z",
   "de": "2026-10-02",
   "ate": "2026-12-27",
   "noites": [
@@ -217,6 +217,14 @@
       "slug": "deixa-clarear",
       "nome": "Deixa Clarear",
       "estilo": "PAGODE",
+      "estilo_inferido": false
+    },
+    {
+      "data": "2026-11-29",
+      "atracao": "HILANA",
+      "slug": "hilana",
+      "nome": "Hilana",
+      "estilo": "SERTANEJO",
       "estilo_inferido": false
     },
     {

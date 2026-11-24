@@ -168,6 +168,7 @@ export const NOITES = {
   domingo13: noiteDe("2026-12-27"),
   sabado10: noiteDe("2026-12-05"), // robô noites-novas 05/11
   domingo10: noiteDe("2026-12-06"), // robô noites-novas 05/11
+  domingo9: noiteDe("2026-11-29"), // robô noites-novas 24/11
 };
 export type NoiteKey = keyof typeof NOITES;
 
