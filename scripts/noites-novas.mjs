@@ -210,8 +210,10 @@ for (const n of prontas) n.mes = mesDe(n.data);
 const GL = env.GL || (process.platform === "linux" ? "swangle" : "angle");
 // render defensivo (16/11/2026): cronômetro por peça + 1 nova tentativa — ver scripts/_render.mjs
 const RD = criaRender({ GL, log });
-const still = (b, id, out, frame) => RD.still(b, id, out, frame);
-const video = (b, id, out) => RD.video(b, id, out);
+// assinatura = peça + dia: rodada repetida no MESMO dia pula o que já saiu (23/11/2026; antes refazia tudo)
+const SIG_DIA = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
+const still = (b, id, out, frame) => RD.still(b, id, out, frame, `novas|${id}|${SIG_DIA}`);
+const video = (b, id, out) => RD.video(b, id, out, `novas|${id}|${SIG_DIA}`);
 for (const pasta of ["out/final", "out/agendas", "out/vespera", "public/broll"]) mkdirSync(pasta, { recursive: true });
 
 const baixaClipes = async (datasClipe) => {
