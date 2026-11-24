@@ -68,7 +68,7 @@ jobs:
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
           ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
           ESTUDIO_AVISO_TEL: ${{ secrets.ESTUDIO_AVISO_TEL }}
-          GL: swangle
+          GL: swiftshader # 24/11/2026: ~3x mais rápido que swangle no render por software, mesma imagem
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/estudio-render.mjs
 

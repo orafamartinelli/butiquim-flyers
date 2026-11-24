@@ -103,7 +103,7 @@ jobs:
           ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
           ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
-          GL: swangle
+          GL: swiftshader # 24/11/2026: ~3x mais rápido que swangle no render por software, mesma imagem
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/refaz-noites.mjs
 
@@ -113,7 +113,7 @@ jobs:
           ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
           ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
-          GL: swangle
+          GL: swiftshader # 24/11/2026: ~3x mais rápido que swangle no render por software, mesma imagem
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/noites-novas.mjs
 
