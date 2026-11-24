@@ -98,22 +98,24 @@ jobs:
           restore-keys: refaz-out-
 
       - name: refaz + reagenda + resumo pro Rafa
+        timeout-minutes: 75 # 24/11/2026: teto da etapa < teto do job → log, cache e aviso sobrevivem
         if: steps.refaz.outputs.tem == 'sim'
         env:
           ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
           ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
-          GL: swiftshader # 24/11/2026: ~3x mais rápido que swangle no render por software, mesma imagem
+          GL: swangle # 24/11/2026: swiftshader testado e estourou 90 min no runner Linux — voltou
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/refaz-noites.mjs
 
       - name: noites novas → peças + agendamento + resumo pro Rafa
+        timeout-minutes: 75 # 24/11/2026: teto da etapa < teto do job → log, cache e aviso sobrevivem
         if: always() && steps.novas.outputs.tem == 'sim'
         env:
           ZAPI_INSTANCE_ID: ${{ secrets.ZAPI_INSTANCE_ID }}
           ZAPI_INSTANCE_TOKEN: ${{ secrets.ZAPI_INSTANCE_TOKEN }}
           ZAPI_CLIENT_TOKEN: ${{ secrets.ZAPI_CLIENT_TOKEN }}
-          GL: swiftshader # 24/11/2026: ~3x mais rápido que swangle no render por software, mesma imagem
+          GL: swangle # 24/11/2026: swiftshader testado e estourou 90 min no runner Linux — voltou
           FFMPEG: node_modules/.ffmpeg/ffmpeg
         run: node scripts/noites-novas.mjs
 
